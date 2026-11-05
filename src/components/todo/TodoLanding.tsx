@@ -84,24 +84,24 @@ export const TodoLanding: React.FC<TodoLandingProps> = ({ onOpenPage }) => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-7">
       {/* Top action header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-border-subtle">
         <div>
-          <h1 className="text-3xl font-serif font-bold text-txt-primary tracking-tight">To-Do</h1>
-          <p className="text-xs font-sans text-txt-muted mt-0.5">
+          <h1 className="text-3xl sm:text-4xl font-serif font-bold text-txt-primary tracking-tight">To-Do</h1>
+          <p className="text-sm font-sans text-txt-secondary font-medium mt-1">
             Organize tasks by page, view pending items, and manage workflows.
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-3">
           {archivedPagesCount > 0 && (
             <motion.button
               whileTap={{ scale: 0.95 }}
               onClick={() => setIsArchivedModalOpen(true)}
-              className="px-3.5 py-2 text-xs font-sans font-semibold text-txt-muted hover:text-txt-primary bg-bg-card hover:bg-bg-hover border border-border rounded-xl flex items-center gap-1.5 transition-colors shadow-xs cursor-pointer"
+              className="h-10 px-4 text-xs font-sans font-bold text-txt-secondary hover:text-txt-primary bg-bg-card hover:bg-bg-hover border border-border rounded-xl flex items-center gap-2 transition-colors shadow-2xs cursor-pointer"
             >
-              <Archive className="w-3.5 h-3.5" />
+              <Archive className="w-4 h-4 text-txt-muted" />
               <span>Archived ({archivedPagesCount})</span>
             </motion.button>
           )}
@@ -111,7 +111,7 @@ export const TodoLanding: React.FC<TodoLandingProps> = ({ onOpenPage }) => {
             whileTap={{ scale: 0.96 }}
             transition={{ type: "spring", stiffness: 500, damping: 25 }}
             onClick={() => setIsPageModalOpen(true)}
-            className="px-4 py-2 text-xs font-sans font-semibold text-white bg-primary hover:bg-primary-hover rounded-xl flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
+            className="h-10 px-4 text-xs font-sans font-bold text-white bg-primary hover:bg-primary-hover rounded-xl flex items-center gap-2 shadow-xs transition-colors cursor-pointer"
           >
             <FolderPlus className="w-4 h-4" />
             <span>New Page</span>
@@ -132,18 +132,18 @@ export const TodoLanding: React.FC<TodoLandingProps> = ({ onOpenPage }) => {
             key={f.id}
             whileTap={{ scale: 0.95 }}
             onClick={() => setActiveFilter(f.id)}
-            className={`px-3.5 py-1.5 rounded-full text-xs font-sans font-medium flex items-center gap-1.5 whitespace-nowrap transition-all cursor-pointer ${
+            className={`h-9 px-4 rounded-full text-xs font-sans font-medium flex items-center gap-2 whitespace-nowrap transition-all cursor-pointer shadow-2xs ${
               activeFilter === f.id
-                ? 'bg-primary text-white shadow-xs font-semibold'
-                : 'bg-bg-card hover:bg-bg-hover text-txt-secondary border border-border'
+                ? 'bg-primary text-white shadow-xs font-bold'
+                : 'bg-bg-card hover:bg-bg-hover text-txt-secondary border border-border font-semibold'
             }`}
           >
             <span>{f.label}</span>
             <span
-              className={`text-[10px] font-mono px-1.5 py-0.2 rounded-full ${
+              className={`text-xs font-mono font-bold px-2 py-0.5 rounded-full ${
                 activeFilter === f.id
                   ? 'bg-white/25 text-white'
-                  : 'bg-bg-subtle text-txt-muted'
+                  : 'bg-bg-subtle text-txt-secondary border border-border'
               }`}
             >
               {f.count}
@@ -154,9 +154,9 @@ export const TodoLanding: React.FC<TodoLandingProps> = ({ onOpenPage }) => {
 
       {/* If a filter other than 'all' is selected, show cross-page filtered task view */}
       {activeFilter !== 'all' && (
-        <div className="bg-bg-card border border-border rounded-2xl p-5 shadow-xs space-y-3">
-          <div className="flex items-center justify-between">
-            <h2 className="text-base font-serif font-bold text-txt-primary flex items-center gap-2 tracking-tight">
+        <div className="bg-bg-card border border-border rounded-2xl p-6 shadow-card space-y-4">
+          <div className="flex items-center justify-between pb-2 border-b border-border">
+            <h2 className="text-lg font-serif font-bold text-txt-primary flex items-center gap-2 tracking-tight">
               <span>Filtered Tasks: {activeFilter.toUpperCase()}</span>
               <span className="text-xs font-sans font-normal text-txt-muted">
                 ({filteredTasksAcrossPages.length} tasks across all pages)
@@ -164,15 +164,15 @@ export const TodoLanding: React.FC<TodoLandingProps> = ({ onOpenPage }) => {
             </h2>
             <button
               onClick={() => setActiveFilter('all')}
-              className="text-xs font-sans text-primary font-semibold hover:underline cursor-pointer"
+              className="text-xs font-sans text-primary font-bold hover:underline cursor-pointer"
             >
               Back to All Pages
             </button>
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-2.5">
             {filteredTasksAcrossPages.length === 0 ? (
-              <div className="py-8 text-center text-xs font-sans text-txt-muted">
+              <div className="py-10 text-center text-sm font-sans text-txt-muted">
                 No tasks match the "{activeFilter}" filter.
               </div>
             ) : (
@@ -199,7 +199,7 @@ export const TodoLanding: React.FC<TodoLandingProps> = ({ onOpenPage }) => {
       )}
 
       {/* Pages Grid */}
-      <div className="space-y-3">
+      <div className="space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-xs font-sans font-bold uppercase tracking-wider text-txt-muted">
             Pages ({activePages.length})
@@ -210,23 +210,26 @@ export const TodoLanding: React.FC<TodoLandingProps> = ({ onOpenPage }) => {
         </div>
 
         {activePages.length === 0 ? (
-          <div className="bg-bg-card border border-border rounded-2xl p-12 text-center space-y-3">
-            <h3 className="text-lg font-serif font-bold text-txt-primary">No active pages</h3>
-            <p className="text-xs font-sans text-txt-muted max-w-sm mx-auto">
-              Create a page to start organizing your tasks, projects, and goals.
+          <div className="bg-bg-card border border-border rounded-2xl p-12 text-center space-y-3 shadow-card">
+            <div className="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mx-auto mb-2">
+              <FolderPlus className="w-6 h-6" />
+            </div>
+            <h3 className="text-xl font-serif font-bold text-txt-primary">No active pages</h3>
+            <p className="text-sm font-sans text-txt-muted max-w-sm mx-auto">
+              Create your first page to start organizing tasks, projects, and personal routines.
             </p>
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.96 }}
               onClick={() => setIsPageModalOpen(true)}
-              className="px-4 py-2 bg-primary text-white text-xs font-sans font-semibold rounded-xl inline-flex items-center gap-1.5 shadow-xs cursor-pointer"
+              className="mt-3 h-10 px-5 bg-primary text-white text-xs font-sans font-bold rounded-xl inline-flex items-center gap-2 shadow-xs hover:bg-primary-hover cursor-pointer transition-colors"
             >
-              <Plus className="w-3.5 h-3.5" />
+              <Plus className="w-4 h-4" />
               <span>Create Page</span>
             </motion.button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
             {activePages.map(page => (
               <div
                 key={page.id}

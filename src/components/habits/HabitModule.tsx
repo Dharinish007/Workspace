@@ -51,29 +51,29 @@ export const HabitModule: React.FC = () => {
   };
 
   return (
-    <div className="p-4 md:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
+    <div className="p-4 md:p-6 lg:p-8 max-w-7xl mx-auto space-y-7">
       {/* Top Header & View Controls */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-2 border-b border-border-subtle">
         <div>
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-3">
             <motion.div
               whileHover={{ rotate: 15 }}
-              className="p-1.5 rounded-xl bg-teal-500/10 text-teal-600 dark:text-teal-400"
+              className="w-10 h-10 rounded-xl bg-teal-500/10 text-teal-700 dark:text-teal-400 flex items-center justify-center shadow-2xs"
             >
               <Flame className="w-6 h-6" />
             </motion.div>
-            <h1 className="text-3xl font-serif font-bold text-txt-primary tracking-tight">
+            <h1 className="text-3xl sm:text-4xl font-serif font-bold text-txt-primary tracking-tight">
               Habit Tracker
             </h1>
           </div>
-          <p className="text-xs font-sans text-txt-muted mt-1">
+          <p className="text-sm font-sans text-txt-secondary font-medium mt-1">
             Build long-term consistency through daily execution and streaks.
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2.5">
+        <div className="flex flex-wrap items-center gap-3">
           {/* Template Switcher: Table | Card | Heatmap */}
-          <div className="flex items-center bg-bg-card border border-border rounded-xl p-1 shadow-xs relative">
+          <div className="flex items-center h-10 bg-bg-card border border-border rounded-xl p-1 shadow-2xs relative">
             {[
               { id: 'table' as HabitViewTemplate, label: 'Table', icon: Table },
               { id: 'card' as HabitViewTemplate, label: 'Cards', icon: LayoutGrid },
@@ -85,18 +85,18 @@ export const HabitModule: React.FC = () => {
                 <button
                   key={t.id}
                   onClick={() => setViewTemplate(t.id)}
-                  className={`relative flex items-center gap-1.5 px-3 py-1.5 text-xs font-sans font-semibold rounded-lg transition-colors cursor-pointer z-10 ${
+                  className={`relative flex items-center gap-1.5 h-8 px-3.5 text-xs font-sans font-bold rounded-lg transition-colors cursor-pointer z-10 ${
                     isSelected ? 'text-white' : 'text-txt-secondary hover:text-txt-primary'
                   }`}
                 >
                   {isSelected && (
                     <motion.div
                       layoutId="habitTemplatePill"
-                      className="absolute inset-0 bg-teal-600 rounded-lg -z-10 shadow-xs"
+                      className="absolute inset-0 bg-teal-700 dark:bg-teal-600 rounded-lg -z-10 shadow-xs"
                       transition={{ type: "spring", stiffness: 450, damping: 35 }}
                     />
                   )}
-                  <Icon className="w-3.5 h-3.5" />
+                  <Icon className="w-4 h-4" />
                   <span>{t.label}</span>
                 </button>
               );
@@ -105,13 +105,13 @@ export const HabitModule: React.FC = () => {
 
           {/* Table timeframe switcher & navigation (when Table view) */}
           {viewTemplate === 'table' && (
-            <div className="flex items-center gap-2">
-              <div className="flex items-center bg-bg-card border border-border rounded-xl p-1 text-xs font-sans shadow-xs">
+            <div className="flex items-center gap-2.5">
+              <div className="flex items-center h-10 bg-bg-card border border-border rounded-xl p-1 text-xs font-sans shadow-2xs">
                 <button
                   onClick={() => setTimeframe('week')}
-                  className={`px-2.5 py-1 rounded-lg font-semibold transition-colors cursor-pointer ${
+                  className={`h-8 px-3 rounded-lg font-bold transition-colors cursor-pointer ${
                     timeframe === 'week'
-                      ? 'bg-bg-subtle text-txt-primary'
+                      ? 'bg-bg-subtle text-txt-primary shadow-2xs'
                       : 'text-txt-muted hover:text-txt-primary'
                   }`}
                 >
@@ -119,9 +119,9 @@ export const HabitModule: React.FC = () => {
                 </button>
                 <button
                   onClick={() => setTimeframe('month')}
-                  className={`px-2.5 py-1 rounded-lg font-semibold transition-colors cursor-pointer ${
+                  className={`h-8 px-3 rounded-lg font-bold transition-colors cursor-pointer ${
                     timeframe === 'month'
-                      ? 'bg-bg-subtle text-txt-primary'
+                      ? 'bg-bg-subtle text-txt-primary shadow-2xs'
                       : 'text-txt-muted hover:text-txt-primary'
                   }`}
                 >
@@ -129,26 +129,28 @@ export const HabitModule: React.FC = () => {
                 </button>
               </div>
 
-              <div className="flex items-center gap-1 bg-bg-card border border-border rounded-xl p-1 text-xs font-sans shadow-xs">
+              <div className="flex items-center h-10 gap-1 bg-bg-card border border-border rounded-xl p-1 text-xs font-sans shadow-2xs">
                 <motion.button
                   whileTap={{ scale: 0.9 }}
                   onClick={handlePrev}
-                  className="p-1 rounded hover:bg-bg-hover text-txt-secondary cursor-pointer"
-                  title="Previous"
+                  className="w-8 h-8 rounded-lg hover:bg-bg-hover text-txt-secondary flex items-center justify-center cursor-pointer transition-colors"
+                  title="Previous period"
+                  aria-label="Previous period"
                 >
                   <ChevronLeft className="w-4 h-4" />
                 </motion.button>
                 <button
                   onClick={handleToday}
-                  className="px-2 py-0.5 font-bold hover:bg-bg-hover rounded text-txt-primary cursor-pointer"
+                  className="h-8 px-3 font-bold hover:bg-bg-hover rounded-lg text-txt-primary cursor-pointer transition-colors"
                 >
                   Today
                 </button>
                 <motion.button
                   whileTap={{ scale: 0.9 }}
                   onClick={handleNext}
-                  className="p-1 rounded hover:bg-bg-hover text-txt-secondary cursor-pointer"
-                  title="Next"
+                  className="w-8 h-8 rounded-lg hover:bg-bg-hover text-txt-secondary flex items-center justify-center cursor-pointer transition-colors"
+                  title="Next period"
+                  aria-label="Next period"
                 >
                   <ChevronRight className="w-4 h-4" />
                 </motion.button>
@@ -165,7 +167,7 @@ export const HabitModule: React.FC = () => {
               setHabitToEdit(null);
               setIsModalOpen(true);
             }}
-            className="px-4 py-2 text-xs font-sans font-semibold text-white bg-teal-600 hover:bg-teal-700 rounded-xl flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
+            className="h-10 px-4 text-xs font-sans font-bold text-white bg-teal-700 hover:bg-teal-800 dark:bg-teal-600 dark:hover:bg-teal-700 rounded-xl flex items-center gap-2 shadow-xs transition-colors cursor-pointer"
           >
             <Plus className="w-4 h-4" />
             <span>Add Habit</span>

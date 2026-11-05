@@ -66,11 +66,11 @@ export const PageView: React.FC<PageViewProps> = ({
 
   if (!currentPage) {
     return (
-      <div className="p-8 text-center">
-        <p className="text-txt-muted text-sm mb-4">Page not found or archived.</p>
+      <div className="p-8 text-center bg-bg-card border border-border rounded-2xl max-w-md mx-auto my-12">
+        <p className="text-txt-secondary text-sm mb-4 font-medium">Page not found or archived.</p>
         <button
           onClick={onBackToOverview}
-          className="px-4 py-2 bg-primary text-white rounded-xl text-xs font-semibold"
+          className="h-10 px-4 bg-primary text-white rounded-xl text-xs font-semibold shadow-xs hover:bg-primary-hover transition-colors"
         >
           Return to To-Do Overview
         </button>
@@ -169,21 +169,21 @@ export const PageView: React.FC<PageViewProps> = ({
   return (
     <div className="flex flex-col lg:flex-row gap-6">
       {/* Secondary Navigation (inside To-Do section) */}
-      <aside className="w-full lg:w-60 flex-shrink-0 space-y-4">
+      <aside className="w-full lg:w-64 flex-shrink-0 space-y-4">
         <motion.button
           whileHover={{ x: -2 }}
           whileTap={{ scale: 0.97 }}
           onClick={onBackToOverview}
-          className="flex items-center gap-2 text-xs font-sans font-semibold text-txt-secondary hover:text-primary transition-colors cursor-pointer"
+          className="h-10 px-3 rounded-xl flex items-center gap-2 text-xs font-sans font-bold text-txt-secondary hover:text-primary hover:bg-bg-card border border-transparent hover:border-border transition-colors cursor-pointer"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>All Pages Overview</span>
         </motion.button>
 
-        <div className="bg-bg-card border border-border rounded-2xl p-3 shadow-xs space-y-1">
-          <div className="text-[11px] font-sans font-bold uppercase tracking-wider text-txt-muted px-2 py-1.5 flex items-center justify-between">
+        <div className="bg-bg-card border border-border rounded-2xl p-4 shadow-card space-y-1.5">
+          <div className="text-xs font-sans font-bold uppercase tracking-wider text-txt-muted px-2 py-1.5 flex items-center justify-between">
             <span>Pages</span>
-            <span className="text-[10px] bg-bg-subtle px-1.5 py-0.5 rounded text-txt-muted font-mono">
+            <span className="text-xs bg-bg-subtle px-2 py-0.5 rounded-full text-txt-secondary font-mono font-bold border border-border">
               {activePages.length}
             </span>
           </div>
@@ -198,23 +198,23 @@ export const PageView: React.FC<PageViewProps> = ({
                   key={p.id}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => setSelectedPageId(p.id)}
-                  className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-sans font-medium transition-colors cursor-pointer ${
+                  className={`w-full min-h-[44px] flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-sans font-medium transition-colors cursor-pointer ${
                     isSelected
-                      ? 'bg-primary-light text-primary font-semibold shadow-xs'
+                      ? 'bg-primary-light text-primary font-bold shadow-2xs border border-primary/20'
                       : 'text-txt-secondary hover:text-txt-primary hover:bg-bg-hover'
                   }`}
                 >
-                  <div className="flex items-center gap-2.5 truncate">
+                  <div className="flex items-center gap-3 truncate">
                     <div
-                      className="w-5 h-5 rounded-md flex items-center justify-center text-white flex-shrink-0"
+                      className="w-6 h-6 rounded-lg flex items-center justify-center text-white flex-shrink-0 shadow-2xs"
                       style={{ backgroundColor: p.color }}
                     >
-                      <IconRenderer name={p.icon} className="w-3 h-3" />
+                      <IconRenderer name={p.icon} className="w-3.5 h-3.5" />
                     </div>
                     <span className="truncate">{p.name}</span>
                   </div>
                   {count > 0 && (
-                    <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-full bg-bg-card text-txt-muted border border-border-subtle">
+                    <span className="text-xs font-mono font-bold px-2 py-0.5 rounded-full bg-bg-card text-txt-muted border border-border">
                       {count}
                     </span>
                   )}
@@ -228,46 +228,47 @@ export const PageView: React.FC<PageViewProps> = ({
           {/* Archived Link */}
           <button
             onClick={onOpenArchived}
-            className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-sans font-medium text-txt-muted hover:text-txt-primary hover:bg-bg-hover transition-colors cursor-pointer"
+            className="w-full h-10 flex items-center gap-2.5 px-3.5 rounded-xl text-xs font-sans font-semibold text-txt-muted hover:text-txt-primary hover:bg-bg-hover transition-colors cursor-pointer"
           >
-            <Archive className="w-4 h-4" />
+            <Archive className="w-4 h-4 text-txt-muted" />
             <span>Archived Pages</span>
           </button>
         </div>
       </aside>
 
       {/* Main Page Content */}
-      <div className="flex-1 space-y-5 min-w-0">
-        {/* Page Header with Anthropic Serif */}
-        <div className="bg-bg-card border border-border rounded-2xl p-5 shadow-card flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-3.5">
+      <div className="flex-1 space-y-6 min-w-0">
+        {/* Page Header */}
+        <div className="bg-bg-card border border-border rounded-2xl p-6 shadow-card flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
             <motion.div
               whileHover={{ scale: 1.05 }}
-              className="w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-sm flex-shrink-0"
+              className="w-14 h-14 rounded-2xl flex items-center justify-center text-white shadow-sm flex-shrink-0"
               style={{ backgroundColor: currentPage.color }}
             >
-              <IconRenderer name={currentPage.icon} className="w-6 h-6" />
+              <IconRenderer name={currentPage.icon} className="w-7 h-7" />
             </motion.div>
             <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-2xl font-serif font-bold text-txt-primary tracking-tight">{currentPage.name}</h1>
+              <div className="flex items-center gap-2.5">
+                <h1 className="text-2xl sm:text-3xl font-serif font-bold text-txt-primary tracking-tight">{currentPage.name}</h1>
                 <motion.button
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
                   onClick={() => setIsPageModalOpen(true)}
-                  className="p-1 text-txt-muted hover:text-txt-primary rounded transition-colors cursor-pointer"
+                  className="w-8 h-8 rounded-lg flex items-center justify-center text-txt-muted hover:text-txt-primary hover:bg-bg-subtle transition-colors cursor-pointer"
                   title="Edit page name, icon, or color"
+                  aria-label="Edit page"
                 >
                   <Edit3 className="w-4 h-4" />
                 </motion.button>
               </div>
-              <p className="text-xs font-sans text-txt-muted mt-0.5">
+              <p className="text-xs sm:text-sm font-sans text-txt-secondary font-medium mt-1">
                 {totalTasks} total tasks · {completedTasks} completed ({progressPercent}%)
               </p>
-              {/* Progress Bar with spring animation */}
-              <div className="w-44 h-1.5 bg-bg-subtle rounded-full mt-2 overflow-hidden border border-border/50">
+              {/* Progress Bar */}
+              <div className="w-48 sm:w-64 h-2 bg-bg-subtle rounded-full mt-2.5 overflow-hidden border border-border">
                 <motion.div
-                  className="h-full bg-emerald-500 rounded-full"
+                  className="h-full bg-emerald-600 dark:bg-emerald-500 rounded-full"
                   initial={{ width: 0 }}
                   animate={{ width: `${progressPercent}%` }}
                   transition={{ type: "spring", stiffness: 400, damping: 30 }}
@@ -276,14 +277,14 @@ export const PageView: React.FC<PageViewProps> = ({
             </div>
           </div>
 
-          <div className="flex items-center gap-2 flex-shrink-0">
+          <div className="flex items-center gap-2.5 flex-shrink-0">
             <motion.button
               whileTap={{ scale: 0.95 }}
               onClick={() => archivePage(currentPage.id)}
-              className="px-3 py-1.5 text-xs font-sans font-medium text-txt-muted hover:text-txt-primary bg-bg-subtle hover:bg-bg-hover border border-border rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer"
+              className="h-10 px-4 text-xs font-sans font-bold text-txt-secondary hover:text-txt-primary bg-bg-subtle hover:bg-bg-hover border border-border rounded-xl flex items-center gap-2 transition-colors cursor-pointer shadow-2xs"
               title="Archive page"
             >
-              <Archive className="w-3.5 h-3.5" />
+              <Archive className="w-4 h-4 text-txt-muted" />
               <span>Archive</span>
             </motion.button>
 
@@ -295,18 +296,18 @@ export const PageView: React.FC<PageViewProps> = ({
                 setTaskToEdit(null);
                 setIsTaskModalOpen(true);
               }}
-              className="px-4 py-2 text-xs font-sans font-semibold text-white bg-primary hover:bg-primary-hover rounded-xl flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
+              className="h-10 px-4 text-xs font-sans font-bold text-white bg-primary hover:bg-primary-hover rounded-xl flex items-center gap-2 shadow-xs transition-colors cursor-pointer"
             >
               <Plus className="w-4 h-4" />
               <span>Add Task</span>
-              <kbd className="hidden sm:inline-block ml-1 px-1.5 py-0.2 text-[10px] font-mono bg-white/20 rounded">
+              <kbd className="hidden sm:inline-block ml-1 px-1.5 py-0.5 text-xs font-mono font-bold bg-white/20 rounded-md">
                 N
               </kbd>
             </motion.button>
           </div>
         </div>
 
-        {/* Filter Bar with spring tabs */}
+        {/* Filter Bar */}
         <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
           {[
             { id: 'all' as TaskFilter, label: 'All Tasks', count: filterCounts.all },
@@ -319,15 +320,15 @@ export const PageView: React.FC<PageViewProps> = ({
               key={f.id}
               whileTap={{ scale: 0.95 }}
               onClick={() => setActiveFilter(f.id)}
-              className={`px-3.5 py-1.5 rounded-full text-xs font-sans font-medium flex items-center gap-1.5 whitespace-nowrap transition-all cursor-pointer ${
+              className={`h-9 px-4 rounded-full text-xs font-sans font-medium flex items-center gap-2 whitespace-nowrap transition-all cursor-pointer shadow-2xs ${
                 activeFilter === f.id
-                  ? 'bg-primary text-white shadow-xs font-semibold'
-                  : 'bg-bg-card hover:bg-bg-hover text-txt-secondary border border-border'
+                  ? 'bg-primary text-white shadow-xs font-bold'
+                  : 'bg-bg-card hover:bg-bg-hover text-txt-secondary border border-border font-semibold'
               }`}
             >
               <span>{f.label}</span>
-              <span className={`text-[10px] font-mono px-1.5 py-0.2 rounded-full ${
-                activeFilter === f.id ? 'bg-white/25 text-white' : 'bg-bg-subtle text-txt-muted'
+              <span className={`text-xs font-mono font-bold px-2 py-0.5 rounded-full ${
+                activeFilter === f.id ? 'bg-white/25 text-white' : 'bg-bg-subtle text-txt-secondary border border-border'
               }`}>
                 {f.count}
               </span>
@@ -335,13 +336,13 @@ export const PageView: React.FC<PageViewProps> = ({
           ))}
         </div>
 
-        {/* Task List with AnimatePresence */}
-        <div className="space-y-2">
+        {/* Task List */}
+        <div className="space-y-2.5">
           {sortedTasks.length === 0 ? (
-            <div className="bg-bg-card border border-border rounded-2xl p-12 text-center">
-              <CheckSquare className="w-8 h-8 text-txt-muted mx-auto mb-2 opacity-50" />
-              <h3 className="text-base font-serif font-semibold text-txt-primary">No tasks in this view</h3>
-              <p className="text-xs font-sans text-txt-muted mt-1 max-w-xs mx-auto">
+            <div className="bg-bg-card border border-border rounded-2xl p-12 text-center shadow-card">
+              <CheckSquare className="w-10 h-10 text-txt-muted mx-auto mb-3 opacity-60" />
+              <h3 className="text-lg font-serif font-bold text-txt-primary">No tasks in this view</h3>
+              <p className="text-xs sm:text-sm font-sans text-txt-muted mt-1 max-w-sm mx-auto">
                 {activeFilter === 'all'
                   ? 'Get started by creating your first task in this page.'
                   : `No tasks match the "${activeFilter}" filter.`}
@@ -353,9 +354,9 @@ export const PageView: React.FC<PageViewProps> = ({
                   setTaskToEdit(null);
                   setIsTaskModalOpen(true);
                 }}
-                className="mt-4 px-4 py-2 bg-primary text-white text-xs font-sans font-semibold rounded-xl inline-flex items-center gap-1.5 shadow-xs cursor-pointer"
+                className="mt-5 h-10 px-5 bg-primary text-white text-xs font-sans font-bold rounded-xl inline-flex items-center gap-2 shadow-xs hover:bg-primary-hover cursor-pointer transition-colors"
               >
-                <Plus className="w-3.5 h-3.5" />
+                <Plus className="w-4 h-4" />
                 <span>Add Task</span>
               </motion.button>
             </div>
@@ -394,7 +395,7 @@ export const PageView: React.FC<PageViewProps> = ({
                 setTaskToEdit(null);
                 setIsTaskModalOpen(true);
               }}
-              className="w-full py-2.5 border border-dashed border-border hover:border-primary rounded-xl text-xs font-sans font-semibold text-txt-secondary hover:text-primary bg-bg-card hover:bg-bg-hover flex items-center justify-center gap-2 transition-colors cursor-pointer"
+              className="w-full h-12 border border-dashed border-border hover:border-primary rounded-xl text-sm font-sans font-bold text-txt-secondary hover:text-primary bg-bg-card hover:bg-bg-hover flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-2xs"
             >
               <Plus className="w-4 h-4" />
               <span>Add another task to {currentPage.name}</span>

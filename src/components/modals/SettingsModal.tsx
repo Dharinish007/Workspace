@@ -9,9 +9,12 @@ import {
   User, 
   Database, 
   Check, 
-  AlertTriangle 
+  AlertTriangle,
+  Sparkles,
+  RotateCcw
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { loadDemoData, resetToDefaultWorkspace } from '../../data';
 
 export const SettingsModal: React.FC = () => {
   const { 
@@ -29,6 +32,8 @@ export const SettingsModal: React.FC = () => {
   const [importMode, setImportMode] = useState<'merge' | 'replace'>('merge');
   const [isImporting, setIsImporting] = useState(false);
   const [importError, setImportError] = useState<string | null>(null);
+  const [isLoadingDemo, setIsLoadingDemo] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Calculate days since last backup
@@ -132,6 +137,41 @@ export const SettingsModal: React.FC = () => {
       showToast(`Import failed: ${err.message}`, undefined, undefined, 'error');
     } finally {
       setIsImporting(false);
+    }
+  };
+
+  // Demo data handlers
+  const handleLoadDemo = async (mode: 'replace' | 'merge') => {
+    setIsLoadingDemo(true);
+    try {
+      const res = await loadDemoData(mode);
+      await refreshAll();
+      showToast(
+        `Demo data loaded: ${res.counts.pages} pages, ${res.counts.tasks} tasks, ${res.counts.habits} habits, ${res.counts.events} events`,
+        undefined,
+        undefined,
+        'success'
+      );
+    } catch (err: any) {
+      showToast(`Failed to load demo data: ${err.message}`, undefined, undefined, 'error');
+    } finally {
+      setIsLoadingDemo(false);
+    }
+  };
+
+  const handleResetDefault = async () => {
+    if (!window.confirm('Reset workspace to a clean, empty state with default pages?')) {
+      return;
+    }
+    setIsResetting(true);
+    try {
+      await resetToDefaultWorkspace();
+      await refreshAll();
+      showToast('Workspace reset to default clean state', undefined, undefined, 'success');
+    } catch (err: any) {
+      showToast(`Reset failed: ${err.message}`, undefined, undefined, 'error');
+    } finally {
+      setIsResetting(false);
     }
   };
 
@@ -414,6 +454,59 @@ export const SettingsModal: React.FC = () => {
                     </div>
                   </div>
                 )}
+              </div>
+
+              <hr className="border-border" />
+
+              {/* Section: Demo & Testing Data */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-base font-serif font-bold tracking-tight text-txt-primary flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-primary" />
+                    <span>Demo & Preview Data</span>
+                  </h3>
+                  <span className="text-xs font-mono font-bold px-2.5 py-1 rounded-full bg-primary/10 text-primary border border-primary/20">
+                    Developer Mode
+                  </span>
+                </div>
+                <p className="text-xs text-txt-secondary leading-relaxed font-medium">
+                  Quickly populate your local workspace with rich dummy data (pages, priority tasks, 45-day habit streaks, and scheduled calendar events) to preview all modules in action.
+                </p>
+
+                <div className="p-4 bg-bg-subtle rounded-xl border border-border space-y-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div>
+                      <div className="text-sm font-semibold text-txt-primary">Full Workspace Sample</div>
+                      <div className="text-xs text-txt-muted mt-0.5">
+                        Injects 5 active pages, 1 archived page, 18 tasks, 5 habits with 45-day heatmap history, and 10 calendar events relative to today.
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2.5 flex-shrink-0">
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.96 }}
+                        onClick={() => handleLoadDemo('replace')}
+                        disabled={isLoadingDemo}
+                        className="h-10 px-4 bg-primary hover:bg-primary-hover text-white text-xs font-bold rounded-xl flex items-center gap-2 transition-colors cursor-pointer shadow-xs disabled:opacity-50"
+                      >
+                        <Sparkles className="w-4 h-4" />
+                        <span>{isLoadingDemo ? 'Loading...' : 'Load Demo Data'}</span>
+                      </motion.button>
+
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.96 }}
+                        onClick={handleResetDefault}
+                        disabled={isResetting}
+                        className="h-10 px-3.5 bg-bg-card hover:bg-bg-hover text-txt-secondary hover:text-red-500 border border-border rounded-xl text-xs font-semibold flex items-center gap-2 transition-colors cursor-pointer disabled:opacity-50"
+                        title="Reset workspace to clean empty state"
+                      >
+                        <RotateCcw className="w-4 h-4" />
+                        <span>{isResetting ? 'Resetting...' : 'Reset Clean'}</span>
+                      </motion.button>
+                    </div>
+                  </div>
+                </div>
               </div>
 
               <hr className="border-border" />

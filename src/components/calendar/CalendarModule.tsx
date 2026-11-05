@@ -97,53 +97,55 @@ export const CalendarModule: React.FC = () => {
   });
 
   return (
-    <div className="p-4 md:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
+    <div className="p-4 md:p-6 lg:p-8 max-w-7xl mx-auto space-y-7">
       {/* Top Calendar Control Bar */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-2 border-b border-border-subtle">
         {/* Navigation & Month Title */}
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1 bg-bg-card border border-border rounded-xl p-1 shadow-xs">
+        <div className="flex items-center gap-3.5">
+          <div className="flex items-center gap-1 bg-bg-card border border-border rounded-xl p-1 shadow-2xs">
             <motion.button
               whileTap={{ scale: 0.9 }}
               onClick={handlePrev}
-              className="p-1.5 rounded-lg hover:bg-bg-hover text-txt-secondary hover:text-txt-primary transition-colors cursor-pointer"
+              className="w-9 h-9 rounded-lg hover:bg-bg-hover text-txt-secondary hover:text-txt-primary flex items-center justify-center transition-colors cursor-pointer"
               title="Previous"
+              aria-label="Previous period"
             >
               <ChevronLeft className="w-5 h-5" />
             </motion.button>
             <motion.button
               whileTap={{ scale: 0.95 }}
               onClick={handleToday}
-              className="px-3 py-1 text-xs font-sans font-bold text-txt-primary hover:bg-bg-hover rounded-lg transition-colors cursor-pointer"
+              className="h-9 px-3.5 text-xs font-sans font-bold text-txt-primary hover:bg-bg-hover rounded-lg transition-colors cursor-pointer"
             >
               Today
             </motion.button>
             <motion.button
               whileTap={{ scale: 0.9 }}
               onClick={handleNext}
-              className="p-1.5 rounded-lg hover:bg-bg-hover text-txt-secondary hover:text-txt-primary transition-colors cursor-pointer"
+              className="w-9 h-9 rounded-lg hover:bg-bg-hover text-txt-secondary hover:text-txt-primary flex items-center justify-center transition-colors cursor-pointer"
               title="Next"
+              aria-label="Next period"
             >
               <ChevronRight className="w-5 h-5" />
             </motion.button>
           </div>
 
-          <h1 className="text-2xl sm:text-3xl font-serif font-bold text-txt-primary tracking-tight">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-serif font-bold text-txt-primary tracking-tight">
             {monthYearTitle}
           </h1>
         </div>
 
         {/* View Switcher, Toggles & Add Event */}
-        <div className="flex flex-wrap items-center gap-2.5">
+        <div className="flex flex-wrap items-center gap-3">
           {/* View selector: Month, Week, Day with sliding spring pill */}
-          <div className="flex items-center bg-bg-card border border-border rounded-xl p-1 shadow-xs relative">
+          <div className="flex items-center h-10 bg-bg-card border border-border rounded-xl p-1 shadow-2xs relative">
             {(['month', 'week', 'day'] as CalendarView[]).map(v => {
               const isSelected = currentView === v;
               return (
                 <button
                   key={v}
                   onClick={() => setCurrentView(v)}
-                  className={`relative px-3.5 py-1.5 text-xs font-sans font-semibold rounded-lg capitalize transition-colors cursor-pointer z-10 ${
+                  className={`relative h-8 px-4 text-xs font-sans font-bold rounded-lg capitalize transition-colors cursor-pointer z-10 ${
                     isSelected ? 'text-white' : 'text-txt-secondary hover:text-txt-primary'
                   }`}
                 >
@@ -161,40 +163,40 @@ export const CalendarModule: React.FC = () => {
           </div>
 
           {/* Activity Category Toggles */}
-          <div className="hidden sm:flex items-center gap-1.5 bg-bg-card border border-border rounded-xl p-1 text-xs font-sans shadow-xs">
+          <div className="hidden sm:flex items-center h-10 gap-1.5 bg-bg-card border border-border rounded-xl px-2 text-xs font-sans shadow-2xs">
             <button
               onClick={() => setShowTodos(!showTodos)}
-              className={`px-2.5 py-1 rounded-lg font-medium transition-colors flex items-center gap-1 cursor-pointer ${
-                showTodos ? 'bg-blue-500/10 text-primary font-semibold' : 'text-txt-muted hover:text-txt-primary'
+              className={`h-8 px-2.5 rounded-lg font-semibold transition-colors flex items-center gap-1.5 cursor-pointer ${
+                showTodos ? 'bg-blue-500/10 text-primary font-bold' : 'text-txt-muted hover:text-txt-primary'
               }`}
             >
-              <span className="w-2 h-2 rounded-full bg-blue-500" />
+              <span className="w-2.5 h-2.5 rounded-full bg-blue-500" />
               <span>To-Do</span>
             </button>
 
             <button
               onClick={() => setShowHabits(!showHabits)}
-              className={`px-2.5 py-1 rounded-lg font-medium transition-colors flex items-center gap-1 cursor-pointer ${
-                showHabits ? 'bg-teal-500/10 text-teal-600 dark:text-teal-400 font-semibold' : 'text-txt-muted hover:text-txt-primary'
+              className={`h-8 px-2.5 rounded-lg font-semibold transition-colors flex items-center gap-1.5 cursor-pointer ${
+                showHabits ? 'bg-teal-500/10 text-teal-700 dark:text-teal-400 font-bold' : 'text-txt-muted hover:text-txt-primary'
               }`}
             >
-              <span className="w-2 h-2 rounded-full bg-teal-500" />
+              <span className="w-2.5 h-2.5 rounded-full bg-teal-500" />
               <span>Habits</span>
             </button>
 
             <button
               onClick={() => setShowEvents(!showEvents)}
-              className={`px-2.5 py-1 rounded-lg font-medium transition-colors flex items-center gap-1 cursor-pointer ${
-                showEvents ? 'bg-orange-500/10 text-orange-500 font-semibold' : 'text-txt-muted hover:text-txt-primary'
+              className={`h-8 px-2.5 rounded-lg font-semibold transition-colors flex items-center gap-1.5 cursor-pointer ${
+                showEvents ? 'bg-orange-500/10 text-orange-600 dark:text-orange-400 font-bold' : 'text-txt-muted hover:text-txt-primary'
               }`}
             >
-              <span className="w-2 h-2 rounded-full bg-orange-500" />
+              <span className="w-2.5 h-2.5 rounded-full bg-orange-500" />
               <span>Events</span>
             </button>
 
             <button
               onClick={() => setShowCompleted(!showCompleted)}
-              className={`px-2 py-1 rounded-lg text-[11px] font-medium transition-colors cursor-pointer ${
+              className={`h-8 px-2 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
                 showCompleted ? 'text-txt-primary' : 'text-txt-muted line-through'
               }`}
               title="Toggle show completed"
@@ -209,7 +211,7 @@ export const CalendarModule: React.FC = () => {
             whileTap={{ scale: 0.96 }}
             transition={{ type: "spring", stiffness: 500, damping: 25 }}
             onClick={() => openCreateEventForDate(selectedDateStr)}
-            className="px-4 py-2 text-xs font-sans font-semibold text-white bg-primary hover:bg-primary-hover rounded-xl flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
+            className="h-10 px-4 text-xs font-sans font-bold text-white bg-primary hover:bg-primary-hover rounded-xl flex items-center gap-2 shadow-xs transition-colors cursor-pointer"
           >
             <Plus className="w-4 h-4" />
             <span>Add Event</span>
@@ -263,40 +265,7 @@ export const CalendarModule: React.FC = () => {
         />
       )}
 
-      {/* Category Legend & Colors Panel */}
-      <div className="bg-bg-card border border-border rounded-2xl p-4 shadow-xs flex flex-wrap items-center justify-between gap-4 text-xs font-sans">
-        <div className="flex flex-wrap items-center gap-4">
-          <span className="font-bold text-txt-primary uppercase tracking-wider text-[11px]">
-            Categories & Colors:
-          </span>
-
-          {pages.filter(p => !p.archived).map(page => (
-            <div key={page.id} className="flex items-center gap-1.5">
-              <span
-                className="w-3 h-3 rounded-md shadow-2xs"
-                style={{ backgroundColor: page.color }}
-              />
-              <span className="text-txt-secondary">{page.name}</span>
-            </div>
-          ))}
-
-          <div className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded-md bg-teal-500 shadow-2xs" />
-            <span className="text-txt-secondary">Habits (Teal)</span>
-          </div>
-
-          <div className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded-md bg-orange-500 shadow-2xs" />
-            <span className="text-txt-secondary">Events / Meetings</span>
-          </div>
-        </div>
-
-        <div className="text-txt-muted text-[11px]">
-          Tip: Hover over any day box and click 🎨 to set custom day background colors.
-        </div>
-      </div>
-
-      {/* Modals */}
+      {/* Event Modal */}
       <EventModal
         isOpen={isEventModalOpen}
         onClose={() => {
@@ -307,6 +276,7 @@ export const CalendarModule: React.FC = () => {
         defaultDate={eventDefaultDate}
       />
 
+      {/* Day Background Color Picker */}
       <DayColorPickerModal
         isOpen={isColorPickerOpen}
         onClose={() => setIsColorPickerOpen(false)}
