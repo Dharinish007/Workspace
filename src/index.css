@@ -3,33 +3,33 @@
 @tailwind utilities;
 
 :root {
-  --color-bg-main: #F7FAFF;
+  --color-bg-main: #FAF8F5;
   --color-bg-card: #FFFFFF;
-  --color-bg-subtle: #F1F4F9;
-  --color-bg-hover: #E8F0FE;
-  --color-primary: #4285F4;
-  --color-primary-hover: #1A73E8;
-  --color-primary-light: #E8F0FE;
-  --color-text-primary: #202124;
-  --color-text-secondary: #5F6368;
-  --color-text-muted: #80868B;
-  --color-border: #E8EAED;
-  --color-border-subtle: #F1F3F4;
+  --color-bg-subtle: #F4EFEB;
+  --color-bg-hover: #EBE5DC;
+  --color-primary: #D97706;
+  --color-primary-hover: #B45309;
+  --color-primary-light: #FEF3C7;
+  --color-text-primary: #1F1E1D;
+  --color-text-secondary: #686259;
+  --color-text-muted: #918B81;
+  --color-border: #E6DFD5;
+  --color-border-subtle: #EFEAE2;
 }
 
 [data-theme="dark"] {
-  --color-bg-main: #202124;
-  --color-bg-card: #303134;
-  --color-bg-subtle: #292A2D;
-  --color-bg-hover: #3C4043;
-  --color-primary: #8AB4F8;
-  --color-primary-hover: #AECBFA;
-  --color-primary-light: #283344;
-  --color-text-primary: #E8EAED;
-  --color-text-secondary: #BDC1C6;
-  --color-text-muted: #9AA0A6;
-  --color-border: #45474A;
-  --color-border-subtle: #3C4043;
+  --color-bg-main: #171614;
+  --color-bg-card: #22201D;
+  --color-bg-subtle: #2B2824;
+  --color-bg-hover: #36332E;
+  --color-primary: #F59E0B;
+  --color-primary-hover: #FBBF24;
+  --color-primary-light: #382C17;
+  --color-text-primary: #F4F1EA;
+  --color-text-secondary: #AAA498;
+  --color-text-muted: #7D776D;
+  --color-border: #38342E;
+  --color-border-subtle: #2C2924;
 }
 
 * {
@@ -37,9 +37,11 @@
 }
 
 body {
-  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  transition: background-color 180ms ease, color 180ms ease;
+  font-family: 'Inter', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  transition: background-color 200ms ease, color 200ms ease;
   overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* Custom scrollbar for clean Google-inspired look */

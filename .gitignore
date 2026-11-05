@@ -12,6 +12,7 @@ out
 .agents/*
 !.agents/agents/
 .gstack/*
+skills
 skills/*
 
 # Local env files

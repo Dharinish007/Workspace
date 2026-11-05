@@ -78,3 +78,4 @@ flowchart TD
 - Never compromise on detail: tooltips, focus rings, hover states, disabled states, and skeleton loaders all matter.
 - Always maintain dark mode and light mode parity with high aesthetic fidelity.
 - All layout shifts must be avoided; use `layout` and `layoutId` responsibly.
+

@@ -1,9 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import { useWorkspace } from '../../context/WorkspaceContext';
-import { Task, Page } from '../../types';
+import { Task } from '../../types';
 import { 
-  CheckSquare, 
-  Square, 
   Star, 
   Calendar, 
   MoreVertical, 
@@ -13,6 +11,7 @@ import {
   GripVertical,
   AlertCircle
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { formatLocalDate } from '../../db/indexedDB';
 
 interface TaskItemProps {
@@ -70,17 +69,22 @@ export const TaskItem: React.FC<TaskItemProps> = ({
   };
 
   return (
-    <div
+    <motion.div
       ref={itemRef}
       draggable={isDraggable}
-      onDragStart={e => onDragStart && onDragStart(e, task.id)}
+      onDragStart={e => onDragStart && onDragStart(e as any, task.id)}
       onDragOver={onDragOver}
-      onDrop={e => onDrop && onDrop(e, task.id)}
-      className={`group relative flex items-center justify-between p-3 rounded-xl border transition-all duration-200 ${
+      onDrop={e => onDrop && onDrop(e as any, task.id)}
+      layout
+      initial={{ opacity: 0, y: 6 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.96 }}
+      transition={{ type: "spring", stiffness: 500, damping: 32 }}
+      className={`group relative flex items-center justify-between p-3 rounded-xl border transition-colors duration-150 ${
         isHighlighted
           ? 'ring-2 ring-primary border-primary bg-primary-light/30 shadow-md'
           : task.completed
-          ? 'bg-bg-subtle/40 border-border text-txt-muted'
+          ? 'bg-bg-subtle/40 border-border/70 text-txt-muted'
           : 'bg-bg-card border-border hover:border-border hover:shadow-xs'
       }`}
     >
@@ -93,28 +97,49 @@ export const TaskItem: React.FC<TaskItemProps> = ({
         )}
 
         {/* Serial number */}
-        <span className="text-xs font-mono text-txt-muted w-6 text-right flex-shrink-0">
+        <span className="text-xs font-mono text-txt-muted w-6 text-right flex-shrink-0 select-none">
           {serialNumber}.
         </span>
 
-        {/* Checkbox */}
-        <button
+        {/* Tactile Checkbox with animated SVG checkmark */}
+        <motion.button
+          whileTap={{ scale: 0.82 }}
+          transition={{ type: "spring", stiffness: 500, damping: 25 }}
           onClick={() => toggleTaskCompleted(task.id)}
-          className="text-txt-muted hover:text-primary transition-colors flex-shrink-0 cursor-pointer"
+          className={`w-5 h-5 rounded-md flex items-center justify-center border transition-colors duration-150 cursor-pointer flex-shrink-0 ${
+            task.completed
+              ? 'bg-emerald-500 border-emerald-500 text-white shadow-xs'
+              : 'border-border hover:border-primary bg-bg-card'
+          }`}
           title={task.completed ? 'Mark incomplete' : 'Mark completed'}
+          aria-label={task.completed ? 'Mark incomplete' : 'Mark completed'}
         >
           {task.completed ? (
-            <CheckSquare className="w-5 h-5 text-green-500 fill-green-500/10" />
-          ) : (
-            <Square className="w-5 h-5" />
-          )}
-        </button>
+            <svg 
+              className="w-3.5 h-3.5 stroke-white" 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              strokeWidth="3.5" 
+              strokeLinecap="round" 
+              strokeLinejoin="round"
+            >
+              <motion.path
+                d="M20 6L9 17L4 12"
+                initial={{ pathLength: 0 }}
+                animate={{ pathLength: 1 }}
+                transition={{ type: "spring", stiffness: 600, damping: 25 }}
+              />
+            </svg>
+          ) : null}
+        </motion.button>
 
         {/* Task Title */}
         <div className="flex-1 min-w-0 pr-2">
           <span
-            className={`text-sm font-medium transition-all ${
-              task.completed ? 'line-through text-txt-muted' : 'text-txt-primary'
+            className={`text-sm font-sans font-medium transition-all duration-180 block truncate ${
+              task.completed 
+                ? 'line-through text-txt-muted opacity-70' 
+                : 'text-txt-primary'
             }`}
           >
             {task.title}
@@ -127,11 +152,11 @@ export const TaskItem: React.FC<TaskItemProps> = ({
         {/* Due date badge */}
         {task.dueDate && (
           <div
-            className={`flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-medium ${
+            className={`flex items-center gap-1 text-[11px] font-sans px-2.5 py-0.5 rounded-full font-medium ${
               isOverdue
                 ? 'bg-red-500/15 text-red-600 dark:text-red-400 font-semibold'
                 : isDueToday
-                ? 'bg-amber-500/15 text-amber-600 dark:text-amber-400 font-semibold'
+                ? 'bg-amber-500/15 text-amber-700 dark:text-amber-400 font-semibold'
                 : 'bg-bg-subtle text-txt-muted'
             }`}
           >
@@ -145,25 +170,28 @@ export const TaskItem: React.FC<TaskItemProps> = ({
 
         {/* Priority tag */}
         {task.priority === 'high' && (
-          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400">
+          <span className="text-[10px] font-sans font-bold px-2 py-0.5 rounded-full bg-red-100 dark:bg-red-950/40 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-900/50">
             High
           </span>
         )}
         {task.priority === 'medium' && (
-          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400">
+          <span className="text-[10px] font-sans font-semibold px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-900/50">
             Medium
           </span>
         )}
         {task.priority === 'low' && (
-          <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400">
+          <span className="text-[10px] font-sans font-medium px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-900/50">
             Low
           </span>
         )}
 
         {/* Star */}
-        <button
+        <motion.button
+          whileHover={{ scale: 1.25 }}
+          whileTap={{ scale: 0.85 }}
+          transition={{ type: "spring", stiffness: 500, damping: 25 }}
           onClick={toggleStar}
-          className="p-1 rounded-md text-txt-muted hover:text-amber-400 transition-colors cursor-pointer"
+          className="p-1 rounded-md text-txt-muted hover:text-amber-500 transition-colors cursor-pointer"
           title={task.important ? 'Unmark important' : 'Mark important'}
         >
           <Star
@@ -171,61 +199,69 @@ export const TaskItem: React.FC<TaskItemProps> = ({
               task.important ? 'fill-amber-400 text-amber-400' : 'text-txt-muted hover:text-amber-400'
             }`}
           />
-        </button>
+        </motion.button>
 
         {/* Action dropdown */}
         <div className="relative">
-          <button
+          <motion.button
+            whileTap={{ scale: 0.9 }}
             onClick={() => setMenuOpen(!menuOpen)}
             className="p-1 rounded-md text-txt-muted hover:text-txt-primary hover:bg-bg-subtle transition-colors cursor-pointer"
           >
             <MoreVertical className="w-4 h-4" />
-          </button>
+          </motion.button>
 
-          {menuOpen && (
-            <>
-              <div 
-                className="fixed inset-0 z-20" 
-                onClick={() => setMenuOpen(false)} 
-              />
-              <div className="absolute right-0 mt-1 w-36 bg-bg-card border border-border shadow-modal rounded-xl py-1 z-30 text-xs">
-                <button
-                  onClick={() => {
-                    setMenuOpen(false);
-                    onEdit(task);
-                  }}
-                  className="w-full flex items-center gap-2 px-3 py-1.5 text-txt-primary hover:bg-bg-hover text-left"
+          <AnimatePresence>
+            {menuOpen && (
+              <>
+                <div 
+                  className="fixed inset-0 z-20" 
+                  onClick={() => setMenuOpen(false)} 
+                />
+                <motion.div 
+                  initial={{ opacity: 0, scale: 0.92, y: -4 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.92, y: -4 }}
+                  transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                  className="absolute right-0 mt-1 w-36 bg-bg-card border border-border shadow-modal rounded-xl py-1 z-30 text-xs font-sans"
                 >
-                  <Edit2 className="w-3.5 h-3.5" />
-                  <span>Edit</span>
-                </button>
-                <button
-                  onClick={() => {
-                    setMenuOpen(false);
-                    onMove(task);
-                  }}
-                  className="w-full flex items-center gap-2 px-3 py-1.5 text-txt-primary hover:bg-bg-hover text-left"
-                >
-                  <ArrowRightLeft className="w-3.5 h-3.5" />
-                  <span>Move to Page</span>
-                </button>
-                <hr className="my-1 border-border" />
-                <button
-                  onClick={() => {
-                    setMenuOpen(false);
-                    deleteTask(task.id);
-                  }}
-                  className="w-full flex items-center gap-2 px-3 py-1.5 text-red-600 dark:text-red-400 hover:bg-red-500/10 text-left font-medium"
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                  <span>Delete</span>
-                </button>
-              </div>
-            </>
-          )}
+                  <button
+                    onClick={() => {
+                      setMenuOpen(false);
+                      onEdit(task);
+                    }}
+                    className="w-full flex items-center gap-2 px-3 py-1.5 text-txt-primary hover:bg-bg-hover text-left cursor-pointer"
+                  >
+                    <Edit2 className="w-3.5 h-3.5" />
+                    <span>Edit</span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      setMenuOpen(false);
+                      onMove(task);
+                    }}
+                    className="w-full flex items-center gap-2 px-3 py-1.5 text-txt-primary hover:bg-bg-hover text-left cursor-pointer"
+                  >
+                    <ArrowRightLeft className="w-3.5 h-3.5" />
+                    <span>Move to Page</span>
+                  </button>
+                  <hr className="my-1 border-border" />
+                  <button
+                    onClick={() => {
+                      setMenuOpen(false);
+                      deleteTask(task.id);
+                    }}
+                    className="w-full flex items-center gap-2 px-3 py-1.5 text-red-600 dark:text-red-400 hover:bg-red-500/10 text-left font-medium cursor-pointer"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>Delete</span>
+                  </button>
+                </motion.div>
+              </>
+            )}
+          </AnimatePresence>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
-

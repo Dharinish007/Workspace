@@ -5,6 +5,7 @@ import { IconRenderer } from '../common/IconRegistry';
 import { formatLocalDate } from '../../db/indexedDB';
 import { calculateHabitStats, isHabitScheduledOnDate } from '../../utils/habitCalculations';
 import { Flame, Award, MoreVertical, Edit2, Trash2 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface HabitCardViewProps {
   habits: Habit[];
@@ -37,7 +38,7 @@ export const HabitCardView: React.FC<HabitCardViewProps> = ({
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       {habits.length === 0 ? (
-        <div className="col-span-full bg-bg-card border border-border rounded-2xl p-12 text-center text-txt-muted text-sm">
+        <div className="col-span-full bg-bg-card border border-border rounded-2xl p-12 text-center text-txt-muted text-sm font-sans">
           No habits to display in Card view. Click "+ Add Habit" to create one.
         </div>
       ) : (
@@ -45,25 +46,27 @@ export const HabitCardView: React.FC<HabitCardViewProps> = ({
           const stats = calculateHabitStats(habit, habitLogs, 28, now);
 
           return (
-            <div
+            <motion.div
               key={habit.id}
-              className="bg-bg-card border border-border hover:border-teal-500/50 shadow-card hover:shadow-card-hover rounded-2xl p-5 flex flex-col justify-between transition-all group"
+              whileHover={{ y: -3, transition: { type: "spring", stiffness: 450, damping: 25 } }}
+              className="bg-bg-card border border-border hover:border-teal-500/50 shadow-card hover:shadow-card-hover rounded-2xl p-5 flex flex-col justify-between transition-colors duration-150 group select-none"
             >
               <div>
                 {/* Header: Icon, Name & Menu */}
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-3">
-                    <div
+                    <motion.div
+                      whileHover={{ scale: 1.08 }}
                       className="w-10 h-10 rounded-xl flex items-center justify-center text-white shadow-xs"
                       style={{ backgroundColor: habit.color }}
                     >
                       <IconRenderer name={habit.icon} className="w-5 h-5" />
-                    </div>
+                    </motion.div>
                     <div>
-                      <h3 className="font-bold text-sm text-txt-primary group-hover:text-teal-600 transition-colors">
+                      <h3 className="font-serif font-bold text-base text-txt-primary group-hover:text-teal-600 transition-colors tracking-tight">
                         {habit.name}
                       </h3>
-                      <p className="text-[11px] text-txt-muted">
+                      <p className="text-[11px] font-sans text-txt-muted">
                         {habit.schedule.type === 'daily'
                           ? 'Every Day'
                           : `${habit.schedule.days.length} days/week`}
@@ -72,75 +75,84 @@ export const HabitCardView: React.FC<HabitCardViewProps> = ({
                   </div>
 
                   <div className="relative">
-                    <button
+                    <motion.button
+                      whileTap={{ scale: 0.9 }}
                       onClick={() => setActiveMenuId(activeMenuId === habit.id ? null : habit.id)}
                       className="p-1 rounded text-txt-muted hover:text-txt-primary hover:bg-bg-subtle transition-colors cursor-pointer"
                     >
                       <MoreVertical className="w-4 h-4" />
-                    </button>
+                    </motion.button>
 
-                    {activeMenuId === habit.id && (
-                      <>
-                        <div
-                          className="fixed inset-0 z-20"
-                          onClick={() => setActiveMenuId(null)}
-                        />
-                        <div className="absolute right-0 top-8 w-28 bg-bg-card border border-border shadow-modal rounded-xl py-1 z-30 text-xs">
-                          <button
-                            onClick={() => {
-                              setActiveMenuId(null);
-                              onEditHabit(habit);
-                            }}
-                            className="w-full flex items-center gap-2 px-3 py-1.5 text-txt-primary hover:bg-bg-hover text-left"
+                    <AnimatePresence>
+                      {activeMenuId === habit.id && (
+                        <>
+                          <div
+                            className="fixed inset-0 z-20"
+                            onClick={() => setActiveMenuId(null)}
+                          />
+                          <motion.div 
+                            initial={{ opacity: 0, scale: 0.92, y: -4 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.92, y: -4 }}
+                            transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                            className="absolute right-0 top-8 w-28 bg-bg-card border border-border shadow-modal rounded-xl py-1 z-30 text-xs font-sans"
                           >
-                            <Edit2 className="w-3.5 h-3.5" />
-                            <span>Edit</span>
-                          </button>
-                          <hr className="my-1 border-border" />
-                          <button
-                            onClick={() => {
-                              setActiveMenuId(null);
-                              onDeleteHabit(habit.id);
-                            }}
-                            className="w-full flex items-center gap-2 px-3 py-1.5 text-red-600 dark:text-red-400 hover:bg-red-500/10 text-left"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                            <span>Delete</span>
-                          </button>
-                        </div>
-                      </>
-                    )}
+                            <button
+                              onClick={() => {
+                                setActiveMenuId(null);
+                                onEditHabit(habit);
+                              }}
+                              className="w-full flex items-center gap-2 px-3 py-1.5 text-txt-primary hover:bg-bg-hover text-left cursor-pointer"
+                            >
+                              <Edit2 className="w-3.5 h-3.5" />
+                              <span>Edit</span>
+                            </button>
+                            <hr className="my-1 border-border" />
+                            <button
+                              onClick={() => {
+                                setActiveMenuId(null);
+                                onDeleteHabit(habit.id);
+                              }}
+                              className="w-full flex items-center gap-2 px-3 py-1.5 text-red-600 dark:text-red-400 hover:bg-red-500/10 text-left font-medium cursor-pointer"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                              <span>Delete</span>
+                            </button>
+                          </motion.div>
+                        </>
+                      )}
+                    </AnimatePresence>
                   </div>
                 </div>
 
-                {/* Big Percentage & Circular Progress or Counter */}
+                {/* Big Percentage & Counter */}
                 <div className="flex items-baseline justify-between mb-2">
-                  <span className="text-3xl font-extrabold text-txt-primary tracking-tight">
+                  <span className="text-3xl font-mono font-bold text-txt-primary tracking-tight">
                     {stats.completionPercentage}%
                   </span>
-                  <span className="text-xs font-semibold text-txt-muted">
+                  <span className="text-xs font-sans font-medium text-txt-muted">
                     {stats.completedDays} / {stats.scheduledDays} completed
                   </span>
                 </div>
 
                 {/* Progress bar */}
                 <div className="w-full bg-bg-subtle rounded-full h-2 mb-4 overflow-hidden border border-border-subtle">
-                  <div
-                    className="h-full rounded-full transition-all duration-300"
-                    style={{
-                      width: `${stats.completionPercentage}%`,
-                      backgroundColor: habit.color,
-                    }}
+                  <motion.div
+                    className="h-full rounded-full"
+                    initial={{ width: 0 }}
+                    animate={{ width: `${stats.completionPercentage}%` }}
+                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                    style={{ backgroundColor: habit.color }}
                   />
                 </div>
 
                 {/* Stats Breakdown */}
-                <div className="grid grid-cols-2 gap-2 text-xs mb-4">
+                <div className="grid grid-cols-2 gap-2 text-xs mb-4 font-sans">
                   <div className="p-2.5 rounded-xl bg-bg-subtle border border-border-subtle flex items-center gap-2">
                     <Flame className="w-4 h-4 text-orange-500 fill-orange-500 flex-shrink-0" />
                     <div>
                       <div className="text-[10px] text-txt-muted font-medium">Current Streak</div>
-                      <div className="font-bold text-txt-primary">{stats.currentStreak} days</div>
+                      <div className="font-mono font-bold text-txt-primary">{stats.currentStreak} days</div>
                     </div>
                   </div>
 
@@ -148,7 +160,7 @@ export const HabitCardView: React.FC<HabitCardViewProps> = ({
                     <Award className="w-4 h-4 text-amber-500 flex-shrink-0" />
                     <div>
                       <div className="text-[10px] text-txt-muted font-medium">Longest Streak</div>
-                      <div className="font-bold text-txt-primary">{stats.longestStreak} days</div>
+                      <div className="font-mono font-bold text-txt-primary">{stats.longestStreak} days</div>
                     </div>
                   </div>
                 </div>
@@ -156,7 +168,7 @@ export const HabitCardView: React.FC<HabitCardViewProps> = ({
 
               {/* Mini Frequency Activity Bars (Last 14 days) */}
               <div>
-                <div className="text-[10px] uppercase font-bold text-txt-muted tracking-wider mb-1.5 flex items-center justify-between">
+                <div className="text-[10px] uppercase font-sans font-bold text-txt-muted tracking-wider mb-1.5 flex items-center justify-between">
                   <span>Last 14 Days Activity</span>
                   <span>Missed: {stats.missedDays}</span>
                 </div>
@@ -187,11 +199,10 @@ export const HabitCardView: React.FC<HabitCardViewProps> = ({
                   })}
                 </div>
               </div>
-            </div>
+            </motion.div>
           );
         })
       )}
     </div>
   );
 };
-

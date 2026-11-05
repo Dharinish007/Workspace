@@ -1,24 +1,20 @@
 import React, { useState, useMemo } from 'react';
 import { useWorkspace } from '../../context/WorkspaceContext';
 import { formatLocalDate } from '../../db/indexedDB';
-import { Task, Habit, Priority } from '../../types';
+import { Habit } from '../../types';
 import { IconRenderer } from '../common/IconRegistry';
-import { TaskModal } from '../todo/TaskModal';
 import { HabitModal } from '../habits/HabitModal';
 import { 
   CheckCircle2, 
   Square, 
-  CheckSquare, 
   Activity, 
   Calendar, 
   Layers, 
   Plus, 
   ArrowRight, 
-  AlertCircle, 
-  Check,
-  Flame,
-  Clock
+  Check
 } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 export const DashboardModule: React.FC = () => {
   const { 
@@ -35,7 +31,6 @@ export const DashboardModule: React.FC = () => {
     createTask 
   } = useWorkspace();
 
-  const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [isHabitModalOpen, setIsHabitModalOpen] = useState(false);
   const [inlineTaskTitle, setInlineTaskTitle] = useState('');
   const [inlineTaskPageId, setInlineTaskPageId] = useState('');
@@ -59,7 +54,7 @@ export const DashboardModule: React.FC = () => {
   const tasksDueTodayCompleted = tasksDueToday.filter(t => t.completed).length;
 
   // 2. Habits Card: Habits scheduled today
-  const isHabitScheduledForDate = (habit: Habit, dateStr: string, dayOfWeek: number) => {
+  const isHabitScheduledForDate = (habit: Habit, _dateStr: string, dayOfWeek: number) => {
     if (habit.schedule.type === 'daily') return true;
     if (habit.schedule.type === 'weekdays') {
       return habit.schedule.days.includes(dayOfWeek);
@@ -80,7 +75,6 @@ export const DashboardModule: React.FC = () => {
   const activePagesCount = activePages.length;
 
   // 5. Today's Tasks: top 3
-  // Incomplete tasks that are due today, overdue, or High priority
   const todaysTasksCandidates = useMemo(() => {
     const priorityWeight: { [key: string]: number } = { high: 3, medium: 2, low: 1 };
 
@@ -104,30 +98,25 @@ export const DashboardModule: React.FC = () => {
 
   const top3TodaysTasks = todaysTasksCandidates.slice(0, 3);
 
-  // 6. Upcoming (Next 7 days, starting today)
+  // 6. Upcoming (Next 7 days)
   const next7DaysItems = useMemo(() => {
-    const items: {
+    const items: Array<{
       id: string;
       title: string;
       date: string;
-      type: 'task' | 'event';
-      color: string;
-      pageId?: string;
       time?: string | null;
-    }[] = [];
+      type: 'task' | 'event';
+      color?: string;
+      pageId?: string;
+    }> = [];
 
-    // Construct 7 dates
-    const dateStrings: string[] = [];
-    for (let i = 0; i < 7; i++) {
-      const d = new Date(now);
-      d.setDate(now.getDate() + i);
-      dateStrings.push(formatLocalDate(d));
-    }
-    const dateSet = new Set(dateStrings);
+    const start = new Date(now);
+    const end = new Date(now);
+    end.setDate(end.getDate() + 7);
+    const endStr = formatLocalDate(end);
 
-    // Incomplete tasks with a due date in next 7 days
     tasks.forEach(t => {
-      if (!t.completed && t.dueDate && dateSet.has(t.dueDate)) {
+      if (!t.completed && t.dueDate && t.dueDate >= todayStr && t.dueDate <= endStr) {
         const page = pages.find(p => p.id === t.pageId);
         items.push({
           id: t.id,
@@ -140,51 +129,44 @@ export const DashboardModule: React.FC = () => {
       }
     });
 
-    // Events in next 7 days
     events.forEach(e => {
-      if (dateSet.has(e.date)) {
+      if (e.date >= todayStr && e.date <= endStr) {
         items.push({
           id: e.id,
           title: e.title,
           date: e.date,
+          time: e.startTime ? `${e.startTime}${e.endTime ? ` - ${e.endTime}` : ''}` : null,
           type: 'event',
-          color: e.color || '#F97316',
-          time: e.startTime,
+          color: e.color,
         });
       }
     });
 
-    // Sort chronologically
     return items.sort((a, b) => a.date.localeCompare(b.date));
-  }, [events, now, pages, tasks]);
+  }, [events, now, pages, tasks, todayStr]);
 
   // 7. Weekly Progress
-  // Monday to Sunday of the current week
   const weekProgressData = useMemo(() => {
-    // Determine start of week
-    const current = new Date(now);
-    const day = current.getDay();
-    // Monday as start (or based on settings)
-    const diffToMonday = current.getDate() - (day === 0 ? 6 : day - 1);
-    const monday = new Date(current.setDate(diffToMonday));
+    const monday = new Date(now);
+    const day = (now.getDay() + 6) % 7;
+    monday.setDate(now.getDate() - day);
 
-    const weekDates: { dateStr: string; dayOfWeek: number }[] = [];
+    const weekDates: Array<{ dateStr: string; dayOfWeek: number }> = [];
     for (let i = 0; i < 7; i++) {
       const d = new Date(monday);
       d.setDate(monday.getDate() + i);
-      const dStr = formatLocalDate(d);
-      const dow = (d.getDay() + 6) % 7 + 1;
-      weekDates.push({ dateStr: dStr, dayOfWeek: dow });
+      weekDates.push({
+        dateStr: formatLocalDate(d),
+        dayOfWeek: i + 1,
+      });
     }
 
     const weekDateSet = new Set(weekDates.map(w => w.dateStr));
 
-    // Tasks due this week & completed this week
     const weekTasks = tasks.filter(t => t.dueDate && weekDateSet.has(t.dueDate));
     const tasksDueThisWeek = weekTasks.length;
     const tasksCompletedThisWeek = weekTasks.filter(t => t.completed).length;
 
-    // Habit occurrences this week
     let habitOccurrencesThisWeek = 0;
     let habitCompletionsThisWeek = 0;
 
@@ -200,11 +182,8 @@ export const DashboardModule: React.FC = () => {
       });
     });
 
-    // Events this week
     const eventsThisWeek = events.filter(e => weekDateSet.has(e.date)).length;
 
-    // Formula from Section 5.5:
-    // (tasks completed this week + habit completions this week) / (tasks due this week + habit occurrences this week) * 100
     const numerator = tasksCompletedThisWeek + habitCompletionsThisWeek;
     const denominator = tasksDueThisWeek + habitOccurrencesThisWeek;
     const overallPercent = denominator > 0 ? Math.round((numerator / denominator) * 100) : 0;
@@ -239,14 +218,14 @@ export const DashboardModule: React.FC = () => {
 
   return (
     <div className="p-4 md:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
-      {/* Welcome Banner */}
+      {/* Welcome Banner with Anthropic Serif */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
         <div>
-          <h1 className="text-2xl font-bold text-txt-primary tracking-tight">
+          <h1 className="text-3xl sm:text-4xl font-serif font-bold text-txt-primary tracking-tight">
             {greeting}, {settings.displayName || 'Friend'} 👋
           </h1>
-          <p className="text-xs text-txt-muted mt-0.5">
-            Here's your day at a glance.
+          <p className="text-xs font-sans text-txt-muted mt-1">
+            Here's your day at a glance. Everything is focused and organized.
           </p>
         </div>
       </div>
@@ -254,109 +233,118 @@ export const DashboardModule: React.FC = () => {
       {/* 4 Overview Stat Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
         {/* Tasks Card */}
-        <div 
+        <motion.div 
+          whileHover={{ y: -3, transition: { type: "spring", stiffness: 450, damping: 25 } }}
+          whileTap={{ scale: 0.98 }}
           onClick={() => setActiveSection('todo')}
-          className="bg-bg-card border border-border hover:border-primary/50 shadow-card rounded-2xl p-4 transition-all duration-150 cursor-pointer group"
+          className="bg-bg-card border border-border hover:border-primary/50 shadow-card rounded-2xl p-4 transition-colors duration-150 cursor-pointer group select-none"
         >
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-semibold text-txt-secondary group-hover:text-primary transition-colors">
+            <span className="text-xs font-sans font-semibold text-txt-secondary group-hover:text-primary transition-colors">
               Tasks
             </span>
             <div className="p-1.5 rounded-lg bg-blue-500/10 text-primary">
               <CheckCircle2 className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-2xl font-bold text-txt-primary">
+          <div className="text-2xl font-mono font-bold text-txt-primary">
             {tasksDueTodayCompleted} / {tasksDueToday.length}
           </div>
-          <div className="text-[11px] text-txt-muted mt-0.5">
+          <div className="text-[11px] font-sans text-txt-muted mt-0.5">
             {tasksDueToday.length === 0 ? 'No tasks due today' : 'Due today'}
           </div>
-        </div>
+        </motion.div>
 
         {/* Habits Card */}
-        <div 
+        <motion.div 
+          whileHover={{ y: -3, transition: { type: "spring", stiffness: 450, damping: 25 } }}
+          whileTap={{ scale: 0.98 }}
           onClick={() => setActiveSection('habits')}
-          className="bg-bg-card border border-border hover:border-teal-500/50 shadow-card rounded-2xl p-4 transition-all duration-150 cursor-pointer group"
+          className="bg-bg-card border border-border hover:border-teal-500/50 shadow-card rounded-2xl p-4 transition-colors duration-150 cursor-pointer group select-none"
         >
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-semibold text-txt-secondary group-hover:text-teal-600 transition-colors">
+            <span className="text-xs font-sans font-semibold text-txt-secondary group-hover:text-teal-600 transition-colors">
               Habits
             </span>
             <div className="p-1.5 rounded-lg bg-teal-500/10 text-teal-600 dark:text-teal-400">
               <Activity className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-2xl font-bold text-txt-primary">
+          <div className="text-2xl font-mono font-bold text-txt-primary">
             {habitsCompletedToday} / {habitsScheduledToday.length}
           </div>
-          <div className="text-[11px] text-txt-muted mt-0.5">
+          <div className="text-[11px] font-sans text-txt-muted mt-0.5">
             {habitsScheduledToday.length === 0 ? 'None scheduled' : 'Scheduled today'}
           </div>
-        </div>
+        </motion.div>
 
         {/* Events Card */}
-        <div 
+        <motion.div 
+          whileHover={{ y: -3, transition: { type: "spring", stiffness: 450, damping: 25 } }}
+          whileTap={{ scale: 0.98 }}
           onClick={() => setActiveSection('calendar')}
-          className="bg-bg-card border border-border hover:border-orange-500/50 shadow-card rounded-2xl p-4 transition-all duration-150 cursor-pointer group"
+          className="bg-bg-card border border-border hover:border-orange-500/50 shadow-card rounded-2xl p-4 transition-colors duration-150 cursor-pointer group select-none"
         >
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-semibold text-txt-secondary group-hover:text-orange-500 transition-colors">
+            <span className="text-xs font-sans font-semibold text-txt-secondary group-hover:text-orange-500 transition-colors">
               Events
             </span>
             <div className="p-1.5 rounded-lg bg-orange-500/10 text-orange-500">
               <Calendar className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-2xl font-bold text-txt-primary">
+          <div className="text-2xl font-mono font-bold text-txt-primary">
             {eventsToday.length}
           </div>
-          <div className="text-[11px] text-txt-muted mt-0.5">
+          <div className="text-[11px] font-sans text-txt-muted mt-0.5">
             {eventsToday.length === 1 ? '1 Event today' : `${eventsToday.length} Events today`}
           </div>
-        </div>
+        </motion.div>
 
         {/* Pages Card */}
-        <div 
+        <motion.div 
+          whileHover={{ y: -3, transition: { type: "spring", stiffness: 450, damping: 25 } }}
+          whileTap={{ scale: 0.98 }}
           onClick={() => setActiveSection('todo')}
-          className="bg-bg-card border border-border hover:border-purple-500/50 shadow-card rounded-2xl p-4 transition-all duration-150 cursor-pointer group"
+          className="bg-bg-card border border-border hover:border-purple-500/50 shadow-card rounded-2xl p-4 transition-colors duration-150 cursor-pointer group select-none"
         >
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-semibold text-txt-secondary group-hover:text-purple-600 transition-colors">
+            <span className="text-xs font-sans font-semibold text-txt-secondary group-hover:text-purple-600 transition-colors">
               Pages
             </span>
             <div className="p-1.5 rounded-lg bg-purple-500/10 text-purple-600 dark:text-purple-400">
               <Layers className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-2xl font-bold text-txt-primary">
+          <div className="text-2xl font-mono font-bold text-txt-primary">
             {activePagesCount}
           </div>
-          <div className="text-[11px] text-txt-muted mt-0.5">
+          <div className="text-[11px] font-sans text-txt-muted mt-0.5">
             Active Pages
           </div>
-        </div>
+        </motion.div>
       </div>
 
       {/* Middle row: Today's Tasks & Habit Summary */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Today's Tasks (Section 5.2) */}
+        {/* Today's Tasks */}
         <div className="bg-bg-card border border-border shadow-card rounded-2xl p-5 flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
-                <span className="text-base font-bold text-txt-primary">Today's Tasks</span>
-                <span className="text-xs px-2 py-0.5 rounded-full bg-bg-subtle text-txt-muted font-medium">
+                <span className="text-lg font-serif font-bold text-txt-primary tracking-tight">Today's Tasks</span>
+                <span className="text-xs font-mono px-2 py-0.5 rounded-full bg-bg-subtle text-txt-muted font-medium">
                   {todaysTasksCandidates.length}
                 </span>
               </div>
-              <button
+              <motion.button
+                whileTap={{ scale: 0.95 }}
                 onClick={() => setShowInlineAdd(!showInlineAdd)}
-                className="px-2.5 py-1 text-xs font-semibold text-primary bg-primary-light hover:bg-bg-hover rounded-lg flex items-center gap-1 transition-colors cursor-pointer"
+                className="px-2.5 py-1 text-xs font-sans font-semibold text-primary bg-primary-light hover:bg-bg-hover rounded-lg flex items-center gap-1 transition-colors cursor-pointer"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>Add Task</span>
-              </button>
+              </motion.button>
             </div>
 
             {/* Inline Add Task Form */}
@@ -368,13 +356,13 @@ export const DashboardModule: React.FC = () => {
                   placeholder="Task title..."
                   value={inlineTaskTitle}
                   onChange={e => setInlineTaskTitle(e.target.value)}
-                  className="w-full px-3 py-1.5 text-xs bg-bg-card border border-border rounded-lg text-txt-primary outline-hidden focus:border-primary"
+                  className="w-full px-3 py-1.5 text-xs font-sans bg-bg-card border border-border rounded-lg text-txt-primary outline-hidden focus:border-primary"
                 />
                 <div className="flex items-center justify-between gap-2">
                   <select
                     value={inlineTaskPageId || activePages[0]?.id || ''}
                     onChange={e => setInlineTaskPageId(e.target.value)}
-                    className="px-2 py-1 text-xs bg-bg-card border border-border rounded-lg text-txt-primary outline-hidden"
+                    className="px-2 py-1 text-xs font-sans bg-bg-card border border-border rounded-lg text-txt-primary outline-hidden cursor-pointer"
                   >
                     {activePages.map(p => (
                       <option key={p.id} value={p.id}>
@@ -386,13 +374,13 @@ export const DashboardModule: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => setShowInlineAdd(false)}
-                      className="px-2.5 py-1 text-xs text-txt-muted hover:text-txt-primary rounded"
+                      className="px-2.5 py-1 text-xs font-sans text-txt-muted hover:text-txt-primary rounded cursor-pointer"
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
-                      className="px-3 py-1 text-xs font-semibold text-white bg-primary rounded-lg hover:bg-primary-hover"
+                      className="px-3 py-1 text-xs font-sans font-semibold text-white bg-primary rounded-lg hover:bg-primary-hover cursor-pointer"
                     >
                       Add
                     </button>
@@ -404,7 +392,7 @@ export const DashboardModule: React.FC = () => {
             {/* Top 3 tasks */}
             <div className="space-y-2">
               {top3TodaysTasks.length === 0 ? (
-                <div className="py-8 text-center text-xs text-txt-muted">
+                <div className="py-8 text-center text-xs font-sans text-txt-muted">
                   No pending tasks due today or overdue. You're all caught up!
                 </div>
               ) : (
@@ -413,20 +401,23 @@ export const DashboardModule: React.FC = () => {
                   const page = pages.find(p => p.id === task.pageId);
 
                   return (
-                    <div
+                    <motion.div
                       key={task.id}
+                      whileHover={{ x: 2 }}
+                      transition={{ type: "spring", stiffness: 500, damping: 30 }}
                       className="flex items-center justify-between p-2.5 rounded-xl bg-bg-subtle/50 hover:bg-bg-subtle border border-border transition-colors group"
                     >
                       <div className="flex items-center gap-2.5 overflow-hidden flex-1">
-                        <button
+                        <motion.button
+                          whileTap={{ scale: 0.82 }}
                           onClick={() => toggleTaskCompleted(task.id)}
                           className="text-txt-muted hover:text-primary transition-colors flex-shrink-0 cursor-pointer"
                         >
                           <Square className="w-4 h-4" />
-                        </button>
+                        </motion.button>
                         <button
                           onClick={() => navigateToTask(task.pageId, task.id)}
-                          className="text-xs font-medium text-txt-primary group-hover:text-primary truncate text-left transition-colors"
+                          className="text-xs font-sans font-medium text-txt-primary group-hover:text-primary truncate text-left transition-colors cursor-pointer"
                         >
                           {task.title}
                         </button>
@@ -434,17 +425,17 @@ export const DashboardModule: React.FC = () => {
 
                       <div className="flex items-center gap-2 flex-shrink-0">
                         {isOverdue && (
-                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400">
+                          <span className="text-[10px] font-sans font-bold px-1.5 py-0.5 rounded bg-red-100 dark:bg-red-950/40 text-red-600 dark:text-red-400">
                             Overdue
                           </span>
                         )}
                         {task.priority === 'high' && (
-                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400">
+                          <span className="text-[10px] font-sans font-bold px-1.5 py-0.5 rounded bg-red-100 dark:bg-red-950/40 text-red-600 dark:text-red-400">
                             High
                           </span>
                         )}
                         {task.priority === 'medium' && (
-                          <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400">
+                          <span className="text-[10px] font-sans font-medium px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400">
                             Medium
                           </span>
                         )}
@@ -456,14 +447,14 @@ export const DashboardModule: React.FC = () => {
                           />
                         )}
                       </div>
-                    </div>
+                    </motion.div>
                   );
                 })
               )}
             </div>
           </div>
 
-          <div className="mt-4 pt-3 border-t border-border flex items-center justify-between text-xs">
+          <div className="mt-4 pt-3 border-t border-border flex items-center justify-between text-xs font-sans">
             <span className="text-txt-muted">
               {todaysTasksCandidates.length > 3
                 ? `Showing top 3 of ${todaysTasksCandidates.length} items`
@@ -479,28 +470,30 @@ export const DashboardModule: React.FC = () => {
           </div>
         </div>
 
-        {/* Habit Summary (Section 5.3) */}
+        {/* Habit Summary */}
         <div className="bg-bg-card border border-border shadow-card rounded-2xl p-5 flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
-                <span className="text-base font-bold text-txt-primary">Habit Summary</span>
-                <span className="text-xs px-2 py-0.5 rounded-full bg-bg-subtle text-txt-muted font-medium">
+                <span className="text-lg font-serif font-bold text-txt-primary tracking-tight">Habit Summary</span>
+                <span className="text-xs font-mono px-2 py-0.5 rounded-full bg-bg-subtle text-txt-muted font-medium">
                   {habitsScheduledToday.length}
                 </span>
               </div>
-              <button
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
                 onClick={() => setIsHabitModalOpen(true)}
                 className="p-1 rounded-lg text-teal-600 bg-teal-500/10 hover:bg-teal-500/20 transition-colors cursor-pointer"
                 title="Add Habit"
               >
                 <Plus className="w-4 h-4" />
-              </button>
+              </motion.button>
             </div>
 
             <div className="space-y-2">
               {habitsScheduledToday.length === 0 ? (
-                <div className="py-8 text-center text-xs text-txt-muted">
+                <div className="py-8 text-center text-xs font-sans text-txt-muted">
                   No habits scheduled today.
                 </div>
               ) : (
@@ -510,8 +503,10 @@ export const DashboardModule: React.FC = () => {
                   );
 
                   return (
-                    <div
+                    <motion.div
                       key={habit.id}
+                      whileHover={{ x: 2 }}
+                      transition={{ type: "spring", stiffness: 500, damping: 30 }}
                       className="flex items-center justify-between p-2.5 rounded-xl bg-bg-subtle/50 hover:bg-bg-subtle border border-border transition-colors"
                     >
                       <div className="flex items-center gap-3">
@@ -521,12 +516,14 @@ export const DashboardModule: React.FC = () => {
                         >
                           <IconRenderer name={habit.icon} className="w-3.5 h-3.5" />
                         </div>
-                        <span className={`text-xs font-semibold ${isChecked ? 'text-txt-primary' : 'text-txt-secondary'}`}>
+                        <span className={`text-xs font-sans font-semibold ${isChecked ? 'text-txt-primary' : 'text-txt-secondary'}`}>
                           {habit.name}
                         </span>
                       </div>
 
-                      <button
+                      <motion.button
+                        whileTap={{ scale: 0.85 }}
+                        transition={{ type: "spring", stiffness: 500, damping: 25 }}
                         onClick={() => toggleHabitLog(habit.id, todayStr)}
                         className={`w-7 h-7 rounded-lg flex items-center justify-center transition-all cursor-pointer ${
                           isChecked
@@ -536,15 +533,15 @@ export const DashboardModule: React.FC = () => {
                         title={isChecked ? 'Mark incomplete' : 'Mark completed'}
                       >
                         <Check className="w-4 h-4 stroke-[3]" />
-                      </button>
-                    </div>
+                      </motion.button>
+                    </motion.div>
                   );
                 })
               )}
             </div>
           </div>
 
-          <div className="mt-4 pt-3 border-t border-border flex items-center justify-between text-xs">
+          <div className="mt-4 pt-3 border-t border-border flex items-center justify-between text-xs font-sans">
             <span className="text-txt-muted">
               {habitsScheduledToday.length > 0
                 ? `${habitsCompletedToday} / ${habitsScheduledToday.length} · ${Math.round(
@@ -563,30 +560,32 @@ export const DashboardModule: React.FC = () => {
         </div>
       </div>
 
-      {/* Bottom row: Upcoming (Next 7 days) & Weekly Progress */}
+      {/* Bottom row: Upcoming & Weekly Progress */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Upcoming (Section 5.4) */}
+        {/* Upcoming */}
         <div className="bg-bg-card border border-border shadow-card rounded-2xl p-5 flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <Calendar className="w-4 h-4 text-primary" />
-                <span className="text-base font-bold text-txt-primary">Upcoming (Next 7 Days)</span>
+                <span className="text-lg font-serif font-bold text-txt-primary tracking-tight">Upcoming (Next 7 Days)</span>
               </div>
-              <span className="text-xs text-txt-muted">
+              <span className="text-xs font-mono text-txt-muted">
                 {next7DaysItems.length} items
               </span>
             </div>
 
             <div className="space-y-2">
               {next7DaysItems.length === 0 ? (
-                <div className="py-8 text-center text-xs text-txt-muted">
+                <div className="py-8 text-center text-xs font-sans text-txt-muted">
                   No tasks or events scheduled in the next 7 days.
                 </div>
               ) : (
                 next7DaysItems.slice(0, 6).map(item => (
-                  <div
+                  <motion.div
                     key={`${item.type}-${item.id}`}
+                    whileHover={{ x: 2 }}
+                    transition={{ type: "spring", stiffness: 500, damping: 30 }}
                     onClick={() => {
                       if (item.type === 'task' && item.pageId) {
                         navigateToTask(item.pageId, item.id);
@@ -597,31 +596,31 @@ export const DashboardModule: React.FC = () => {
                     className="flex items-center justify-between p-2.5 rounded-xl bg-bg-subtle/50 hover:bg-bg-subtle border border-border transition-colors cursor-pointer group"
                   >
                     <div className="flex items-center gap-3 overflow-hidden">
-                      <span className="text-xs font-semibold px-2 py-0.5 rounded-md bg-bg-card border border-border text-txt-secondary flex-shrink-0">
+                      <span className="text-xs font-mono font-medium px-2 py-0.5 rounded-md bg-bg-card border border-border text-txt-secondary flex-shrink-0">
                         {item.date}
                       </span>
                       <div
                         className="w-2 h-2 rounded-full flex-shrink-0"
                         style={{ backgroundColor: item.color }}
                       />
-                      <span className="text-xs font-medium text-txt-primary group-hover:text-primary truncate">
+                      <span className="text-xs font-sans font-medium text-txt-primary group-hover:text-primary truncate">
                         {item.title}
                       </span>
                     </div>
 
-                    <div className="flex items-center gap-2 flex-shrink-0 text-xs text-txt-muted">
+                    <div className="flex items-center gap-2 flex-shrink-0 text-xs font-sans text-txt-muted">
                       {item.time && <span>{item.time}</span>}
                       <span className="text-[10px] uppercase font-semibold text-txt-muted">
                         {item.type}
                       </span>
                     </div>
-                  </div>
+                  </motion.div>
                 ))
               )}
             </div>
           </div>
 
-          <div className="mt-4 pt-3 border-t border-border flex items-center justify-between text-xs">
+          <div className="mt-4 pt-3 border-t border-border flex items-center justify-between text-xs font-sans">
             <span className="text-txt-muted">
               {next7DaysItems.length > 6 ? `+${next7DaysItems.length - 6} more` : 'Next 7 days'}
             </span>
@@ -635,16 +634,16 @@ export const DashboardModule: React.FC = () => {
           </div>
         </div>
 
-        {/* Weekly Progress (Section 5.5) */}
+        {/* Weekly Progress */}
         <div className="bg-bg-card border border-border shadow-card rounded-2xl p-5 flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-4">
-              <span className="text-base font-bold text-txt-primary">Weekly Progress</span>
-              <span className="text-xs text-txt-muted font-medium">Mon – Sun</span>
+              <span className="text-lg font-serif font-bold text-txt-primary tracking-tight">Weekly Progress</span>
+              <span className="text-xs font-sans text-txt-muted font-medium">Mon – Sun</span>
             </div>
 
             <div className="flex flex-col sm:flex-row items-center justify-around gap-6 py-2">
-              {/* Circular Progress Ring */}
+              {/* Circular Progress Ring with animated spring */}
               <div className="relative w-32 h-32 flex items-center justify-center">
                 <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
                   <circle
@@ -655,37 +654,38 @@ export const DashboardModule: React.FC = () => {
                     strokeWidth="8"
                     fill="transparent"
                   />
-                  <circle
+                  <motion.circle
                     cx="50"
                     cy="50"
                     r="40"
-                    stroke="#4285F4"
+                    stroke="#D97706"
                     strokeWidth="8"
                     strokeDasharray={251.2}
-                    strokeDashoffset={251.2 - (251.2 * weekProgressData.overallPercent) / 100}
+                    initial={{ strokeDashoffset: 251.2 }}
+                    animate={{ strokeDashoffset: 251.2 - (251.2 * weekProgressData.overallPercent) / 100 }}
+                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
                     strokeLinecap="round"
                     fill="transparent"
-                    className="transition-all duration-500 ease-out"
                   />
                 </svg>
                 <div className="absolute flex flex-col items-center">
-                  <span className="text-2xl font-bold text-txt-primary">
+                  <span className="text-2xl font-mono font-bold text-txt-primary">
                     {weekProgressData.overallPercent}%
                   </span>
-                  <span className="text-[10px] text-txt-muted font-medium uppercase">
+                  <span className="text-[10px] font-sans text-txt-muted font-medium uppercase">
                     Done
                   </span>
                 </div>
               </div>
 
               {/* Legend with breakdown */}
-              <div className="space-y-3 flex-1 max-w-xs">
+              <div className="space-y-3 flex-1 max-w-xs font-sans">
                 <div className="flex items-center justify-between text-xs p-2 rounded-xl bg-bg-subtle border border-border-subtle">
                   <div className="flex items-center gap-2">
-                    <span className="w-2.5 h-2.5 rounded-full bg-blue-500" />
+                    <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
                     <span className="font-medium text-txt-secondary">Tasks</span>
                   </div>
-                  <span className="font-bold text-txt-primary">
+                  <span className="font-mono font-bold text-txt-primary">
                     {weekProgressData.tasksCompletedThisWeek} / {weekProgressData.tasksDueThisWeek}
                   </span>
                 </div>
@@ -695,7 +695,7 @@ export const DashboardModule: React.FC = () => {
                     <span className="w-2.5 h-2.5 rounded-full bg-teal-500" />
                     <span className="font-medium text-txt-secondary">Habits</span>
                   </div>
-                  <span className="font-bold text-txt-primary">
+                  <span className="font-mono font-bold text-txt-primary">
                     {weekProgressData.habitCompletionsThisWeek} / {weekProgressData.habitOccurrencesThisWeek}
                   </span>
                 </div>
@@ -705,7 +705,7 @@ export const DashboardModule: React.FC = () => {
                     <span className="w-2.5 h-2.5 rounded-full bg-orange-500" />
                     <span className="font-medium text-txt-secondary">Events</span>
                   </div>
-                  <span className="font-bold text-txt-primary">
+                  <span className="font-mono font-bold text-txt-primary">
                     {weekProgressData.eventsThisWeek}
                   </span>
                 </div>
@@ -713,7 +713,7 @@ export const DashboardModule: React.FC = () => {
             </div>
           </div>
 
-          <div className="mt-4 pt-3 border-t border-border text-[11px] text-txt-muted text-center sm:text-left">
+          <div className="mt-4 pt-3 border-t border-border text-[11px] font-sans text-txt-muted text-center sm:text-left">
             Formula: (Tasks completed + Habits completed) ÷ (Tasks due + Habits scheduled)
           </div>
         </div>
@@ -727,4 +727,3 @@ export const DashboardModule: React.FC = () => {
     </div>
   );
 };
-

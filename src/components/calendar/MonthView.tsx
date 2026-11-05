@@ -1,8 +1,9 @@
 import React from 'react';
 import { useWorkspace } from '../../context/WorkspaceContext';
 import { formatLocalDate } from '../../db/indexedDB';
-import { Task, Habit, CalendarEvent } from '../../types';
-import { Check, CheckSquare, Palette, Plus } from 'lucide-react';
+import { CalendarEvent } from '../../types';
+import { Palette, Plus } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 interface MonthViewProps {
   currentDate: Date;
@@ -46,23 +47,17 @@ export const MonthView: React.FC<MonthViewProps> = ({
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
 
-  // First day of current month
   const firstDay = new Date(year, month, 1);
-  // Last day of current month
   const lastDay = new Date(year, month + 1, 0);
 
-  // Week start: Monday = 1, Sunday = 0
-  const startDayIndex = settings.weekStart === 'sunday' ? 0 : 1;
-  let firstDayOfWeek = firstDay.getDay(); // 0 is Sun, 1 is Mon...
+  let firstDayOfWeek = firstDay.getDay();
   if (settings.weekStart === 'monday') {
-    firstDayOfWeek = (firstDayOfWeek + 6) % 7; // 0 is Mon, 6 is Sun
+    firstDayOfWeek = (firstDayOfWeek + 6) % 7;
   }
 
-  // Days in calendar grid
   const daysInMonth = lastDay.getDate();
   const days: { dateStr: string; dayNum: number; isCurrentMonth: boolean }[] = [];
 
-  // Previous month trailing days
   const prevMonthLastDay = new Date(year, month, 0).getDate();
   for (let i = firstDayOfWeek - 1; i >= 0; i--) {
     const d = new Date(year, month - 1, prevMonthLastDay - i);
@@ -73,7 +68,6 @@ export const MonthView: React.FC<MonthViewProps> = ({
     });
   }
 
-  // Current month days
   for (let i = 1; i <= daysInMonth; i++) {
     const d = new Date(year, month, i);
     days.push({
@@ -83,9 +77,8 @@ export const MonthView: React.FC<MonthViewProps> = ({
     });
   }
 
-  // Next month leading days to complete grid (42 cells = 6 weeks)
-  const remainingCells = 42 - days.length;
-  for (let i = 1; i <= remainingCells; i++) {
+  const remaining = 42 - days.length;
+  for (let i = 1; i <= remaining; i++) {
     const d = new Date(year, month + 1, i);
     days.push({
       dateStr: formatLocalDate(d),
@@ -94,34 +87,33 @@ export const MonthView: React.FC<MonthViewProps> = ({
     });
   }
 
-  const todayStr = formatLocalDate(new Date());
-
-  // Weekday column headers
-  const weekDayHeaders = settings.weekStart === 'sunday'
+  const dayHeaders = settings.weekStart === 'sunday'
     ? ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
     : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
+  const todayStr = formatLocalDate(new Date());
+
   return (
-    <div className="bg-bg-card border border-border rounded-2xl overflow-hidden shadow-card">
-      {/* Weekday headers */}
-      <div className="grid grid-cols-7 border-b border-border bg-bg-subtle text-center text-xs font-semibold text-txt-secondary py-2.5">
-        {weekDayHeaders.map(h => (
-          <div key={h}>{h}</div>
+    <div className="bg-bg-card border border-border rounded-2xl shadow-card overflow-hidden">
+      {/* Day of Week Headers */}
+      <div className="grid grid-cols-7 border-b border-border bg-bg-subtle text-txt-secondary text-xs font-sans font-semibold text-center select-none">
+        {dayHeaders.map(dayName => (
+          <div key={dayName} className="py-2.5">
+            {dayName}
+          </div>
         ))}
       </div>
 
-      {/* Days grid */}
-      <div className="grid grid-cols-7 auto-rows-fr divide-x divide-y divide-border border-b border-border">
-        {days.map((day, idx) => {
+      {/* Calendar Grid */}
+      <div className="grid grid-cols-7 divide-x divide-y divide-border">
+        {days.map(day => {
           const isToday = day.dateStr === todayStr;
           const isSelected = day.dateStr === selectedDate;
-          const dayColorEntry = dayColors.find(d => d.date === day.dateStr);
+          const dayColorEntry = dayColors.find(c => c.date === day.dateStr);
 
-          // Get day of week for habit schedule (1 = Mon, ..., 7 = Sun)
           const cellDate = new Date(day.dateStr);
           const dow = (cellDate.getDay() + 6) % 7 + 1;
 
-          // Collect activities for this cell
           const cellActivities: {
             id: string;
             type: 'task' | 'habit' | 'event';
@@ -131,7 +123,6 @@ export const MonthView: React.FC<MonthViewProps> = ({
             raw: any;
           }[] = [];
 
-          // 1. Tasks
           if (showTodos) {
             tasks.forEach(t => {
               if (t.dueDate === day.dateStr) {
@@ -150,7 +141,6 @@ export const MonthView: React.FC<MonthViewProps> = ({
             });
           }
 
-          // 2. Habits
           if (showHabits) {
             habits.forEach(h => {
               const isScheduled =
@@ -173,7 +163,6 @@ export const MonthView: React.FC<MonthViewProps> = ({
             });
           }
 
-          // 3. Events
           if (showEvents) {
             events.forEach(e => {
               if (e.date === day.dateStr) {
@@ -188,7 +177,6 @@ export const MonthView: React.FC<MonthViewProps> = ({
             });
           }
 
-          // Overflow handling: up to 3 labels, then +N more (Section 7.2)
           const maxVisible = 3;
           const visibleActivities = cellActivities.slice(0, maxVisible);
           const overflowCount = cellActivities.length - maxVisible;
@@ -206,7 +194,7 @@ export const MonthView: React.FC<MonthViewProps> = ({
                 {/* Date header */}
                 <div className="flex items-center justify-between mb-1">
                   <span
-                    className={`text-xs font-semibold w-6 h-6 rounded-full flex items-center justify-center ${
+                    className={`text-xs font-mono w-6 h-6 rounded-full flex items-center justify-center ${
                       isToday
                         ? 'bg-primary text-white font-bold shadow-xs'
                         : isSelected
@@ -226,7 +214,7 @@ export const MonthView: React.FC<MonthViewProps> = ({
                         e.stopPropagation();
                         onOpenDayColorPicker(day.dateStr);
                       }}
-                      className="p-1 rounded text-txt-muted hover:text-primary transition-colors"
+                      className="p-1 rounded text-txt-muted hover:text-primary transition-colors cursor-pointer"
                       title="Set Day Background Color"
                     >
                       <Palette className="w-3.5 h-3.5" />
@@ -236,7 +224,7 @@ export const MonthView: React.FC<MonthViewProps> = ({
                         e.stopPropagation();
                         onOpenCreateEvent(day.dateStr);
                       }}
-                      className="p-1 rounded text-txt-muted hover:text-primary transition-colors"
+                      className="p-1 rounded text-txt-muted hover:text-primary transition-colors cursor-pointer"
                       title="Create Event on this date"
                     >
                       <Plus className="w-3.5 h-3.5" />
@@ -244,11 +232,12 @@ export const MonthView: React.FC<MonthViewProps> = ({
                   </div>
                 </div>
 
-                {/* Activity Names inside Box (Section 7.2) */}
+                {/* Activity Names inside Box */}
                 <div className="space-y-1">
                   {visibleActivities.map(act => (
-                    <div
+                    <motion.div
                       key={`${act.type}-${act.id}`}
+                      whileHover={{ scale: 1.02 }}
                       onClick={e => {
                         e.stopPropagation();
                         if (act.type === 'task') {
@@ -259,7 +248,7 @@ export const MonthView: React.FC<MonthViewProps> = ({
                           onOpenEditEvent(act.raw);
                         }
                       }}
-                      className="px-1.5 py-0.5 rounded text-[11px] font-medium truncate flex items-center gap-1.5 transition-opacity hover:opacity-85 shadow-2xs cursor-pointer"
+                      className="px-1.5 py-0.5 rounded text-[11px] font-sans font-medium truncate flex items-center gap-1.5 transition-opacity hover:opacity-85 shadow-2xs cursor-pointer"
                       style={{
                         backgroundColor: `${act.color}20`,
                         borderLeft: `3px solid ${act.color}`,
@@ -274,7 +263,7 @@ export const MonthView: React.FC<MonthViewProps> = ({
                       >
                         {act.title}
                       </span>
-                    </div>
+                    </motion.div>
                   ))}
                 </div>
               </div>
@@ -287,7 +276,7 @@ export const MonthView: React.FC<MonthViewProps> = ({
                       e.stopPropagation();
                       onOpenDayView(day.dateStr);
                     }}
-                    className="text-[10px] font-bold text-primary hover:underline px-1 py-0.5 rounded bg-primary-light/50"
+                    className="text-[10px] font-sans font-bold text-primary hover:underline px-1 py-0.5 rounded bg-primary-light/50 cursor-pointer"
                   >
                     +{overflowCount} more
                   </button>
@@ -300,4 +289,3 @@ export const MonthView: React.FC<MonthViewProps> = ({
     </div>
   );
 };
-

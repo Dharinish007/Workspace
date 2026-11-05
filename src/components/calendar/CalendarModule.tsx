@@ -10,23 +10,18 @@ import { DayColorPickerModal } from './DayColorPickerModal';
 import { 
   ChevronLeft, 
   ChevronRight, 
-  Calendar as CalendarIcon, 
-  Plus, 
-  Eye, 
-  EyeOff, 
-  Check, 
-  Palette,
-  Edit2
+  Plus
 } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 export const CalendarModule: React.FC = () => {
-  const { pages, habits, events } = useWorkspace();
+  const { pages } = useWorkspace();
 
   const [currentView, setCurrentView] = useState<CalendarView>('month');
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
   const [selectedDateStr, setSelectedDateStr] = useState<string>(formatLocalDate(new Date()));
 
-  // Visibility Toggles (Section 7.6)
+  // Visibility Toggles
   const [showTodos, setShowTodos] = useState(true);
   const [showHabits, setShowHabits] = useState(true);
   const [showEvents, setShowEvents] = useState(true);
@@ -108,54 +103,65 @@ export const CalendarModule: React.FC = () => {
         {/* Navigation & Month Title */}
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-1 bg-bg-card border border-border rounded-xl p-1 shadow-xs">
-            <button
+            <motion.button
+              whileTap={{ scale: 0.9 }}
               onClick={handlePrev}
               className="p-1.5 rounded-lg hover:bg-bg-hover text-txt-secondary hover:text-txt-primary transition-colors cursor-pointer"
               title="Previous"
             >
               <ChevronLeft className="w-5 h-5" />
-            </button>
-            <button
+            </motion.button>
+            <motion.button
+              whileTap={{ scale: 0.95 }}
               onClick={handleToday}
-              className="px-3 py-1 text-xs font-bold text-txt-primary hover:bg-bg-hover rounded-lg transition-colors cursor-pointer"
+              className="px-3 py-1 text-xs font-sans font-bold text-txt-primary hover:bg-bg-hover rounded-lg transition-colors cursor-pointer"
             >
               Today
-            </button>
-            <button
+            </motion.button>
+            <motion.button
+              whileTap={{ scale: 0.9 }}
               onClick={handleNext}
               className="p-1.5 rounded-lg hover:bg-bg-hover text-txt-secondary hover:text-txt-primary transition-colors cursor-pointer"
               title="Next"
             >
               <ChevronRight className="w-5 h-5" />
-            </button>
+            </motion.button>
           </div>
 
-          <h1 className="text-xl sm:text-2xl font-bold text-txt-primary tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-serif font-bold text-txt-primary tracking-tight">
             {monthYearTitle}
           </h1>
         </div>
 
         {/* View Switcher, Toggles & Add Event */}
         <div className="flex flex-wrap items-center gap-2.5">
-          {/* View selector: Month, Week, Day */}
-          <div className="flex items-center bg-bg-card border border-border rounded-xl p-1 shadow-xs">
-            {(['month', 'week', 'day'] as CalendarView[]).map(v => (
-              <button
-                key={v}
-                onClick={() => setCurrentView(v)}
-                className={`px-3 py-1.5 text-xs font-semibold rounded-lg capitalize transition-all cursor-pointer ${
-                  currentView === v
-                    ? 'bg-primary text-white shadow-xs'
-                    : 'text-txt-secondary hover:text-txt-primary hover:bg-bg-hover'
-                }`}
-              >
-                {v}
-              </button>
-            ))}
+          {/* View selector: Month, Week, Day with sliding spring pill */}
+          <div className="flex items-center bg-bg-card border border-border rounded-xl p-1 shadow-xs relative">
+            {(['month', 'week', 'day'] as CalendarView[]).map(v => {
+              const isSelected = currentView === v;
+              return (
+                <button
+                  key={v}
+                  onClick={() => setCurrentView(v)}
+                  className={`relative px-3.5 py-1.5 text-xs font-sans font-semibold rounded-lg capitalize transition-colors cursor-pointer z-10 ${
+                    isSelected ? 'text-white' : 'text-txt-secondary hover:text-txt-primary'
+                  }`}
+                >
+                  {isSelected && (
+                    <motion.div
+                      layoutId="calendarViewPill"
+                      className="absolute inset-0 bg-primary rounded-lg -z-10 shadow-xs"
+                      transition={{ type: "spring", stiffness: 450, damping: 35 }}
+                    />
+                  )}
+                  <span>{v}</span>
+                </button>
+              );
+            })}
           </div>
 
-          {/* Activity Category Toggles (Section 7.6) */}
-          <div className="hidden sm:flex items-center gap-1.5 bg-bg-card border border-border rounded-xl p-1 text-xs shadow-xs">
+          {/* Activity Category Toggles */}
+          <div className="hidden sm:flex items-center gap-1.5 bg-bg-card border border-border rounded-xl p-1 text-xs font-sans shadow-xs">
             <button
               onClick={() => setShowTodos(!showTodos)}
               className={`px-2.5 py-1 rounded-lg font-medium transition-colors flex items-center gap-1 cursor-pointer ${
@@ -198,13 +204,16 @@ export const CalendarModule: React.FC = () => {
           </div>
 
           {/* Add Event Button */}
-          <button
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.96 }}
+            transition={{ type: "spring", stiffness: 500, damping: 25 }}
             onClick={() => openCreateEventForDate(selectedDateStr)}
-            className="px-4 py-2 text-xs font-semibold text-white bg-primary hover:bg-primary-hover rounded-xl flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
+            className="px-4 py-2 text-xs font-sans font-semibold text-white bg-primary hover:bg-primary-hover rounded-xl flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
           >
             <Plus className="w-4 h-4" />
             <span>Add Event</span>
-          </button>
+          </motion.button>
         </div>
       </div>
 
@@ -254,8 +263,8 @@ export const CalendarModule: React.FC = () => {
         />
       )}
 
-      {/* Category Legend & Colors Panel (README Section 7.4) */}
-      <div className="bg-bg-card border border-border rounded-2xl p-4 shadow-xs flex flex-wrap items-center justify-between gap-4 text-xs">
+      {/* Category Legend & Colors Panel */}
+      <div className="bg-bg-card border border-border rounded-2xl p-4 shadow-xs flex flex-wrap items-center justify-between gap-4 text-xs font-sans">
         <div className="flex flex-wrap items-center gap-4">
           <span className="font-bold text-txt-primary uppercase tracking-wider text-[11px]">
             Categories & Colors:
@@ -306,4 +315,3 @@ export const CalendarModule: React.FC = () => {
     </div>
   );
 };
-

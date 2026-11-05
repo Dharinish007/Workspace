@@ -207,7 +207,7 @@ test('Section 14 Phase 3: Dashboard Acceptance Criteria', async (t) => {
 
   await t.test('Ticking a task updates To-Do and Calendar', async () => {
     const tasks = await Repository.getAllTasks();
-    const task = tasks[0];
+    const task = tasks.find(t => !t.completed) || tasks[0];
     assert.equal(task.completed, false);
 
     // Toggle complete

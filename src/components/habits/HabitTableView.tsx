@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import { useWorkspace } from '../../context/WorkspaceContext';
-import { Habit, HabitLog } from '../../types';
+import { Habit } from '../../types';
 import { IconRenderer } from '../common/IconRegistry';
 import { formatLocalDate } from '../../db/indexedDB';
 import { 
   isHabitScheduledOnDate, 
-  calculateCurrentStreak, 
   calculateHabitStats 
 } from '../../utils/habitCalculations';
 import { Check, Edit2, Trash2, MoreVertical, Flame } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface HabitTableViewProps {
   habits: Habit[];
@@ -29,7 +29,6 @@ export const HabitTableView: React.FC<HabitTableViewProps> = ({
     habitLogs, 
     toggleHabitLog, 
     highlightedHabitId, 
-    setHighlightedHabitId, 
     settings 
   } = useWorkspace();
 
@@ -40,7 +39,6 @@ export const HabitTableView: React.FC<HabitTableViewProps> = ({
   const todayStr = formatLocalDate(new Date());
 
   if (timeframe === 'week') {
-    // 7 days of current week
     const curr = new Date(currentDate);
     const day = curr.getDay();
     const diff = curr.getDate() - day + (settings.weekStart === 'sunday' ? 0 : (day === 0 ? -6 : 1));
@@ -59,7 +57,6 @@ export const HabitTableView: React.FC<HabitTableViewProps> = ({
       });
     }
   } else {
-    // Month view: all days of the month
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
     const daysInMonth = new Date(year, month + 1, 0).getDate();
@@ -80,9 +77,9 @@ export const HabitTableView: React.FC<HabitTableViewProps> = ({
   return (
     <div className="bg-bg-card border border-border rounded-2xl shadow-card overflow-hidden">
       <div className="overflow-x-auto">
-        <table className="w-full text-left border-collapse text-xs">
+        <table className="w-full text-left border-collapse text-xs font-sans">
           <thead>
-            <tr className="border-b border-border bg-bg-subtle text-txt-secondary font-semibold">
+            <tr className="border-b border-border bg-bg-subtle text-txt-secondary font-semibold select-none">
               <th className="py-3 px-4 min-w-[180px]">Habit</th>
               {dateColumns.map(col => (
                 <th
@@ -91,8 +88,8 @@ export const HabitTableView: React.FC<HabitTableViewProps> = ({
                     col.isToday ? 'bg-teal-500/10 text-teal-600 dark:text-teal-400 font-bold' : ''
                   }`}
                 >
-                  <div className="text-[10px] uppercase">{col.dayName}</div>
-                  <div className={`text-xs ${col.isToday ? 'font-bold' : ''}`}>{col.dayNum}</div>
+                  <div className="text-[10px] uppercase font-sans">{col.dayName}</div>
+                  <div className={`text-xs font-mono ${col.isToday ? 'font-bold' : ''}`}>{col.dayNum}</div>
                 </th>
               ))}
               <th className="py-3 px-3 text-center min-w-[70px]">Streak</th>
@@ -131,7 +128,7 @@ export const HabitTableView: React.FC<HabitTableViewProps> = ({
                           <IconRenderer name={habit.icon} className="w-3.5 h-3.5" />
                         </div>
                         <div className="overflow-hidden">
-                          <span className="font-semibold text-txt-primary truncate block">
+                          <span className="font-semibold text-txt-primary truncate block text-sm">
                             {habit.name}
                           </span>
                           <span className="text-[10px] text-txt-muted block">
@@ -158,9 +155,11 @@ export const HabitTableView: React.FC<HabitTableViewProps> = ({
                           }`}
                         >
                           {isScheduled ? (
-                            <button
+                            <motion.button
+                              whileTap={{ scale: 0.8 }}
+                              transition={{ type: "spring", stiffness: 600, damping: 25 }}
                               onClick={() => toggleHabitLog(habit.id, col.dateStr)}
-                              className={`w-6 h-6 mx-auto rounded-md flex items-center justify-center transition-all cursor-pointer ${
+                              className={`w-6 h-6 mx-auto rounded-md flex items-center justify-center transition-colors cursor-pointer ${
                                 isCompleted
                                   ? 'bg-teal-500 text-white shadow-2xs'
                                   : 'border border-border bg-bg-card hover:bg-bg-subtle text-transparent'
@@ -168,7 +167,7 @@ export const HabitTableView: React.FC<HabitTableViewProps> = ({
                               title={`${habit.name} - ${col.dateStr}: ${isCompleted ? 'Done' : 'Pending'}`}
                             >
                               <Check className="w-3.5 h-3.5 stroke-[3]" />
-                            </button>
+                            </motion.button>
                           ) : (
                             <span className="text-txt-muted opacity-40 font-mono">–</span>
                           )}
@@ -178,7 +177,7 @@ export const HabitTableView: React.FC<HabitTableViewProps> = ({
 
                     {/* Streak */}
                     <td className="py-3 px-3 text-center">
-                      <div className="inline-flex items-center gap-1 font-bold text-xs text-txt-primary">
+                      <div className="inline-flex items-center gap-1 font-bold text-xs text-txt-primary font-mono">
                         <Flame className={`w-3.5 h-3.5 ${stats.currentStreak > 0 ? 'text-orange-500 fill-orange-500' : 'text-txt-muted'}`} />
                         <span>{stats.currentStreak}d</span>
                       </div>
@@ -188,16 +187,16 @@ export const HabitTableView: React.FC<HabitTableViewProps> = ({
                     <td className="py-3 px-4">
                       <div className="space-y-1">
                         <div className="flex items-center justify-between text-[11px] font-semibold text-txt-secondary">
-                          <span>{stats.completedDays} / {stats.scheduledDays}</span>
-                          <span className="font-bold text-txt-primary">{stats.completionPercentage}%</span>
+                          <span className="font-mono">{stats.completedDays} / {stats.scheduledDays}</span>
+                          <span className="font-mono font-bold text-txt-primary">{stats.completionPercentage}%</span>
                         </div>
                         <div className="w-full bg-bg-subtle rounded-full h-1.5 overflow-hidden border border-border-subtle">
-                          <div
-                            className="h-full rounded-full transition-all duration-300"
-                            style={{
-                              width: `${stats.completionPercentage}%`,
-                              backgroundColor: habit.color,
-                            }}
+                          <motion.div
+                            className="h-full rounded-full"
+                            initial={{ width: 0 }}
+                            animate={{ width: `${stats.completionPercentage}%` }}
+                            transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                            style={{ backgroundColor: habit.color }}
                           />
                         </div>
                       </div>
@@ -205,46 +204,55 @@ export const HabitTableView: React.FC<HabitTableViewProps> = ({
 
                     {/* Row Menu */}
                     <td className="py-3 px-2 text-center relative">
-                      <button
+                      <motion.button
+                        whileTap={{ scale: 0.9 }}
                         onClick={() =>
                           setActiveMenuHabitId(activeMenuHabitId === habit.id ? null : habit.id)
                         }
                         className="p-1 rounded text-txt-muted hover:text-txt-primary hover:bg-bg-subtle transition-colors cursor-pointer"
                       >
                         <MoreVertical className="w-4 h-4" />
-                      </button>
+                      </motion.button>
 
-                      {activeMenuHabitId === habit.id && (
-                        <>
-                          <div
-                            className="fixed inset-0 z-20"
-                            onClick={() => setActiveMenuHabitId(null)}
-                          />
-                          <div className="absolute right-2 top-8 w-32 bg-bg-card border border-border shadow-modal rounded-xl py-1 z-30 text-xs">
-                            <button
-                              onClick={() => {
-                                setActiveMenuHabitId(null);
-                                onEditHabit(habit);
-                              }}
-                              className="w-full flex items-center gap-2 px-3 py-1.5 text-txt-primary hover:bg-bg-hover text-left"
+                      <AnimatePresence>
+                        {activeMenuHabitId === habit.id && (
+                          <>
+                            <div
+                              className="fixed inset-0 z-20"
+                              onClick={() => setActiveMenuHabitId(null)}
+                            />
+                            <motion.div 
+                              initial={{ opacity: 0, scale: 0.92, y: -4 }}
+                              animate={{ opacity: 1, scale: 1, y: 0 }}
+                              exit={{ opacity: 0, scale: 0.92, y: -4 }}
+                              transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                              className="absolute right-2 top-8 w-32 bg-bg-card border border-border shadow-modal rounded-xl py-1 z-30 text-xs"
                             >
-                              <Edit2 className="w-3.5 h-3.5" />
-                              <span>Edit</span>
-                            </button>
-                            <hr className="my-1 border-border" />
-                            <button
-                              onClick={() => {
-                                setActiveMenuHabitId(null);
-                                onDeleteHabit(habit.id);
-                              }}
-                              className="w-full flex items-center gap-2 px-3 py-1.5 text-red-600 dark:text-red-400 hover:bg-red-500/10 text-left font-medium"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                              <span>Delete</span>
-                            </button>
-                          </div>
-                        </>
-                      )}
+                              <button
+                                onClick={() => {
+                                  setActiveMenuHabitId(null);
+                                  onEditHabit(habit);
+                                }}
+                                className="w-full flex items-center gap-2 px-3 py-1.5 text-txt-primary hover:bg-bg-hover text-left cursor-pointer"
+                              >
+                                <Edit2 className="w-3.5 h-3.5" />
+                                <span>Edit</span>
+                              </button>
+                              <hr className="my-1 border-border" />
+                              <button
+                                onClick={() => {
+                                  setActiveMenuHabitId(null);
+                                  onDeleteHabit(habit.id);
+                                }}
+                                className="w-full flex items-center gap-2 px-3 py-1.5 text-red-600 dark:text-red-400 hover:bg-red-500/10 text-left font-medium cursor-pointer"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                                <span>Delete</span>
+                              </button>
+                            </motion.div>
+                          </>
+                        )}
+                      </AnimatePresence>
                     </td>
                   </tr>
                 );
@@ -256,4 +264,3 @@ export const HabitTableView: React.FC<HabitTableViewProps> = ({
     </div>
   );
 };
-
