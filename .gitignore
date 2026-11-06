@@ -35,5 +35,7 @@ Thumbs.db
 coverage
 temp_clone_inspect
 .tmp
-node_modules
 .gstack/
+artifacts/
+scratch/
+image.png

@@ -40,7 +40,6 @@ interface WorkspaceContextType {
   selectedPageId: string | null;
   highlightedTaskId: string | null;
   highlightedHabitId: string | null;
-  isSettingsOpen: boolean;
   isSearchOpen: boolean;
   isSidebarCollapsed: boolean;
   isMobileSidebarOpen: boolean;
@@ -52,7 +51,6 @@ interface WorkspaceContextType {
   setSelectedPageId: (pageId: string | null) => void;
   setHighlightedTaskId: (taskId: string | null) => void;
   setHighlightedHabitId: (habitId: string | null) => void;
-  setIsSettingsOpen: (open: boolean) => void;
   setIsSearchOpen: (open: boolean) => void;
   setIsSidebarCollapsed: (collapsed: boolean | ((prev: boolean) => boolean)) => void;
   setIsMobileSidebarOpen: (open: boolean | ((prev: boolean) => boolean)) => void;
@@ -175,7 +173,6 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   const [highlightedTaskId, setHighlightedTaskId] = useState<string | null>(null);
   const [highlightedHabitId, setHighlightedHabitId] = useState<string | null>(null);
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsedState] = useState<boolean>(() => {
     try {
@@ -327,11 +324,6 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
           e.preventDefault();
           return;
         }
-        if (isSettingsOpen) {
-          setIsSettingsOpen(false);
-          e.preventDefault();
-          return;
-        }
       }
 
       // 2. Ctrl/Cmd + B: Toggle sidebar
@@ -367,7 +359,7 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isMobileSidebarOpen, isSearchOpen, isSettingsOpen, toggleMobileSidebar, toggleSidebar, undo]);
+  }, [isMobileSidebarOpen, isSearchOpen, toggleMobileSidebar, toggleSidebar, undo]);
 
   // Navigation helpers
   const navigateToTask = useCallback((pageId: string, taskId: string) => {
@@ -745,7 +737,6 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     selectedPageId,
     highlightedTaskId,
     highlightedHabitId,
-    isSettingsOpen,
     isSearchOpen,
     isSidebarCollapsed,
     isMobileSidebarOpen,
@@ -755,7 +746,6 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     setSelectedPageId,
     setHighlightedTaskId,
     setHighlightedHabitId,
-    setIsSettingsOpen,
     setIsSearchOpen,
     setIsSidebarCollapsed,
     setIsMobileSidebarOpen,

@@ -6,7 +6,6 @@ import { Sidebar } from './components/layout/Sidebar';
 import { MobileNav } from './components/layout/MobileNav';
 import { Toast } from './components/common/Toast';
 import { SearchModal } from './components/modals/SearchModal';
-import { SettingsModal } from './components/modals/SettingsModal';
 import { DashboardModule } from './components/dashboard/DashboardModule';
 import { TodoModule } from './components/todo/TodoModule';
 import { CalendarModule } from './components/calendar/CalendarModule';
@@ -88,7 +87,6 @@ const WorkspaceContent: React.FC = () => {
 
       <MobileNav />
       <SearchModal />
-      <SettingsModal />
       <Toast />
     </div>
   );
