@@ -19,25 +19,16 @@ export const SearchModal: React.FC = () => {
   } = useWorkspace();
 
   const [query, setQuery] = useState('');
+  const [selectedIndex, setSelectedIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (isSearchOpen) {
       setQuery('');
+      setSelectedIndex(0);
       setTimeout(() => inputRef.current?.focus(), 50);
     }
   }, [isSearchOpen]);
-
-  // Handle ESC key
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isSearchOpen) {
-        setIsSearchOpen(false);
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isSearchOpen, setIsSearchOpen]);
 
   const trimmedQuery = query.trim().toLowerCase();
 
@@ -58,6 +49,85 @@ export const SearchModal: React.FC = () => {
     ? events.filter(e => e.title.toLowerCase().includes(trimmedQuery))
     : [];
 
+  // Flattened list for keyboard navigation
+  const flatResults = React.useMemo(() => {
+    const list: {
+      id: string;
+      type: 'page' | 'task' | 'habit' | 'event';
+      onSelect: () => void;
+    }[] = [];
+
+    matchingPages.forEach(p =>
+      list.push({
+        id: `page-${p.id}`,
+        type: 'page',
+        onSelect: () => {
+          setActiveSection('todo');
+          setSelectedPageId(p.id);
+          setIsSearchOpen(false);
+        },
+      })
+    );
+
+    matchingTasks.forEach(t =>
+      list.push({
+        id: `task-${t.id}`,
+        type: 'task',
+        onSelect: () => navigateToTask(t.pageId, t.id),
+      })
+    );
+
+    matchingHabits.forEach(h =>
+      list.push({
+        id: `habit-${h.id}`,
+        type: 'habit',
+        onSelect: () => navigateToHabit(h.id),
+      })
+    );
+
+    matchingEvents.forEach(e =>
+      list.push({
+        id: `event-${e.id}`,
+        type: 'event',
+        onSelect: () => {
+          setActiveSection('calendar');
+          setIsSearchOpen(false);
+        },
+      })
+    );
+
+    return list;
+  }, [matchingPages, matchingTasks, matchingHabits, matchingEvents, setActiveSection, setSelectedPageId, setIsSearchOpen, navigateToTask, navigateToHabit]);
+
+  // Reset selected index when query changes
+  useEffect(() => {
+    setSelectedIndex(0);
+  }, [trimmedQuery]);
+
+  // Handle Keyboard Navigation (Arrow keys, Enter, ESC)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!isSearchOpen) return;
+
+      if (e.key === 'Escape') {
+        setIsSearchOpen(false);
+      } else if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        setSelectedIndex(prev => (flatResults.length > 0 ? (prev + 1) % flatResults.length : 0));
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        setSelectedIndex(prev => (flatResults.length > 0 ? (prev - 1 + flatResults.length) % flatResults.length : 0));
+      } else if (e.key === 'Enter') {
+        if (flatResults.length > 0 && flatResults[selectedIndex]) {
+          e.preventDefault();
+          flatResults[selectedIndex].onSelect();
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isSearchOpen, setIsSearchOpen, flatResults, selectedIndex]);
+
   // Group tasks by page
   const tasksByPage: { [pageId: string]: typeof matchingTasks } = {};
   matchingTasks.forEach(t => {
@@ -65,11 +135,7 @@ export const SearchModal: React.FC = () => {
     tasksByPage[t.pageId].push(t);
   });
 
-  const hasResults =
-    matchingPages.length > 0 ||
-    matchingTasks.length > 0 ||
-    matchingHabits.length > 0 ||
-    matchingEvents.length > 0;
+  const hasResults = flatResults.length > 0;
 
   return (
     <AnimatePresence>
@@ -100,7 +166,7 @@ export const SearchModal: React.FC = () => {
                 value={query}
                 onChange={e => setQuery(e.target.value)}
                 placeholder="Search tasks, pages, habits, events... (Esc to close)"
-                className="flex-1 bg-transparent text-txt-primary placeholder-txt-muted outline-hidden text-base font-sans"
+                className="flex-1 bg-transparent text-txt-primary placeholder-txt-muted outline-hidden text-[15px] font-sans"
               />
               {query && (
                 <button
@@ -136,34 +202,41 @@ export const SearchModal: React.FC = () => {
                     Pages ({matchingPages.length})
                   </div>
                   <div className="space-y-1">
-                    {matchingPages.map(p => (
-                      <motion.button
-                        key={p.id}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={() => {
-                          setActiveSection('todo');
-                          setSelectedPageId(p.id);
-                          setIsSearchOpen(false);
-                        }}
-                        className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-bg-hover text-left transition-colors group cursor-pointer"
-                      >
-                        <div className="flex items-center gap-2.5">
-                          <div 
-                            className="w-6 h-6 rounded flex items-center justify-center text-white"
-                            style={{ backgroundColor: p.color }}
-                          >
-                            <IconRenderer name={p.icon} className="w-3.5 h-3.5" />
+                    {matchingPages.map(p => {
+                      const isSelected = flatResults[selectedIndex]?.id === `page-${p.id}`;
+                      return (
+                        <motion.button
+                          key={p.id}
+                          whileTap={{ scale: 0.98 }}
+                          onClick={() => {
+                            setActiveSection('todo');
+                            setSelectedPageId(p.id);
+                            setIsSearchOpen(false);
+                          }}
+                          className={`w-full flex items-center justify-between p-2.5 rounded-xl text-left transition-all group cursor-pointer ${
+                            isSelected
+                              ? 'ring-2 ring-primary bg-bg-hover shadow-2xs'
+                              : 'hover:bg-bg-hover'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2.5">
+                            <div 
+                              className="w-6 h-6 rounded flex items-center justify-center text-white"
+                              style={{ backgroundColor: p.color }}
+                            >
+                              <IconRenderer name={p.icon} className="w-3.5 h-3.5" />
+                            </div>
+                            <span className="font-medium text-sm text-txt-primary">{p.name}</span>
+                            {p.archived && (
+                              <span className="text-[10px] font-semibold uppercase px-1.5 py-0.5 rounded bg-bg-subtle text-txt-muted border border-border">
+                                Archived
+                              </span>
+                            )}
                           </div>
-                          <span className="font-medium text-sm text-txt-primary">{p.name}</span>
-                          {p.archived && (
-                            <span className="text-[10px] font-semibold uppercase px-1.5 py-0.5 rounded bg-bg-subtle text-txt-muted border border-border">
-                              Archived
-                            </span>
-                          )}
-                        </div>
-                        <ArrowRight className="w-4 h-4 text-txt-muted opacity-0 group-hover:opacity-100 transition-opacity" />
-                      </motion.button>
-                    ))}
+                          <ArrowRight className={`w-4 h-4 text-txt-muted transition-opacity ${isSelected ? 'opacity-100 text-primary' : 'opacity-0 group-hover:opacity-100'}`} />
+                        </motion.button>
+                      );
+                    })}
                   </div>
                 </div>
               )}
@@ -189,31 +262,39 @@ export const SearchModal: React.FC = () => {
                             )}
                           </div>
                           <div className="space-y-1">
-                            {pTasks.map(t => (
-                              <motion.button
-                                key={t.id}
-                                whileTap={{ scale: 0.98 }}
-                                onClick={() => navigateToTask(t.pageId, t.id)}
-                                className="w-full flex items-center justify-between p-2 rounded-lg bg-bg-card hover:bg-bg-hover text-left transition-colors border border-border-subtle cursor-pointer"
-                              >
-                                <div className="flex items-center gap-2 overflow-hidden">
-                                  <CheckSquare className={`w-4 h-4 flex-shrink-0 ${t.completed ? 'text-green-500' : 'text-txt-muted'}`} />
-                                  <span className={`text-sm truncate ${t.completed ? 'line-through text-txt-muted' : 'text-txt-primary'}`}>
-                                    {t.title}
-                                  </span>
-                                </div>
-                                <div className="flex items-center gap-1.5 flex-shrink-0 text-xs">
-                                  {t.dueDate && (
-                                    <span className="text-txt-muted font-mono text-[11px]">{t.dueDate}</span>
-                                  )}
-                                  {t.priority === 'high' && (
-                                    <span className="px-1.5 py-0.5 text-[10px] font-semibold text-red-600 bg-red-100 dark:bg-red-950/40 rounded">
-                                      High
+                            {pTasks.map(t => {
+                              const isSelected = flatResults[selectedIndex]?.id === `task-${t.id}`;
+                              return (
+                                <motion.button
+                                  key={t.id}
+                                  whileTap={{ scale: 0.98 }}
+                                  onClick={() => navigateToTask(t.pageId, t.id)}
+                                  className={`w-full flex items-center justify-between p-2 rounded-lg text-left transition-all border cursor-pointer ${
+                                    isSelected
+                                      ? 'ring-2 ring-primary bg-bg-hover border-primary shadow-2xs'
+                                      : 'bg-bg-card hover:bg-bg-hover border-border'
+                                  }`}
+                                  title={t.title}
+                                >
+                                  <div className="flex items-center gap-2 overflow-hidden flex-1 mr-2">
+                                    <CheckSquare className={`w-4 h-4 flex-shrink-0 ${t.completed ? 'text-green-500' : 'text-txt-muted'}`} />
+                                    <span className={`text-sm break-words line-clamp-1 ${t.completed ? 'line-through text-txt-muted' : 'text-txt-primary'}`}>
+                                      {t.title}
                                     </span>
-                                  )}
-                                </div>
-                              </motion.button>
-                            ))}
+                                  </div>
+                                  <div className="flex items-center gap-1.5 flex-shrink-0 text-xs">
+                                    {t.dueDate && (
+                                      <span className="text-txt-muted font-mono text-[11px]">{t.dueDate}</span>
+                                    )}
+                                    {t.priority === 'high' && (
+                                      <span className="px-1.5 py-0.5 text-[10px] font-semibold text-red-600 bg-red-100 dark:bg-red-950/40 rounded">
+                                        High
+                                      </span>
+                                    )}
+                                  </div>
+                                </motion.button>
+                              );
+                            })}
                           </div>
                         </div>
                       );
@@ -229,25 +310,32 @@ export const SearchModal: React.FC = () => {
                     Habits ({matchingHabits.length})
                   </div>
                   <div className="space-y-1">
-                    {matchingHabits.map(h => (
-                      <motion.button
-                        key={h.id}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={() => navigateToHabit(h.id)}
-                        className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-bg-hover text-left transition-colors group cursor-pointer"
-                      >
-                        <div className="flex items-center gap-2.5">
-                          <div 
-                            className="w-6 h-6 rounded flex items-center justify-center text-white"
-                            style={{ backgroundColor: h.color }}
-                          >
-                            <IconRenderer name={h.icon} className="w-3.5 h-3.5" />
+                    {matchingHabits.map(h => {
+                      const isSelected = flatResults[selectedIndex]?.id === `habit-${h.id}`;
+                      return (
+                        <motion.button
+                          key={h.id}
+                          whileTap={{ scale: 0.98 }}
+                          onClick={() => navigateToHabit(h.id)}
+                          className={`w-full flex items-center justify-between p-2.5 rounded-xl text-left transition-all group cursor-pointer ${
+                            isSelected
+                              ? 'ring-2 ring-primary bg-bg-hover shadow-2xs'
+                              : 'hover:bg-bg-hover'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2.5">
+                            <div 
+                              className="w-6 h-6 rounded flex items-center justify-center text-white"
+                              style={{ backgroundColor: h.color }}
+                            >
+                              <IconRenderer name={h.icon} className="w-3.5 h-3.5" />
+                            </div>
+                            <span className="font-medium text-sm text-txt-primary">{h.name}</span>
                           </div>
-                          <span className="font-medium text-sm text-txt-primary">{h.name}</span>
-                        </div>
-                        <ArrowRight className="w-4 h-4 text-txt-muted opacity-0 group-hover:opacity-100 transition-opacity" />
-                      </motion.button>
-                    ))}
+                          <ArrowRight className={`w-4 h-4 text-txt-muted transition-opacity ${isSelected ? 'opacity-100 text-primary' : 'opacity-0 group-hover:opacity-100'}`} />
+                        </motion.button>
+                      );
+                    })}
                   </div>
                 </div>
               )}
@@ -259,28 +347,59 @@ export const SearchModal: React.FC = () => {
                     Events ({matchingEvents.length})
                   </div>
                   <div className="space-y-1">
-                    {matchingEvents.map(e => (
-                      <motion.button
-                        key={e.id}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={() => {
-                          setActiveSection('calendar');
-                          setIsSearchOpen(false);
-                        }}
-                        className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-bg-hover text-left transition-colors cursor-pointer"
-                      >
-                        <div className="flex items-center gap-2">
-                          <Calendar className="w-4 h-4 text-orange-500" />
-                          <span className="font-medium text-sm text-txt-primary">{e.title}</span>
-                          <span className="text-xs font-mono text-txt-muted">({e.date})</span>
-                        </div>
-                        {e.startTime && (
-                          <span className="text-xs font-mono text-txt-muted">{e.startTime}</span>
-                        )}
-                      </motion.button>
-                    ))}
+                    {matchingEvents.map(e => {
+                      const isSelected = flatResults[selectedIndex]?.id === `event-${e.id}`;
+                      return (
+                        <motion.button
+                          key={e.id}
+                          whileTap={{ scale: 0.98 }}
+                          onClick={() => {
+                            setActiveSection('calendar');
+                            setIsSearchOpen(false);
+                          }}
+                          className={`w-full flex items-center justify-between p-2.5 rounded-xl text-left transition-all cursor-pointer ${
+                            isSelected
+                              ? 'ring-2 ring-primary bg-bg-hover shadow-2xs'
+                              : 'hover:bg-bg-hover'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2">
+                            <Calendar className="w-4 h-4 text-txt-secondary" />
+                            <span className="font-medium text-sm text-txt-primary">{e.title}</span>
+                            <span className="text-xs font-mono text-txt-muted">({e.date})</span>
+                          </div>
+                          {e.startTime && (
+                            <span className="text-xs font-mono text-txt-muted">{e.startTime}</span>
+                          )}
+                        </motion.button>
+                      );
+                    })}
                   </div>
                 </div>
+              )}
+            </div>
+
+            {/* Keyboard navigation hints footer */}
+            <div className="border-t border-border bg-bg-subtle/50 px-4 py-2.5 flex items-center justify-between text-xs font-sans text-txt-muted">
+              <div className="flex items-center gap-3">
+                <span className="flex items-center gap-1">
+                  <kbd className="px-1.5 py-0.5 text-[10px] font-mono bg-bg-card rounded border border-border">↑</kbd>
+                  <kbd className="px-1.5 py-0.5 text-[10px] font-mono bg-bg-card rounded border border-border">↓</kbd>
+                  <span>Navigate</span>
+                </span>
+                <span className="flex items-center gap-1">
+                  <kbd className="px-1.5 py-0.5 text-[10px] font-mono bg-bg-card rounded border border-border">Enter</kbd>
+                  <span>Select</span>
+                </span>
+                <span className="flex items-center gap-1">
+                  <kbd className="px-1.5 py-0.5 text-[10px] font-mono bg-bg-card rounded border border-border">Esc</kbd>
+                  <span>Close</span>
+                </span>
+              </div>
+              {hasResults && (
+                <span className="font-mono text-[11px]">
+                  {selectedIndex + 1} of {flatResults.length}
+                </span>
               )}
             </div>
           </motion.div>
