@@ -161,6 +161,7 @@ export async function seedInitialDataIfNeeded(db: IDBDatabase): Promise<void> {
         settingsStore.put({ key: 'lastBackup', value: null });
         settingsStore.put({ key: 'habitDefaultColor', value: '#0D9488' });
         settingsStore.put({ key: 'eventDefaultColor', value: '#F97316' });
+        settingsStore.put({ key: 'backgroundStyle', value: 'current' });
       }
     };
 

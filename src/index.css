@@ -2,48 +2,160 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  /* Warm White & Parchment Light Theme */
-  --color-bg-main: #FAF8F5;
+:root, [data-theme="light"] {
+  /* Powder Blue + Creamy White Light Theme with Google Blue Accent */
+  --color-bg-main: #F8F4E9;
   --color-bg-card: #FFFFFF;
-  --color-bg-subtle: #F3EEE7;
-  --color-bg-hover: #E9E1D6;
+  --color-bg-subtle: #E8F0FE;
+  --color-bg-hover: #D2E3FC;
   
-  /* Primary Warm Accent (Deep Amber / Warm Orange - WCAG AA compliant on light & dark) */
-  --color-primary: #C85E04;
-  --color-primary-hover: #A54B00;
-  --color-primary-light: #FDE8D3;
+  /* Primary Google-Style Blue Accent */
+  --color-primary: #1A73E8;
+  --color-primary-hover: #1557B0;
+  --color-primary-light: #E8F0FE;
   
-  /* Text Contrast - High Legibility (WCAG AA & AAA) */
-  --color-text-primary: #1C1917;    /* Stone-900: >15:1 contrast against #FFFFFF */
-  --color-text-secondary: #4A443C;  /* Warm Charcoal: ~8.5:1 contrast */
-  --color-text-muted: #6B6358;      /* Warm Slate: ~5.6:1 contrast (meets AA for all text) */
+  /* Text Contrast - High Legibility */
+  --color-text-primary: #1E3A5F;
+  --color-text-secondary: #42566B;
+  --color-text-muted: #64788A;
   
-  /* Borders - Distinct & Defined */
-  --color-border: #D8D0C3;          /* Crisp card and section boundaries */
-  --color-border-subtle: #E8E1D5;   /* Soft internal dividers */
+  /* Borders - Distinct & Defined (P0 Border Visibility Upgrade) */
+  --color-border: #B8C9DC;
+  --color-border-interactive: #A8BCD3;
+  --color-border-subtle: #D2DCE8;
+  --color-border-focus: #6B91BE;
 }
 
 [data-theme="dark"] {
-  /* Deep Anthropic Warm Dark Theme */
-  --color-bg-main: #141311;
-  --color-bg-card: #1E1C19;
-  --color-bg-subtle: #292622;
-  --color-bg-hover: #35312B;
+  /* Slate Dark Theme with Google Blue Accent */
+  --color-bg-main: #0E1726;
+  --color-bg-card: #152238;
+  --color-bg-subtle: #1C2D47;
+  --color-bg-hover: #243B5C;
   
-  /* Primary Warm Accent in Dark Mode */
-  --color-primary: #F59E0B;
-  --color-primary-hover: #FBBF24;
-  --color-primary-light: #3A2B14;
+  /* Primary Google-Style Blue Accent in Dark Mode */
+  --color-primary: #1A73E8;
+  --color-primary-hover: #1557B0;
+  --color-primary-light: #1C2D47;
   
-  /* Text Contrast in Dark Mode (WCAG AA & AAA) */
-  --color-text-primary: #F7F5F0;    /* >14:1 contrast against #1E1C19 */
-  --color-text-secondary: #D0C9BD;  /* ~8.5:1 contrast */
-  --color-text-muted: #9E9689;      /* ~5.5:1 contrast (meets AA for all text) */
+  /* Text Contrast in Dark Mode */
+  --color-text-primary: #F0F6FA;
+  --color-text-secondary: #B1C3D6;
+  --color-text-muted: #7E97B0;
   
   /* Borders in Dark Mode */
-  --color-border: #3D3830;
-  --color-border-subtle: #2C2822;
+  --color-border: #3A5578;
+  --color-border-interactive: #4A6E9B;
+  --color-border-subtle: #2C425E;
+  --color-border-focus: #6B91BE;
+}
+
+/* ==========================================================================
+   Paper Texture UI Theme: Design Tokens (Isolated behind data-bg-style="paper")
+   ========================================================================== */
+
+/* Light Mode Paper Texture Tokens */
+html[data-bg-style="paper"][data-theme="light"],
+html[data-bg-style="paper"]:not([data-theme="dark"]) {
+  --color-bg-main: #F7F3E9;
+  --color-bg-card: #FFFFFF;
+  --color-bg-subtle: #F4EFE6;
+  --color-bg-hover: #EAE3D4;
+
+  /* Royal Blue Accent */
+  --color-primary: #2F6FDB;
+  --color-primary-hover: #225BC0;
+  --color-primary-light: #EBF2FC;
+
+  /* Navy Text */
+  --color-text-primary: #1E3A5F;
+  --color-text-secondary: #4A5D73;
+  --color-text-muted: #6B7E94;
+
+  /* Visible Warm-Neutral Borders */
+  --color-border: #D2C9B8;
+  --color-border-interactive: #BFB4A0;
+  --color-border-subtle: #E8E1D2;
+  --color-border-focus: #2F6FDB;
+}
+
+/* Dark Mode Paper Texture Tokens (Warm Charcoal) */
+html[data-bg-style="paper"][data-theme="dark"] {
+  --color-bg-main: #1D1B18;
+  --color-bg-card: #35322C;
+  --color-bg-subtle: #2C2924;
+  --color-bg-hover: #403C35;
+
+  /* Blue Accent */
+  --color-primary: #75A5F5;
+  --color-primary-hover: #92B9F8;
+  --color-primary-light: #2A3648;
+
+  /* Light Readable Typography */
+  --color-text-primary: #F5EFE6;
+  --color-text-secondary: #D4CBC0;
+  --color-text-muted: #9E9589;
+
+  /* Warm Dark Borders */
+  --color-border: #4D483F;
+  --color-border-interactive: #5F594E;
+  --color-border-subtle: #3E3A33;
+  --color-border-focus: #75A5F5;
+}
+
+/* ==========================================================================
+   Notion UI Theme: Design Tokens (Isolated behind data-bg-style="notion")
+   ========================================================================== */
+
+/* Light Mode Notion Tokens */
+html[data-bg-style="notion"][data-theme="light"],
+html[data-bg-style="notion"]:not([data-theme="dark"]) {
+  /* Notion Pure White Canvas */
+  --color-bg-main: #FFFFFF;
+  --color-bg-card: #FFFFFF;
+  --color-bg-subtle: #F7F6F3;
+  --color-bg-hover: #EFEFED;
+
+  /* Notion Blue Accent */
+  --color-primary: #2383E2;
+  --color-primary-hover: #1D6FBE;
+  --color-primary-light: #DDEBF1;
+
+  /* Notion Dark Charcoal Text */
+  --color-text-primary: #37352F;
+  --color-text-secondary: #787774;
+  --color-text-muted: #9B9A97;
+
+  /* Notion Crisp Subtle Borders */
+  --color-border: #E3E2DE;
+  --color-border-interactive: #D3D1CB;
+  --color-border-subtle: #EEEEEC;
+  --color-border-focus: #2383E2;
+}
+
+/* Dark Mode Notion Tokens */
+html[data-bg-style="notion"][data-theme="dark"] {
+  /* Notion Dark Canvas */
+  --color-bg-main: #191919;
+  --color-bg-card: #202020;
+  --color-bg-subtle: #252525;
+  --color-bg-hover: #2D2D2D;
+
+  /* Notion Blue Accent in Dark Mode */
+  --color-primary: #2383E2;
+  --color-primary-hover: #447ACB;
+  --color-primary-light: #1F282D;
+
+  /* Notion Light Text */
+  --color-text-primary: #E6E6E6;
+  --color-text-secondary: #9B9B9B;
+  --color-text-muted: #787878;
+
+  /* Notion Dark Borders */
+  --color-border: #373737;
+  --color-border-interactive: #474747;
+  --color-border-subtle: #2D2D2D;
+  --color-border-focus: #2383E2;
 }
 
 * {
@@ -51,13 +163,157 @@
 }
 
 body {
-  font-family: 'Inter', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: 'Newsreader', 'Source Serif 4', 'Tiempos Headline', Georgia, serif;
+  font-optical-sizing: auto;
+  letter-spacing: 0.005em;
   transition: background-color 200ms ease, color 200ms ease;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: var(--color-text-primary);
   background-color: var(--color-bg-main);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Newsreader', 'Source Serif 4', 'Tiempos Headline', Georgia, serif;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+}
+
+/* Modern sans-serif typography for navigation, labels, controls, and form elements */
+button, input, select, textarea, label, [role="button"], [role="tab"], [role="radio"], nav, aside, .font-sans {
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  letter-spacing: 0.005em;
+}
+
+/* ==========================================================================
+   Background Styles: Current Theme vs Paper Texture
+   ========================================================================== */
+
+/* Light Mode Paper Texture: Classic Paper with subtle 88% warm overlay */
+html[data-bg-style="paper"] body,
+html[data-theme="light"][data-bg-style="paper"] body {
+  background-image: 
+    linear-gradient(rgba(247, 243, 233, 0.88), rgba(247, 243, 233, 0.88)),
+    url('/textures/classic-paper.jpg');
+  background-size: cover;
+  background-position: center center;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+}
+
+/* Dark Mode Paper Texture: Charcoal Paper with subtle 86% warm overlay */
+html[data-theme="dark"][data-bg-style="paper"] body {
+  background-image: 
+    linear-gradient(rgba(37, 35, 31, 0.86), rgba(37, 35, 31, 0.86)),
+    url('/textures/charcoal-paper.jpg');
+  background-size: cover;
+  background-position: center center;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+}
+
+/* When Paper Texture is active, make the main layout wrapper transparent */
+html[data-bg-style="paper"] .bg-bg-main {
+  background-color: transparent !important;
+}
+
+/* Paper Texture: Warm Ivory Header & Sidebar in Light Mode */
+html[data-bg-style="paper"][data-theme="light"] header,
+html[data-bg-style="paper"]:not([data-theme="dark"]) header,
+html[data-bg-style="paper"][data-theme="light"] aside,
+html[data-bg-style="paper"]:not([data-theme="dark"]) aside,
+html[data-bg-style="paper"][data-theme="light"] aside .bg-bg-card,
+html[data-bg-style="paper"]:not([data-theme="dark"]) aside .bg-bg-card,
+html[data-bg-style="paper"][data-theme="light"] nav,
+html[data-bg-style="paper"]:not([data-theme="dark"]) nav {
+  background-color: #FAF6ED !important;
+}
+
+/* Paper Texture: Warm Charcoal Header & Sidebar in Dark Mode */
+html[data-bg-style="paper"][data-theme="dark"] header,
+html[data-bg-style="paper"][data-theme="dark"] aside,
+html[data-bg-style="paper"][data-theme="dark"] aside .bg-bg-card,
+html[data-bg-style="paper"][data-theme="dark"] nav {
+  background-color: #25231F !important;
+}
+
+/* ==========================================================================
+   Notion Theme: Layout, Chrome, Typography & Card Rules
+   ========================================================================== */
+
+/* Notion Theme: Body Background Reset (Solid clean canvas) */
+html[data-bg-style="notion"] body {
+  background-image: none !important;
+  background-color: var(--color-bg-main) !important;
+}
+
+/* Notion Theme: Signature Sidebar & Header (Soft off-white / Dark charcoal) */
+html[data-bg-style="notion"][data-theme="light"] header,
+html[data-bg-style="notion"]:not([data-theme="dark"]) header,
+html[data-bg-style="notion"][data-theme="light"] aside,
+html[data-bg-style="notion"]:not([data-theme="dark"]) aside,
+html[data-bg-style="notion"][data-theme="light"] aside .bg-bg-card,
+html[data-bg-style="notion"]:not([data-theme="dark"]) aside .bg-bg-card,
+html[data-bg-style="notion"][data-theme="light"] nav,
+html[data-bg-style="notion"]:not([data-theme="dark"]) nav {
+  background-color: #FBFBFA !important;
+}
+
+html[data-bg-style="notion"][data-theme="dark"] header,
+html[data-bg-style="notion"][data-theme="dark"] aside,
+html[data-bg-style="notion"][data-theme="dark"] aside .bg-bg-card,
+html[data-bg-style="notion"][data-theme="dark"] nav {
+  background-color: #202020 !important;
+}
+
+/* Notion Theme: Clean Modern UI Sans-Serif Typography */
+html[data-bg-style="notion"] body,
+html[data-bg-style="notion"] h1,
+html[data-bg-style="notion"] h2,
+html[data-bg-style="notion"] h3,
+html[data-bg-style="notion"] h4,
+html[data-bg-style="notion"] h5,
+html[data-bg-style="notion"] h6,
+html[data-bg-style="notion"] button,
+html[data-bg-style="notion"] input,
+html[data-bg-style="notion"] select,
+html[data-bg-style="notion"] textarea,
+html[data-bg-style="notion"] label,
+html[data-bg-style="notion"] p,
+html[data-bg-style="notion"] span {
+  font-family: 'Inter', ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif !important;
+  letter-spacing: -0.01em;
+}
+
+/* Notion Theme: Compact Crisp Card Radius & Micro-Shadow */
+html[data-bg-style="notion"] .rounded-card,
+html[data-bg-style="notion"] .rounded-2xl {
+  border-radius: 8px !important;
+}
+html[data-bg-style="notion"] .rounded-xl {
+  border-radius: 6px !important;
+}
+html[data-bg-style="notion"] .shadow-card,
+html[data-bg-style="notion"] .shadow-xs,
+html[data-bg-style="notion"] .shadow-sm {
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03), 0 0 0 1px var(--color-border) !important;
+}
+
+/* Ensure text on primary buttons has accessible contrast */
+.bg-primary,
+button.bg-primary {
+  color: #FFFFFF;
+}
+
+html[data-theme="dark"][data-bg-style="paper"] .bg-primary,
+html[data-theme="dark"][data-bg-style="paper"] button.bg-primary {
+  color: #1A202C !important;
+}
+
+html[data-bg-style="notion"] .bg-primary,
+html[data-bg-style="notion"] button.bg-primary {
+  color: #FFFFFF !important;
 }
 
 /* Custom scrollbar */

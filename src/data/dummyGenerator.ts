@@ -612,6 +612,7 @@ export function generateDummyData(refDate: Date = new Date()): BackupData {
         lastBackup: now,
         habitDefaultColor: '#0D9488',
         eventDefaultColor: '#F97316',
+        backgroundStyle: 'current',
       },
     },
   };

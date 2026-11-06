@@ -868,6 +868,7 @@ export class Repository {
           lastBackup: null,
           habitDefaultColor: '#0D9488',
           eventDefaultColor: '#F97316',
+          backgroundStyle: 'current',
         };
         results.forEach(r => {
           settingsMap[r.key] = r.value;

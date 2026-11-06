@@ -7,9 +7,17 @@
     <title>My Workspace</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400..700;1,6..72,400..700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,300..800;1,6..72,300..800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+      try {
+        var theme = localStorage.getItem('my_workspace_theme') || 'light';
+        var bgStyle = localStorage.getItem('my_workspace_bg_style') || 'current';
+        document.documentElement.setAttribute('data-theme', theme);
+        document.documentElement.setAttribute('data-bg-style', bgStyle);
+      } catch (e) {}
+    </script>
   </head>
-  <body class="bg-bg-main text-txt-primary min-h-screen antialiased select-none md:select-auto font-sans">
+  <body class="bg-bg-main text-txt-primary min-h-screen antialiased select-none md:select-auto font-serif">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

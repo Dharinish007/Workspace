@@ -64,6 +64,8 @@ export interface DayColor {
   color: string;
 }
 
+export type BackgroundStyle = 'current' | 'paper' | 'notion';
+
 export interface UserSettings {
   theme: 'light' | 'dark';
   displayName: string;
@@ -71,6 +73,7 @@ export interface UserSettings {
   lastBackup: string | null;
   habitDefaultColor?: string;
   eventDefaultColor?: string;
+  backgroundStyle?: BackgroundStyle;
 }
 
 export interface SnapshotRecord {
@@ -103,7 +106,7 @@ export interface BackupData {
   };
 }
 
-export type NavigationSection = 'dashboard' | 'todo' | 'calendar' | 'habits';
+export type NavigationSection = 'dashboard' | 'todo' | 'calendar' | 'habits' | 'pages';
 
 export type TaskFilter = 'all' | 'open' | 'important' | 'completed' | 'today';
 export type CalendarView = 'month' | 'week' | 'day';

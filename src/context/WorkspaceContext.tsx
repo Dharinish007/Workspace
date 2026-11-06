@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { 
   openDB, 
   seedInitialDataIfNeeded, 
@@ -41,6 +42,8 @@ interface WorkspaceContextType {
   highlightedHabitId: string | null;
   isSettingsOpen: boolean;
   isSearchOpen: boolean;
+  isSidebarCollapsed: boolean;
+  isMobileSidebarOpen: boolean;
   toast: ToastInfo | null;
   errorMessage: string | null;
 
@@ -51,6 +54,10 @@ interface WorkspaceContextType {
   setHighlightedHabitId: (habitId: string | null) => void;
   setIsSettingsOpen: (open: boolean) => void;
   setIsSearchOpen: (open: boolean) => void;
+  setIsSidebarCollapsed: (collapsed: boolean | ((prev: boolean) => boolean)) => void;
+  setIsMobileSidebarOpen: (open: boolean | ((prev: boolean) => boolean)) => void;
+  toggleSidebar: () => void;
+  toggleMobileSidebar: () => void;
   navigateToTask: (pageId: string, taskId: string) => void;
   navigateToHabit: (habitId: string) => void;
 
@@ -99,6 +106,9 @@ interface WorkspaceContextType {
 const WorkspaceContext = createContext<WorkspaceContextType | null>(null);
 
 export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
   const [isInitialized, setIsInitialized] = useState(false);
   const [pages, setPages] = useState<Page[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -113,14 +123,101 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     lastBackup: null,
     habitDefaultColor: '#0D9488',
     eventDefaultColor: '#F97316',
+    backgroundStyle: 'current',
   });
 
-  const [activeSection, setActiveSection] = useState<NavigationSection>('dashboard');
-  const [selectedPageId, setSelectedPageId] = useState<string | null>(null);
+  // Derive active section from URL pathname
+  const activeSection = React.useMemo<NavigationSection>(() => {
+    const p = location.pathname;
+    if (p.startsWith('/calendar')) return 'calendar';
+    if (p.startsWith('/habits')) return 'habits';
+    if (p.startsWith('/pages')) return 'pages';
+    if (p.startsWith('/tasks') || p.startsWith('/todo')) return 'todo';
+    return 'dashboard';
+  }, [location.pathname]);
+
+  const setActiveSection = useCallback((section: NavigationSection) => {
+    switch (section) {
+      case 'dashboard':
+        navigate('/dashboard');
+        break;
+      case 'todo':
+        navigate('/tasks');
+        break;
+      case 'calendar':
+        navigate('/calendar');
+        break;
+      case 'habits':
+        navigate('/habits');
+        break;
+      case 'pages':
+        navigate('/pages');
+        break;
+      default:
+        navigate('/dashboard');
+        break;
+    }
+  }, [navigate]);
+
+  // Derive selected page ID directly from /pages/:pageId URL
+  const selectedPageId = React.useMemo<string | null>(() => {
+    const match = location.pathname.match(/^\/pages\/([^/]+)/);
+    return match ? match[1] : null;
+  }, [location.pathname]);
+
+  const setSelectedPageId = useCallback((pageId: string | null) => {
+    if (pageId) {
+      navigate(`/pages/${pageId}`);
+    } else {
+      navigate('/pages');
+    }
+  }, [navigate]);
+
   const [highlightedTaskId, setHighlightedTaskId] = useState<string | null>(null);
   const [highlightedHabitId, setHighlightedHabitId] = useState<string | null>(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsedState] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem('sidebar_collapsed') === 'true';
+    } catch {
+      return false;
+    }
+  });
+
+  const setIsSidebarCollapsed = useCallback((action: boolean | ((prev: boolean) => boolean)) => {
+    setIsSidebarCollapsedState(prev => {
+      const next = typeof action === 'function' ? action(prev) : action;
+      try {
+        localStorage.setItem('sidebar_collapsed', String(next));
+      } catch (e) {
+        console.warn('Failed to save sidebar state to localStorage', e);
+      }
+      return next;
+    });
+  }, []);
+
+  const toggleSidebar = useCallback(() => {
+    setIsSidebarCollapsed(prev => !prev);
+  }, [setIsSidebarCollapsed]);
+
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+
+  const toggleMobileSidebar = useCallback(() => {
+    setIsMobileSidebarOpen(prev => !prev);
+  }, []);
+
+  // Automatically close mobile sidebar if window is resized to desktop width
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 768) {
+        setIsMobileSidebarOpen(false);
+      }
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const [toast, setToast] = useState<ToastInfo | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -168,8 +265,17 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       setSettings(s);
       setIsInitialized(true);
 
-      // Apply theme to document element
-      document.documentElement.setAttribute('data-theme', s.theme || 'light');
+      // Apply theme and background style to document element
+      const activeTheme = s.theme || 'light';
+      const activeBgStyle = s.backgroundStyle || 'current';
+      document.documentElement.setAttribute('data-theme', activeTheme);
+      document.documentElement.setAttribute('data-bg-style', activeBgStyle);
+      try {
+        localStorage.setItem('my_workspace_theme', activeTheme);
+        localStorage.setItem('my_workspace_bg_style', activeBgStyle);
+      } catch (e) {
+        // Ignore storage errors in sandboxed contexts
+      }
     } catch (err: any) {
       console.error('Failed to initialize database:', err);
       setErrorMessage(err?.message || 'Database initialization error');
@@ -211,6 +317,11 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
       // 1. Esc: close modal or cancel active interaction
       if (e.key === 'Escape') {
+        if (isMobileSidebarOpen) {
+          setIsMobileSidebarOpen(false);
+          e.preventDefault();
+          return;
+        }
         if (isSearchOpen) {
           setIsSearchOpen(false);
           e.preventDefault();
@@ -223,7 +334,20 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         }
       }
 
-      // 2. Ctrl/Cmd + K: Global search
+      // 2. Ctrl/Cmd + B: Toggle sidebar
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'b') {
+        if (!isInput) {
+          e.preventDefault();
+          if (window.innerWidth < 768) {
+            toggleMobileSidebar();
+          } else {
+            toggleSidebar();
+          }
+          return;
+        }
+      }
+
+      // 3. Ctrl/Cmd + K: Global search
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
         setIsSearchOpen(prev => !prev);
@@ -243,27 +367,29 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isSearchOpen, isSettingsOpen, undo]);
+  }, [isMobileSidebarOpen, isSearchOpen, isSettingsOpen, toggleMobileSidebar, toggleSidebar, undo]);
 
   // Navigation helpers
   const navigateToTask = useCallback((pageId: string, taskId: string) => {
-    setActiveSection('todo');
-    setSelectedPageId(pageId);
     setHighlightedTaskId(taskId);
     setIsSearchOpen(false);
-  }, []);
+    navigate(`/pages/${pageId}`);
+  }, [navigate]);
 
   const navigateToHabit = useCallback((habitId: string) => {
-    setActiveSection('habits');
     setHighlightedHabitId(habitId);
     setIsSearchOpen(false);
-  }, []);
+    navigate('/habits');
+  }, [navigate]);
 
   // Theme toggle
   const toggleTheme = useCallback(async () => {
     const nextTheme = settings.theme === 'light' ? 'dark' : 'light';
     // Optimistic
     document.documentElement.setAttribute('data-theme', nextTheme);
+    try {
+      localStorage.setItem('my_workspace_theme', nextTheme);
+    } catch (e) {}
     setSettings(prev => ({ ...prev, theme: nextTheme }));
     try {
       await Repository.updateSetting('theme', nextTheme);
@@ -277,10 +403,29 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const updateSetting = useCallback(async (key: string, value: any) => {
     const prevVal = (settings as any)[key];
     setSettings(prev => ({ ...prev, [key]: value }));
+
+    if (key === 'backgroundStyle') {
+      const bgVal = value || 'current';
+      document.documentElement.setAttribute('data-bg-style', bgVal);
+      try {
+        localStorage.setItem('my_workspace_bg_style', bgVal);
+      } catch (e) {}
+    }
+    if (key === 'theme') {
+      const themeVal = value || 'light';
+      document.documentElement.setAttribute('data-theme', themeVal);
+      try {
+        localStorage.setItem('my_workspace_theme', themeVal);
+      } catch (e) {}
+    }
+
     try {
       await Repository.updateSetting(key, value);
     } catch (err: any) {
       setSettings(prev => ({ ...prev, [key]: prevVal }));
+      if (key === 'backgroundStyle') {
+        document.documentElement.setAttribute('data-bg-style', prevVal || 'current');
+      }
       showToast(`Failed to update setting: ${err.message}`, undefined, undefined, 'error');
     }
   }, [settings, showToast]);
@@ -602,6 +747,8 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     highlightedHabitId,
     isSettingsOpen,
     isSearchOpen,
+    isSidebarCollapsed,
+    isMobileSidebarOpen,
     toast,
     errorMessage,
     setActiveSection,
@@ -610,6 +757,10 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     setHighlightedHabitId,
     setIsSettingsOpen,
     setIsSearchOpen,
+    setIsSidebarCollapsed,
+    setIsMobileSidebarOpen,
+    toggleSidebar,
+    toggleMobileSidebar,
     navigateToTask,
     navigateToHabit,
     refreshAll,
