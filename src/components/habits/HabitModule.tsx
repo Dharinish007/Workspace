@@ -62,11 +62,11 @@ export const HabitModule: React.FC = () => {
             >
               <Flame className="w-6 h-6" />
             </motion.div>
-            <h1 className="text-3xl sm:text-4xl font-serif font-bold text-txt-primary tracking-tight">
+            <h1 className="text-[26px] sm:text-[28px] font-bold text-txt-primary tracking-tight">
               Habit Tracker
             </h1>
           </div>
-          <p className="text-sm font-sans text-txt-secondary font-medium mt-1">
+          <p className="text-[13px] sm:text-[14px] font-sans text-txt-secondary font-medium mt-1">
             Build long-term consistency through daily execution and streaks.
           </p>
         </div>

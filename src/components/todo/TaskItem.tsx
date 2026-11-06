@@ -136,11 +136,12 @@ export const TaskItem: React.FC<TaskItemProps> = ({
         {/* Task Title */}
         <div className="flex-1 min-w-0 pr-2">
           <span
-            className={`text-sm font-sans font-medium transition-all duration-180 block truncate ${
+            className={`text-[14px] sm:text-[15px] font-sans font-medium transition-all duration-180 block break-words ${
               task.completed 
                 ? 'line-through text-txt-muted opacity-80' 
                 : 'text-txt-primary'
             }`}
+            title={task.title}
           >
             {task.title}
           </span>
@@ -152,7 +153,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
         {/* Due date badge */}
         {task.dueDate && (
           <div
-            className={`flex items-center gap-1.5 text-xs font-sans px-2.5 py-1 rounded-lg font-medium border ${
+            className={`flex items-center gap-1.5 text-[13px] font-sans px-2.5 py-1 rounded-lg font-medium border ${
               isOverdue
                 ? 'bg-red-500/10 border-red-300 dark:border-red-900 text-red-700 dark:text-red-400 font-bold'
                 : isDueToday

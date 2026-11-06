@@ -88,8 +88,8 @@ export const TodoLanding: React.FC<TodoLandingProps> = ({ onOpenPage }) => {
       {/* Top action header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-border-subtle">
         <div>
-          <h1 className="text-3xl sm:text-4xl font-serif font-bold text-txt-primary tracking-tight">To-Do</h1>
-          <p className="text-sm font-sans text-txt-secondary font-medium mt-1">
+          <h1 className="text-[26px] sm:text-[28px] font-bold text-txt-primary tracking-tight">To-Do</h1>
+          <p className="text-[13px] sm:text-[14px] font-sans text-txt-secondary font-medium mt-1">
             Organize tasks by page, view pending items, and manage workflows.
           </p>
         </div>
@@ -132,9 +132,9 @@ export const TodoLanding: React.FC<TodoLandingProps> = ({ onOpenPage }) => {
             key={f.id}
             whileTap={{ scale: 0.95 }}
             onClick={() => setActiveFilter(f.id)}
-            className={`h-9 px-4 rounded-full text-xs font-sans font-medium flex items-center gap-2 whitespace-nowrap transition-all cursor-pointer shadow-2xs ${
+            className={`h-9 px-4 rounded-full text-xs font-sans flex items-center gap-2 whitespace-nowrap transition-all cursor-pointer shadow-2xs ${
               activeFilter === f.id
-                ? 'bg-primary text-white shadow-xs font-bold'
+                ? 'bg-primary text-white shadow-xs font-bold ring-1 ring-primary-hover/50'
                 : 'bg-bg-card hover:bg-bg-hover text-txt-secondary border border-border font-semibold'
             }`}
           >
@@ -142,7 +142,7 @@ export const TodoLanding: React.FC<TodoLandingProps> = ({ onOpenPage }) => {
             <span
               className={`text-xs font-mono font-bold px-2 py-0.5 rounded-full ${
                 activeFilter === f.id
-                  ? 'bg-white/25 text-white'
+                  ? 'bg-white/20 text-white'
                   : 'bg-bg-subtle text-txt-secondary border border-border'
               }`}
             >
@@ -229,7 +229,11 @@ export const TodoLanding: React.FC<TodoLandingProps> = ({ onOpenPage }) => {
             </motion.button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
+          <div className={`grid gap-5 ${
+            activePages.length === 4
+              ? 'grid-cols-1 md:grid-cols-2 xl:grid-cols-4'
+              : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'
+          }`}>
             {activePages.map(page => (
               <div
                 key={page.id}

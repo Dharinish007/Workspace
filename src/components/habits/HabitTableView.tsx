@@ -128,10 +128,10 @@ export const HabitTableView: React.FC<HabitTableViewProps> = ({
                           <IconRenderer name={habit.icon} className="w-4 h-4" />
                         </div>
                         <div className="overflow-hidden">
-                          <span className="font-bold text-txt-primary truncate block text-sm">
+                          <span className="font-semibold text-txt-primary truncate block text-[14px] sm:text-[15px]">
                             {habit.name}
                           </span>
-                          <span className="text-xs font-medium text-txt-muted block">
+                          <span className="text-[13px] font-medium text-txt-muted block">
                             {habit.schedule.type === 'daily'
                               ? 'Daily'
                               : `${habit.schedule.days.length} days/week`}
@@ -146,6 +146,8 @@ export const HabitTableView: React.FC<HabitTableViewProps> = ({
                       const isCompleted = habitLogs.some(
                         l => l.habitId === habit.id && l.date === col.dateStr && l.completed
                       );
+                      const isPast = col.dateStr < todayStr;
+                      const isFuture = col.dateStr > todayStr;
 
                       return (
                         <td
@@ -159,18 +161,47 @@ export const HabitTableView: React.FC<HabitTableViewProps> = ({
                               whileTap={{ scale: 0.82 }}
                               transition={{ type: "spring", stiffness: 600, damping: 25 }}
                               onClick={() => toggleHabitLog(habit.id, col.dateStr)}
-                              className={`w-7 h-7 mx-auto rounded-lg flex items-center justify-center transition-colors cursor-pointer ${
+                              className={`w-7 h-7 mx-auto rounded-lg flex items-center justify-center transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 ${
                                 isCompleted
                                   ? 'bg-teal-600 text-white shadow-2xs'
-                                  : 'border-2 border-border bg-bg-card hover:border-teal-500 text-transparent'
+                                  : col.isToday
+                                  ? 'border-2 border-teal-500 bg-teal-500/10 text-transparent hover:border-teal-600'
+                                  : isPast
+                                  ? 'border border-border/80 bg-bg-subtle/50 text-txt-muted/40 hover:border-border'
+                                  : 'border border-dashed border-border/70 bg-transparent text-transparent hover:border-border'
                               }`}
-                              title={`${habit.name} - ${col.dateStr}: ${isCompleted ? 'Done' : 'Pending'}`}
-                              aria-label={`${habit.name} - ${col.dateStr}: ${isCompleted ? 'Done' : 'Pending'}`}
+                              title={`${habit.name} - ${col.dateStr}: ${
+                                isCompleted
+                                  ? 'Completed'
+                                  : col.isToday
+                                  ? 'Pending (Today)'
+                                  : isPast
+                                  ? 'Missed (Past)'
+                                  : 'Scheduled (Future)'
+                              }`}
+                              aria-label={`${habit.name} - ${col.dateStr}: ${
+                                isCompleted
+                                  ? 'Completed'
+                                  : col.isToday
+                                  ? 'Pending (Today)'
+                                  : isPast
+                                  ? 'Missed (Past)'
+                                  : 'Scheduled (Future)'
+                              }`}
                             >
-                              <Check className="w-4 h-4 stroke-[3]" />
+                              {isCompleted ? (
+                                <Check className="w-4 h-4 stroke-[3]" />
+                              ) : isPast ? (
+                                <span className="text-[10px] text-txt-muted/60 font-mono">·</span>
+                              ) : null}
                             </motion.button>
                           ) : (
-                            <span className="text-txt-muted opacity-40 font-mono text-xs">–</span>
+                            <span
+                              className="text-txt-muted opacity-40 font-mono text-xs select-none"
+                              title="Not scheduled for this day"
+                            >
+                              –
+                            </span>
                           )}
                         </td>
                       );
@@ -263,6 +294,33 @@ export const HabitTableView: React.FC<HabitTableViewProps> = ({
             )}
           </tbody>
         </table>
+      </div>
+
+      {/* Table Status Legend and Progress Calculation explanation */}
+      <div className="border-t border-border bg-bg-subtle/50 px-4 py-3 flex flex-wrap items-center justify-between gap-3 text-xs font-sans">
+        <div className="flex flex-wrap items-center gap-3">
+          <span className="font-bold text-txt-secondary uppercase tracking-wider text-[11px]">Legend:</span>
+          <div className="flex items-center gap-1.5">
+            <span className="w-5 h-5 rounded-md bg-teal-600 text-white flex items-center justify-center text-[10px] shadow-2xs font-bold">✓</span>
+            <span className="text-txt-primary font-medium">Completed</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="w-5 h-5 rounded-md border-2 border-teal-500 bg-teal-500/10 inline-block" />
+            <span className="text-txt-primary font-medium">Pending (Today)</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="w-5 h-5 rounded-md border border-border/80 bg-bg-card flex items-center justify-center text-txt-muted text-[10px] font-mono">·</span>
+            <span className="text-txt-secondary font-medium">Missed (Past)</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="text-txt-muted font-mono font-bold w-4 text-center">–</span>
+            <span className="text-txt-muted font-medium">Not Scheduled</span>
+          </div>
+        </div>
+
+        <div className="text-txt-muted text-[11px] font-medium">
+          Progress = Completed days ÷ Scheduled days in active {timeframe}
+        </div>
       </div>
     </div>
   );

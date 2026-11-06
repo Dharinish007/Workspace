@@ -70,7 +70,7 @@ export const PageView: React.FC<PageViewProps> = ({
         <p className="text-txt-secondary text-sm mb-4 font-medium">Page not found or archived.</p>
         <button
           onClick={onBackToOverview}
-          className="h-10 px-4 bg-primary text-white rounded-xl text-xs font-semibold shadow-xs hover:bg-primary-hover transition-colors"
+          className="h-10 px-4 bg-primary text-white rounded-xl text-xs font-bold shadow-xs hover:bg-primary-hover transition-colors"
         >
           Return to To-Do Overview
         </button>
@@ -250,7 +250,7 @@ export const PageView: React.FC<PageViewProps> = ({
             </motion.div>
             <div>
               <div className="flex items-center gap-2.5">
-                <h1 className="text-2xl sm:text-3xl font-serif font-bold text-txt-primary tracking-tight">{currentPage.name}</h1>
+                <h1 className="text-[26px] sm:text-[28px] font-bold text-txt-primary tracking-tight">{currentPage.name}</h1>
                 <motion.button
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
@@ -262,7 +262,7 @@ export const PageView: React.FC<PageViewProps> = ({
                   <Edit3 className="w-4 h-4" />
                 </motion.button>
               </div>
-              <p className="text-xs sm:text-sm font-sans text-txt-secondary font-medium mt-1">
+              <p className="text-[13px] sm:text-[14px] font-sans text-txt-secondary font-medium mt-1">
                 {totalTasks} total tasks · {completedTasks} completed ({progressPercent}%)
               </p>
               {/* Progress Bar */}
@@ -300,7 +300,7 @@ export const PageView: React.FC<PageViewProps> = ({
             >
               <Plus className="w-4 h-4" />
               <span>Add Task</span>
-              <kbd className="hidden sm:inline-block ml-1 px-1.5 py-0.5 text-xs font-mono font-bold bg-white/20 rounded-md">
+              <kbd className="hidden sm:inline-block ml-1 px-1.5 py-0.5 text-xs font-mono font-bold bg-white/20 text-white rounded-md">
                 N
               </kbd>
             </motion.button>
@@ -320,15 +320,15 @@ export const PageView: React.FC<PageViewProps> = ({
               key={f.id}
               whileTap={{ scale: 0.95 }}
               onClick={() => setActiveFilter(f.id)}
-              className={`h-9 px-4 rounded-full text-xs font-sans font-medium flex items-center gap-2 whitespace-nowrap transition-all cursor-pointer shadow-2xs ${
+              className={`h-9 px-4 rounded-full text-xs font-sans flex items-center gap-2 whitespace-nowrap transition-all cursor-pointer shadow-2xs ${
                 activeFilter === f.id
-                  ? 'bg-primary text-white shadow-xs font-bold'
+                  ? 'bg-primary text-white shadow-xs font-bold ring-1 ring-primary-hover/50'
                   : 'bg-bg-card hover:bg-bg-hover text-txt-secondary border border-border font-semibold'
               }`}
             >
               <span>{f.label}</span>
               <span className={`text-xs font-mono font-bold px-2 py-0.5 rounded-full ${
-                activeFilter === f.id ? 'bg-white/25 text-white' : 'bg-bg-subtle text-txt-secondary border border-border'
+                activeFilter === f.id ? 'bg-white/20 text-white' : 'bg-bg-subtle text-txt-secondary border border-border'
               }`}>
                 {f.count}
               </span>
@@ -341,7 +341,7 @@ export const PageView: React.FC<PageViewProps> = ({
           {sortedTasks.length === 0 ? (
             <div className="bg-bg-card border border-border rounded-2xl p-12 text-center shadow-card">
               <CheckSquare className="w-10 h-10 text-txt-muted mx-auto mb-3 opacity-60" />
-              <h3 className="text-lg font-serif font-bold text-txt-primary">No tasks in this view</h3>
+              <h3 className="text-lg font-bold text-txt-primary">No tasks in this view</h3>
               <p className="text-xs sm:text-sm font-sans text-txt-muted mt-1 max-w-sm mx-auto">
                 {activeFilter === 'all'
                   ? 'Get started by creating your first task in this page.'

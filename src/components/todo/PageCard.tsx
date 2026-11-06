@@ -30,7 +30,7 @@ export const PageCard: React.FC<PageCardProps> = ({ page, onOpenPage }) => {
       whileHover={{ y: -3, transition: { type: "spring", stiffness: 450, damping: 25 } }}
       whileTap={{ scale: 0.98 }}
       onClick={() => onOpenPage(page.id)}
-      className="bg-bg-card border border-border hover:border-primary/60 shadow-card hover:shadow-card-hover rounded-2xl p-6 transition-all duration-150 cursor-pointer flex flex-col justify-between group select-none min-h-[220px]"
+      className="bg-bg-card border border-border hover:border-primary/60 shadow-card hover:shadow-card-hover rounded-2xl p-6 transition-all duration-150 cursor-pointer flex flex-col justify-between group select-none min-h-[280px] h-full"
       role="button"
       tabIndex={0}
       aria-label={`Open page ${page.name}`}
@@ -51,7 +51,7 @@ export const PageCard: React.FC<PageCardProps> = ({ page, onOpenPage }) => {
                 <span>{page.name}</span>
                 <ChevronRight className="w-4 h-4 text-txt-muted group-hover:translate-x-0.5 transition-transform flex-shrink-0" />
               </h3>
-              <p className="text-xs font-sans text-txt-secondary font-medium mt-0.5">
+              <p className="text-[13px] font-sans text-txt-secondary font-medium mt-0.5">
                 {totalCount} task{totalCount === 1 ? '' : 's'} · {completedCount} done
               </p>
             </div>
@@ -86,19 +86,22 @@ export const PageCard: React.FC<PageCardProps> = ({ page, onOpenPage }) => {
               <div
                 key={task.id}
                 onClick={e => e.stopPropagation()}
-                className="flex items-center justify-between gap-2.5 p-2 rounded-xl hover:bg-bg-subtle transition-colors text-xs font-sans group/item"
+                className="flex items-center justify-between gap-2.5 p-2 rounded-xl hover:bg-bg-subtle transition-colors text-[13px] font-sans group/item"
               >
                 <div className="flex items-center gap-2.5 overflow-hidden flex-1">
                   <motion.button
                     whileTap={{ scale: 0.82 }}
                     onClick={() => toggleTaskCompleted(task.id)}
-                    className="w-7 h-7 rounded-lg flex items-center justify-center text-txt-muted hover:text-primary hover:bg-bg-card transition-colors flex-shrink-0 cursor-pointer"
+                    className="w-7 h-7 rounded-lg flex items-center justify-center border border-border bg-bg-card text-txt-muted hover:border-primary hover:text-primary transition-colors flex-shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                     title="Mark complete"
                     aria-label={`Mark task ${task.title} complete`}
                   >
-                    <Square className="w-4 h-4" />
+                    <Square className="w-3.5 h-3.5" />
                   </motion.button>
-                  <span className="truncate text-txt-primary font-semibold">
+                  <span
+                    className="truncate text-txt-primary font-medium text-[14px] hover:text-primary transition-colors"
+                    title={task.title}
+                  >
                     {task.title}
                   </span>
                 </div>
@@ -110,7 +113,10 @@ export const PageCard: React.FC<PageCardProps> = ({ page, onOpenPage }) => {
                     </span>
                   )}
                   {task.dueDate && (
-                    <span className="text-xs font-mono font-medium text-txt-secondary bg-bg-card px-1.5 py-0.5 rounded border border-border">
+                    <span
+                      className="text-xs font-mono font-medium text-txt-secondary bg-bg-subtle px-1.5 py-0.5 rounded border border-border"
+                      title={`Due: ${task.dueDate}`}
+                    >
                       {task.dueDate.slice(5)}
                     </span>
                   )}

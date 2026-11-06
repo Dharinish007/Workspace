@@ -1,23 +1,26 @@
 import React, { useState } from 'react';
-import { useWorkspace } from '../../context/WorkspaceContext';
+import { useParams, useNavigate } from 'react-router-dom';
 import { TodoLanding } from './TodoLanding';
 import { PageView } from './PageView';
 import { ArchivedPagesModal } from './ArchivedPagesModal';
 
 export const TodoModule: React.FC = () => {
-  const { selectedPageId, setSelectedPageId } = useWorkspace();
+  const { pageId } = useParams<{ pageId?: string }>();
+  const navigate = useNavigate();
   const [isArchivedModalOpen, setIsArchivedModalOpen] = useState(false);
 
   return (
     <div className="p-4 md:p-6 lg:p-8 max-w-7xl mx-auto">
-      {selectedPageId ? (
+      {pageId ? (
         <PageView
-          pageId={selectedPageId}
-          onBackToOverview={() => setSelectedPageId(null)}
+          pageId={pageId}
+          onBackToOverview={() => navigate('/pages')}
           onOpenArchived={() => setIsArchivedModalOpen(true)}
         />
       ) : (
-        <TodoLanding onOpenPage={(id) => setSelectedPageId(id)} />
+        <TodoLanding 
+          onOpenPage={(id) => navigate(`/pages/${id}`)} 
+        />
       )}
 
       <ArchivedPagesModal
@@ -27,4 +30,3 @@ export const TodoModule: React.FC = () => {
     </div>
   );
 };
-
