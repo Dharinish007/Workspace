@@ -4,6 +4,7 @@ import { formatLocalDate } from '../../db/indexedDB';
 import { CalendarEvent } from '../../types';
 import { Palette, Plus } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { getDayCellBackgroundStyle } from '../../utils/calendarColors';
 
 interface MonthViewProps {
   currentDate: Date;
@@ -44,6 +45,7 @@ export const MonthView: React.FC<MonthViewProps> = ({
     settings 
   } = useWorkspace();
 
+  const isDark = settings.theme === 'dark';
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
 
@@ -185,7 +187,7 @@ export const MonthView: React.FC<MonthViewProps> = ({
             <div
               key={day.dateStr}
               onClick={() => onSelectDate(day.dateStr)}
-              style={dayColorEntry ? { backgroundColor: dayColorEntry.color } : {}}
+              style={day.isCurrentMonth ? getDayCellBackgroundStyle(dayColorEntry?.color, isDark) : {}}
               className={`min-h-[105px] p-1.5 transition-colors duration-100 flex flex-col justify-between group relative cursor-pointer ${
                 !day.isCurrentMonth ? 'opacity-40 bg-bg-subtle/30' : 'hover:bg-bg-hover/30'
               } ${isSelected ? 'ring-2 ring-primary ring-inset z-10' : ''}`}
@@ -198,7 +200,7 @@ export const MonthView: React.FC<MonthViewProps> = ({
                       isToday
                         ? 'bg-primary text-white font-bold shadow-xs'
                         : isSelected
-                        ? 'text-primary font-bold'
+                        ? 'text-txt-primary font-bold bg-primary/20'
                         : day.isCurrentMonth
                         ? 'text-txt-primary'
                         : 'text-txt-muted'
@@ -258,7 +260,7 @@ export const MonthView: React.FC<MonthViewProps> = ({
                     >
                       <span
                         className={`truncate ${
-                          act.completed ? 'line-through opacity-70 text-txt-muted' : 'text-txt-primary'
+                          act.completed ? 'line-through text-txt-muted' : 'text-txt-primary'
                         }`}
                       >
                         {act.title}
@@ -276,7 +278,7 @@ export const MonthView: React.FC<MonthViewProps> = ({
                       e.stopPropagation();
                       onOpenDayView(day.dateStr);
                     }}
-                    className="text-[10px] font-sans font-bold text-primary hover:underline px-1 py-0.5 rounded bg-primary-light/50 cursor-pointer"
+                    className="text-[10px] font-sans font-bold text-txt-primary hover:bg-primary-hover/30 px-2 py-0.5 rounded-md bg-primary/20 border border-primary/40 cursor-pointer transition-colors shadow-2xs block w-full text-center"
                   >
                     +{overflowCount} more
                   </button>

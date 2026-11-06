@@ -3,6 +3,7 @@ import { useWorkspace } from '../../context/WorkspaceContext';
 import { CalendarEvent } from '../../types';
 import { Clock, Plus, Palette, CheckSquare, Activity, Calendar as CalendarIcon, ArrowLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { getDayCellBackgroundStyle } from '../../utils/calendarColors';
 
 interface DayViewProps {
   dateStr: string;
@@ -35,8 +36,11 @@ export const DayView: React.FC<DayViewProps> = ({
     events, 
     dayColors, 
     navigateToTask, 
-    navigateToHabit 
+    navigateToHabit,
+    settings 
   } = useWorkspace();
+
+  const isDark = settings.theme === 'dark';
 
   const d = new Date(dateStr);
   const formattedFullDate = d.toLocaleDateString('en-US', {
@@ -141,21 +145,22 @@ export const DayView: React.FC<DayViewProps> = ({
     <div className="space-y-4 font-sans">
       {/* Top Header */}
       <div 
-        style={dayColorEntry ? { backgroundColor: dayColorEntry.color } : {}}
+        style={getDayCellBackgroundStyle(dayColorEntry?.color, isDark)}
         className="bg-bg-card border border-border rounded-2xl p-5 shadow-card flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-colors"
       >
         <div className="flex items-center gap-3">
           <motion.button
             whileTap={{ scale: 0.9 }}
             onClick={onBackToMonth}
-            className="p-2 rounded-xl bg-bg-subtle hover:bg-bg-hover text-txt-secondary hover:text-txt-primary border border-border transition-colors cursor-pointer"
+            className="w-10 h-10 rounded-xl bg-bg-subtle hover:bg-bg-hover text-txt-secondary hover:text-txt-primary border border-border flex items-center justify-center transition-colors cursor-pointer"
             title="Back to Month View"
+            aria-label="Back to Month View"
           >
             <ArrowLeft className="w-5 h-5" />
           </motion.button>
           <div>
-            <h2 className="text-2xl font-serif font-bold text-txt-primary tracking-tight">{formattedFullDate}</h2>
-            <p className="text-xs text-txt-muted">
+            <h2 className="text-[24px] sm:text-[26px] font-bold text-txt-primary tracking-tight">{formattedFullDate}</h2>
+            <p className="text-[13px] text-txt-muted">
               {allDayItems.length} all-day items · {timedItems.length} timed events
             </p>
           </div>
@@ -165,9 +170,11 @@ export const DayView: React.FC<DayViewProps> = ({
           <motion.button
             whileTap={{ scale: 0.95 }}
             onClick={() => onOpenDayColorPicker(dateStr)}
-            className="px-3.5 py-2 text-xs font-semibold text-txt-secondary hover:text-txt-primary bg-bg-card hover:bg-bg-hover border border-border rounded-xl flex items-center gap-1.5 transition-colors shadow-xs cursor-pointer"
+            className="h-10 px-4 text-xs font-semibold text-txt-secondary hover:text-txt-primary bg-bg-card hover:bg-bg-hover border border-border-interactive/70 hover:border-primary rounded-xl flex items-center gap-1.5 transition-colors shadow-2xs cursor-pointer"
+            title="Set Day Background Color"
+            aria-label="Set Day Background Color"
           >
-            <Palette className="w-3.5 h-3.5" />
+            <Palette className="w-4 h-4" />
             <span>Day Color</span>
           </motion.button>
 
@@ -176,7 +183,7 @@ export const DayView: React.FC<DayViewProps> = ({
             whileTap={{ scale: 0.96 }}
             transition={{ type: "spring", stiffness: 500, damping: 25 }}
             onClick={() => onOpenCreateEvent(dateStr)}
-            className="px-4 py-2 text-xs font-semibold text-white bg-primary hover:bg-primary-hover rounded-xl flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
+            className="px-4 py-2 text-xs font-bold text-white bg-primary hover:bg-primary-hover rounded-xl flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
           >
             <Plus className="w-4 h-4" />
             <span>Add Event</span>
@@ -215,9 +222,9 @@ export const DayView: React.FC<DayViewProps> = ({
                   style={{ backgroundColor: `${item.color}10`, borderLeft: `4px solid ${item.color}` }}
                 >
                   <div className="flex items-center gap-2.5 overflow-hidden">
-                    {item.type === 'task' && <CheckSquare className="w-4 h-4 text-primary flex-shrink-0" />}
+                    {item.type === 'task' && <CheckSquare className="w-4 h-4 text-primary-hover flex-shrink-0" />}
                     {item.type === 'habit' && <Activity className="w-4 h-4 text-teal-600 flex-shrink-0" />}
-                    {item.type === 'event' && <CalendarIcon className="w-4 h-4 text-orange-500 flex-shrink-0" />}
+                    {item.type === 'event' && <CalendarIcon className="w-4 h-4 text-txt-secondary flex-shrink-0" />}
 
                     <span className={`text-xs font-semibold truncate ${item.completed ? 'line-through text-txt-muted' : 'text-txt-primary'}`}>
                       {item.title}

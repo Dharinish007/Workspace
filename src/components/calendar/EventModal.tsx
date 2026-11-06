@@ -264,7 +264,7 @@ export const EventModal: React.FC<EventModalProps> = ({
                     whileTap={{ scale: 0.96 }}
                     transition={{ type: "spring", stiffness: 500, damping: 25 }}
                     type="submit"
-                    className="px-5 py-2 text-xs font-semibold text-white bg-primary hover:bg-primary-hover rounded-xl shadow-xs transition-colors cursor-pointer"
+                    className="px-5 py-2 text-xs font-bold text-white bg-primary hover:bg-primary-hover rounded-xl shadow-xs transition-colors cursor-pointer"
                   >
                     {eventToEdit ? 'Save Changes' : 'Create Event'}
                   </motion.button>

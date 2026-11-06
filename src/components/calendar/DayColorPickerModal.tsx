@@ -2,24 +2,16 @@ import React, { useEffect } from 'react';
 import { useWorkspace } from '../../context/WorkspaceContext';
 import { X, Check, Ban } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  DAY_COLOR_CATEGORIES, 
+  resolveDayColorCategory 
+} from '../../utils/calendarColors';
 
 interface DayColorPickerModalProps {
   isOpen: boolean;
   onClose: () => void;
   dateStr: string;
 }
-
-// 8 soft pastel colors suitable for day background tinting
-const SOFT_DAY_COLORS = [
-  { name: 'Soft Blue', hex: '#E8F0FE', darkHex: '#1E293B' },
-  { name: 'Soft Green', hex: '#E6F4EA', darkHex: '#143823' },
-  { name: 'Soft Yellow', hex: '#FEF7E0', darkHex: '#3A2E12' },
-  { name: 'Soft Purple', hex: '#F3E8FD', darkHex: '#2E1A47' },
-  { name: 'Soft Pink', hex: '#FCE8E6', darkHex: '#3D1B1B' },
-  { name: 'Soft Teal', hex: '#E0F2F1', darkHex: '#133535' },
-  { name: 'Soft Orange', hex: '#FFE8D6', darkHex: '#3D2514' },
-  { name: 'Soft Indigo', hex: '#EDE9FE', darkHex: '#211E4A' },
-];
 
 export const DayColorPickerModal: React.FC<DayColorPickerModalProps> = ({
   isOpen,
@@ -41,9 +33,10 @@ export const DayColorPickerModal: React.FC<DayColorPickerModalProps> = ({
   const currentEntry = dayColors.find(d => d.date === dateStr);
   const currentColor = currentEntry?.color;
   const isDark = settings.theme === 'dark';
+  const selectedCategoryId = resolveDayColorCategory(currentColor);
 
-  const handleSelectColor = (color: string) => {
-    setDayColor(dateStr, color);
+  const handleSelectColor = (categoryId: string) => {
+    setDayColor(dateStr, categoryId);
     onClose();
   };
 
@@ -63,7 +56,7 @@ export const DayColorPickerModal: React.FC<DayColorPickerModalProps> = ({
             exit={{ opacity: 0 }}
             transition={{ duration: 0.15 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/40 backdrop-blur-md"
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm"
           />
 
           {/* Modal Dialog */}
@@ -73,42 +66,64 @@ export const DayColorPickerModal: React.FC<DayColorPickerModalProps> = ({
             exit={{ opacity: 0, scale: 0.95, y: 8 }}
             transition={{ type: 'spring', stiffness: 450, damping: 30 }}
             onClick={e => e.stopPropagation()}
-            className="bg-bg-card border border-border shadow-modal rounded-2xl w-full max-w-xs overflow-hidden flex flex-col relative z-10"
+            className="bg-bg-card border border-border shadow-modal rounded-2xl w-full max-w-sm overflow-hidden flex flex-col relative z-10"
           >
-            <div className="flex items-center justify-between px-5 py-3.5 border-b border-border">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-border">
               <div>
-                <h3 className="text-base font-serif font-bold text-txt-primary">Day Background</h3>
-                <p className="text-[11px] font-mono text-txt-muted">{dateStr}</p>
+                <h3 className="text-base font-serif font-bold text-txt-primary">Day Background Color</h3>
+                <p className="text-xs font-mono text-txt-secondary mt-0.5">{dateStr}</p>
               </div>
               <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
+                whileHover={{ scale: 1.08 }}
+                whileTap={{ scale: 0.92 }}
                 onClick={onClose}
-                className="p-1 rounded text-txt-muted hover:text-txt-primary transition-colors"
+                className="w-8 h-8 rounded-lg flex items-center justify-center text-txt-muted hover:text-txt-primary hover:bg-bg-subtle transition-colors cursor-pointer"
+                aria-label="Close dialog"
               >
                 <X className="w-4 h-4" />
               </motion.button>
             </div>
 
             <div className="p-5 space-y-4">
-              <div className="grid grid-cols-4 gap-2.5">
-                {SOFT_DAY_COLORS.map(c => {
-                  const appliedColor = isDark ? c.darkHex : c.hex;
-                  const isSelected = currentColor === appliedColor || currentColor === c.hex || currentColor === c.darkHex;
+              {/* 3-Column x 2-Row Color Grid */}
+              <div 
+                role="radiogroup" 
+                aria-label="Calendar day background colors"
+                className="grid grid-cols-3 gap-3"
+              >
+                {DAY_COLOR_CATEGORIES.map(category => {
+                  const appliedHex = isDark ? category.darkHex : category.lightHex;
+                  const isSelected = selectedCategoryId === category.id;
 
                   return (
                     <motion.button
-                      key={c.name}
-                      whileHover={{ scale: 1.08 }}
-                      whileTap={{ scale: 0.92 }}
-                      transition={{ type: 'spring', stiffness: 500, damping: 25 }}
+                      key={category.id}
+                      whileHover={{ scale: 1.04 }}
+                      whileTap={{ scale: 0.94 }}
+                      transition={{ type: 'spring', stiffness: 450, damping: 25 }}
                       type="button"
-                      onClick={() => handleSelectColor(appliedColor)}
-                      className="w-12 h-12 rounded-xl border border-border flex items-center justify-center shadow-2xs hover:shadow-xs transition-shadow"
-                      style={{ backgroundColor: appliedColor }}
-                      title={c.name}
+                      role="radio"
+                      aria-checked={isSelected}
+                      aria-label={`${category.name}${isSelected ? ', currently selected' : ''}`}
+                      onClick={() => handleSelectColor(category.id)}
+                      className={`h-14 rounded-xl flex items-center justify-center relative cursor-pointer shadow-2xs transition-all ring-1 ring-inset ring-black/10 dark:ring-white/10 ${
+                        isSelected 
+                          ? 'ring-2 ring-primary ring-offset-2 ring-offset-bg-card' 
+                          : 'hover:shadow-xs'
+                      } focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-bg-card`}
+                      style={{ backgroundColor: appliedHex }}
+                      title={`${category.name} (${appliedHex})`}
                     >
-                      {isSelected && <Check className="w-4 h-4 text-txt-primary stroke-[3]" />}
+                      {isSelected && (
+                        <motion.div
+                          initial={{ scale: 0.5, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          transition={{ type: 'spring', stiffness: 500, damping: 25 }}
+                          className="w-6 h-6 rounded-full bg-white/95 text-slate-900 dark:bg-slate-900/90 dark:text-white shadow-xs flex items-center justify-center"
+                        >
+                          <Check className="w-3.5 h-3.5 stroke-[3.5]" aria-hidden="true" />
+                        </motion.div>
+                      )}
                     </motion.button>
                   );
                 })}
@@ -116,16 +131,20 @@ export const DayColorPickerModal: React.FC<DayColorPickerModalProps> = ({
 
               <hr className="border-border" />
 
-              {/* Remove / No Color */}
+              {/* Reset to Default / Remove Color */}
               <motion.button
-                whileHover={{ scale: 1.02 }}
+                whileHover={{ scale: 1.01 }}
                 whileTap={{ scale: 0.98 }}
                 type="button"
                 onClick={handleRemoveColor}
-                className="w-full py-2 px-3 text-xs font-medium text-txt-secondary hover:text-red-500 bg-bg-subtle hover:bg-bg-hover rounded-xl flex items-center justify-center gap-1.5 transition-colors"
+                className={`w-full h-10 px-3.5 text-xs font-semibold rounded-xl flex items-center justify-center gap-2 border transition-all cursor-pointer ${
+                  !currentColor
+                    ? 'bg-bg-subtle/80 text-txt-secondary border-border-interactive/80'
+                    : 'bg-bg-card hover:bg-bg-subtle text-txt-secondary hover:text-red-600 dark:hover:text-red-400 border-border hover:border-red-300 dark:hover:border-red-800'
+                }`}
               >
                 <Ban className="w-3.5 h-3.5" />
-                <span>No Color (Reset Default)</span>
+                <span>{!currentColor ? 'Default Background (Active)' : 'No Color (Reset Default)'}</span>
               </motion.button>
             </div>
           </motion.div>

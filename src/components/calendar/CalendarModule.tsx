@@ -15,7 +15,7 @@ import {
 import { motion } from 'framer-motion';
 
 export const CalendarModule: React.FC = () => {
-  const { pages } = useWorkspace();
+  const { pages, habits } = useWorkspace();
 
   const [currentView, setCurrentView] = useState<CalendarView>('month');
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
@@ -130,7 +130,7 @@ export const CalendarModule: React.FC = () => {
             </motion.button>
           </div>
 
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-serif font-bold text-txt-primary tracking-tight">
+          <h1 className="text-[26px] sm:text-[28px] font-bold text-txt-primary tracking-tight">
             {monthYearTitle}
           </h1>
         </div>
@@ -146,7 +146,7 @@ export const CalendarModule: React.FC = () => {
                   key={v}
                   onClick={() => setCurrentView(v)}
                   className={`relative h-8 px-4 text-xs font-sans font-bold rounded-lg capitalize transition-colors cursor-pointer z-10 ${
-                    isSelected ? 'text-white' : 'text-txt-secondary hover:text-txt-primary'
+                    isSelected ? 'text-white font-bold' : 'text-txt-secondary hover:text-txt-primary'
                   }`}
                 >
                   {isSelected && (
@@ -187,10 +187,10 @@ export const CalendarModule: React.FC = () => {
             <button
               onClick={() => setShowEvents(!showEvents)}
               className={`h-8 px-2.5 rounded-lg font-semibold transition-colors flex items-center gap-1.5 cursor-pointer ${
-                showEvents ? 'bg-orange-500/10 text-orange-600 dark:text-orange-400 font-bold' : 'text-txt-muted hover:text-txt-primary'
+                showEvents ? 'bg-primary/20 text-txt-primary font-bold' : 'text-txt-muted hover:text-txt-primary'
               }`}
             >
-              <span className="w-2.5 h-2.5 rounded-full bg-orange-500" />
+              <span className="w-2.5 h-2.5 rounded-full bg-primary" />
               <span>Events</span>
             </button>
 
@@ -264,6 +264,43 @@ export const CalendarModule: React.FC = () => {
           showCompleted={showCompleted}
         />
       )}
+
+      {/* Category Legend & Colors Panel */}
+      <div className="bg-bg-card border border-border rounded-2xl p-4 shadow-card flex flex-wrap items-center justify-between gap-4 text-xs font-sans">
+        <div className="flex flex-wrap items-center gap-4">
+          <div className="flex items-center gap-2">
+            <span className="font-bold text-txt-secondary uppercase tracking-wider text-[11px]">Pages:</span>
+            <div className="flex flex-wrap items-center gap-2">
+              {pages.map(p => (
+                <span key={p.id} className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-bg-subtle text-txt-primary border border-border">
+                  <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: p.color }} />
+                  <span>{p.name}</span>
+                </span>
+              ))}
+            </div>
+          </div>
+
+          <div className="hidden md:flex items-center gap-2 border-l border-border pl-4">
+            <span className="font-bold text-txt-secondary uppercase tracking-wider text-[11px]">Types:</span>
+            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-bg-subtle text-txt-primary border border-border">
+              <span className="w-2.5 h-2.5 rounded-full bg-blue-500" />
+              <span>Tasks</span>
+            </span>
+            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-bg-subtle text-txt-primary border border-border">
+              <span className="w-2.5 h-2.5 rounded-full bg-teal-500" />
+              <span>Habits</span>
+            </span>
+            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-bg-subtle text-txt-primary border border-border">
+              <span className="w-2.5 h-2.5 rounded-full bg-primary" />
+              <span>Events</span>
+            </span>
+          </div>
+        </div>
+
+        <div className="text-txt-muted text-[11px] font-medium">
+          Tip: Click date to view day details, or hover to set custom day background color.
+        </div>
+      </div>
 
       {/* Event Modal */}
       <EventModal

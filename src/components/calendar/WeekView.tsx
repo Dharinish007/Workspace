@@ -4,6 +4,7 @@ import { formatLocalDate } from '../../db/indexedDB';
 import { CalendarEvent } from '../../types';
 import { Plus, Palette, Clock, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { getDayCellBackgroundStyle } from '../../utils/calendarColors';
 
 interface WeekViewProps {
   currentDate: Date;
@@ -40,6 +41,8 @@ export const WeekView: React.FC<WeekViewProps> = ({
     navigateToHabit,
     settings 
   } = useWorkspace();
+
+  const isDark = settings.theme === 'dark';
 
   // Determine week range based on weekStart
   const curr = new Date(currentDate);
@@ -139,7 +142,7 @@ export const WeekView: React.FC<WeekViewProps> = ({
           return (
             <div
               key={dayInfo.dateStr}
-              style={dayColorEntry ? { backgroundColor: dayColorEntry.color } : {}}
+              style={getDayCellBackgroundStyle(dayColorEntry?.color, isDark)}
               className="min-h-[240px] p-3 flex flex-col justify-between group hover:bg-bg-hover/15 transition-colors relative"
             >
               <div>
