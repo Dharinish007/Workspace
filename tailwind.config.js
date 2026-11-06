@@ -8,9 +8,17 @@ export default {
   theme: {
     extend: {
       fontFamily: {
+        sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
         serif: ['Newsreader', 'Source Serif 4', 'Tiempos Headline', 'Georgia', 'serif'],
-        sans: ['Inter', 'Plus Jakarta Sans', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
         mono: ['JetBrains Mono', 'Fira Code', 'Menlo', 'monospace'],
+      },
+      letterSpacing: {
+        tighter: '-0.02em',
+        tight: '-0.01em',
+        normal: '0.005em',
+        wide: '0.03em',
+        wider: '0.06em',
+        widest: '0.1em',
       },
       colors: {
         bg: {
@@ -21,7 +29,9 @@ export default {
         },
         border: {
           DEFAULT: 'var(--color-border)',
+          interactive: 'var(--color-border-interactive)',
           subtle: 'var(--color-border-subtle)',
+          focus: 'var(--color-border-focus)',
         },
         txt: {
           primary: 'var(--color-text-primary)',

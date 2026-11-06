@@ -1,4 +1,5 @@
 import React from 'react';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { WorkspaceProvider, useWorkspace } from './context/WorkspaceContext';
 import { Header } from './components/layout/Header';
 import { Sidebar } from './components/layout/Sidebar';
@@ -10,10 +11,13 @@ import { DashboardModule } from './components/dashboard/DashboardModule';
 import { TodoModule } from './components/todo/TodoModule';
 import { CalendarModule } from './components/calendar/CalendarModule';
 import { HabitModule } from './components/habits/HabitModule';
+import { SettingsView } from './components/settings/SettingsView';
+import { NotFoundPage } from './components/common/NotFoundPage';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const WorkspaceContent: React.FC = () => {
-  const { isInitialized, activeSection, errorMessage } = useWorkspace();
+  const { isInitialized, errorMessage } = useWorkspace();
+  const location = useLocation();
 
   if (errorMessage) {
     return (
@@ -23,7 +27,7 @@ const WorkspaceContent: React.FC = () => {
           <p className="text-xs text-txt-secondary leading-relaxed">{errorMessage}</p>
           <button
             onClick={() => window.location.reload()}
-            className="px-4 py-2 bg-primary text-white text-xs font-semibold rounded-xl shadow-xs hover:bg-primary-hover transition-colors"
+            className="px-4 py-2 bg-primary text-txt-primary text-xs font-semibold rounded-xl shadow-xs hover:bg-primary-hover transition-colors"
           >
             Reload Workspace
           </button>
@@ -36,7 +40,7 @@ const WorkspaceContent: React.FC = () => {
     return (
       <div className="min-h-screen bg-bg-main flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-primary animate-pulse flex items-center justify-center text-white font-serif font-bold text-xl shadow-md">
+          <div className="w-10 h-10 rounded-xl bg-primary animate-pulse flex items-center justify-center text-txt-primary font-serif font-bold text-xl shadow-md">
             W
           </div>
           <span className="text-xs font-medium text-txt-muted tracking-wider uppercase font-sans">
@@ -48,25 +52,35 @@ const WorkspaceContent: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-bg-main flex flex-col transition-colors duration-200">
-      <Header />
+    <div className="h-screen w-screen overflow-hidden bg-bg-main flex transition-colors duration-200">
+      {/* Stationary Full-Height Sidebar */}
+      <Sidebar />
 
-      <div className="flex-1 flex pb-16 md:pb-0">
-        <Sidebar />
+      {/* Main Layout Column: Sticky Header + Independently Scrollable Content */}
+      <div className="flex-1 flex flex-col h-full min-w-0 overflow-hidden relative">
+        <Header />
 
-        <main className="flex-1 overflow-x-hidden min-h-[calc(100vh-4rem)]">
+        <main className="flex-1 overflow-y-auto overflow-x-hidden min-w-0 pb-16 md:pb-6 scrollbar-thin">
           <AnimatePresence mode="wait">
             <motion.div
-              key={activeSection}
+              key={location.pathname}
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -6 }}
               transition={{ duration: 0.16, ease: 'easeOut' }}
             >
-              {activeSection === 'dashboard' && <DashboardModule />}
-              {activeSection === 'todo' && <TodoModule />}
-              {activeSection === 'calendar' && <CalendarModule />}
-              {activeSection === 'habits' && <HabitModule />}
+              <Routes location={location}>
+                <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                <Route path="/dashboard" element={<DashboardModule />} />
+                <Route path="/tasks" element={<TodoModule />} />
+                <Route path="/pages" element={<TodoModule />} />
+                <Route path="/pages/:pageId" element={<TodoModule />} />
+                <Route path="/calendar" element={<CalendarModule />} />
+                <Route path="/habits" element={<HabitModule />} />
+                <Route path="/settings" element={<SettingsView />} />
+                <Route path="/todo" element={<Navigate to="/tasks" replace />} />
+                <Route path="*" element={<NotFoundPage />} />
+              </Routes>
             </motion.div>
           </AnimatePresence>
         </main>

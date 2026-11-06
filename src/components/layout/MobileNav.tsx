@@ -1,17 +1,19 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useWorkspace } from '../../context/WorkspaceContext';
 import { NavigationSection } from '../../types';
 import { LayoutDashboard, CheckSquare, Calendar, Flame } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export const MobileNav: React.FC = () => {
-  const { activeSection, setActiveSection, setSelectedPageId } = useWorkspace();
+  const navigate = useNavigate();
+  const { activeSection } = useWorkspace();
 
   const items = [
-    { id: 'dashboard' as NavigationSection, label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'todo' as NavigationSection, label: 'To-Do', icon: CheckSquare },
-    { id: 'calendar' as NavigationSection, label: 'Calendar', icon: Calendar },
-    { id: 'habits' as NavigationSection, label: 'Habits', icon: Flame },
+    { id: 'dashboard' as NavigationSection, label: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
+    { id: 'todo' as NavigationSection, label: 'To-Do', icon: CheckSquare, path: '/tasks' },
+    { id: 'calendar' as NavigationSection, label: 'Calendar', icon: Calendar, path: '/calendar' },
+    { id: 'habits' as NavigationSection, label: 'Habits', icon: Flame, path: '/habits' },
   ];
 
   return (
@@ -27,12 +29,7 @@ export const MobileNav: React.FC = () => {
           <motion.button
             key={item.id}
             whileTap={{ scale: 0.92 }}
-            onClick={() => {
-              setActiveSection(item.id);
-              if (item.id === 'todo') {
-                setSelectedPageId(null);
-              }
-            }}
+            onClick={() => navigate(item.path)}
             aria-label={item.label}
             className={`relative flex flex-col items-center justify-center flex-1 h-full py-1 text-xs transition-colors cursor-pointer select-none ${
               isActive ? 'text-primary font-bold' : 'text-txt-muted hover:text-txt-primary'
@@ -46,7 +43,7 @@ export const MobileNav: React.FC = () => {
               />
             )}
             <Icon className={`w-5 h-5 mb-1 transition-colors ${isActive ? 'text-primary' : 'text-txt-muted'}`} />
-            <span className="font-sans text-xs font-medium tracking-tight">{item.label}</span>
+            <span className="font-sans text-[12px] font-medium tracking-tight">{item.label}</span>
           </motion.button>
         );
       })}

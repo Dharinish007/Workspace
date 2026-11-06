@@ -1,133 +1,117 @@
-import React from 'react';
+import React, { useMemo } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useWorkspace } from '../../context/WorkspaceContext';
-import { Search, Bell, Settings, Sun, Moon } from 'lucide-react';
+import { Search, Calendar, Sun, Moon, Menu } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export const Header: React.FC = () => {
-  const { 
-    settings, 
-    toggleTheme, 
-    setIsSettingsOpen, 
-    setIsSearchOpen 
+  const {
+    settings,
+    toggleTheme,
+    setIsSearchOpen,
+    toggleMobileSidebar,
+    pages,
+    selectedPageId,
   } = useWorkspace();
-
-  // Current real date formatted, e.g., "Sun, Nov 1, 2026"
-  const formattedDate = new Intl.DateTimeFormat('en-US', {
-    weekday: 'short',
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  }).format(new Date());
+  const location = useLocation();
+  const navigate = useNavigate();
 
   const isDark = settings.theme === 'dark';
 
+  // Dynamic real-world date, e.g. "Sat, Nov 7, 2026"
+  const formattedDate = useMemo(() => {
+    return new Intl.DateTimeFormat('en-US', {
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric',
+    }).format(new Date());
+  }, []);
+
+  // Compute Page Title dynamically based on current route
+  const pageTitle = useMemo(() => {
+    const p = location.pathname;
+    if (p === '/dashboard' || p === '/') return 'Dashboard';
+    if (p === '/tasks' || p === '/todo') return 'Tasks';
+    if (p === '/pages') return 'Pages';
+    if (p.startsWith('/pages/')) {
+      const pageIdFromUrl = p.replace('/pages/', '');
+      const activeId = pageIdFromUrl || selectedPageId;
+      const foundPage = pages.find(item => item.id === activeId);
+      return foundPage ? foundPage.name : 'Pages';
+    }
+    if (p === '/calendar') return 'Calendar';
+    if (p === '/habits') return 'Habit Tracker';
+    if (p === '/settings') return 'Settings';
+    return 'My Workspace';
+  }, [location.pathname, pages, selectedPageId]);
+
   return (
-    <header className="h-16 px-4 md:px-6 lg:px-8 border-b border-border bg-bg-card/95 backdrop-blur-md sticky top-0 z-20 flex items-center justify-between transition-colors duration-200">
-      {/* Brand logo & title */}
-      <div className="flex items-center gap-3">
-        <motion.div 
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          transition={{ type: "spring", stiffness: 500, damping: 30 }}
-          className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center text-white font-serif font-bold text-xl shadow-sm select-none cursor-pointer"
-          title="My Workspace"
+    <header className="h-16 px-4 md:px-6 lg:px-8 border-b border-border bg-bg-card/95 backdrop-blur-md sticky top-0 z-20 flex items-center justify-between shrink-0 transition-colors duration-200">
+      {/* Left: Mobile hamburger menu toggle + Dynamic Page Title */}
+      <div className="flex items-center gap-3 min-w-0">
+        <button
+          onClick={toggleMobileSidebar}
+          aria-label="Open navigation drawer"
+          title="Open navigation menu"
+          className="md:hidden w-9 h-9 rounded-xl border border-border-interactive/60 hover:border-border-interactive bg-bg-card hover:bg-bg-hover text-txt-secondary hover:text-txt-primary flex items-center justify-center transition-colors cursor-pointer shadow-2xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary shrink-0"
         >
-          W
-        </motion.div>
-        <span className="font-serif font-bold text-xl sm:text-2xl text-txt-primary tracking-tight">
-          My Workspace
-        </span>
+          <Menu className="w-5 h-5 text-txt-primary" />
+        </button>
+
+        <h1 className="text-lg sm:text-xl font-bold font-serif text-txt-primary tracking-tight truncate select-none">
+          {pageTitle}
+        </h1>
       </div>
 
-      {/* Center / Search bar trigger */}
-      <div className="hidden sm:flex items-center flex-1 max-w-md mx-4 lg:mx-8">
+      {/* Right: Global Search, Dynamic Date/Calendar Shortcut, and Theme Toggle */}
+      <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+        {/* Global Search Button */}
         <motion.button
-          whileHover={{ scale: 1.01 }}
-          whileTap={{ scale: 0.99 }}
-          transition={{ type: "spring", stiffness: 500, damping: 30 }}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.96 }}
           onClick={() => setIsSearchOpen(true)}
-          className="w-full h-10 flex items-center justify-between px-4 rounded-xl bg-bg-subtle hover:bg-bg-hover text-txt-secondary text-sm border border-border hover:border-primary/40 transition-all duration-150 cursor-pointer text-left shadow-2xs group"
-          title="Search tasks, pages, habits (Ctrl+K)"
-          aria-label="Search tasks and pages"
+          className="h-9 px-3 rounded-xl border border-border bg-bg-card hover:bg-bg-hover hover:border-primary/50 text-txt-secondary hover:text-txt-primary flex items-center gap-2.5 transition-all cursor-pointer shadow-2xs group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          title="Search tasks, pages, habits, events (Ctrl+K)"
+          aria-label="Search workspace"
         >
-          <div className="flex items-center gap-2.5">
-            <Search className="w-4 h-4 text-txt-muted group-hover:text-primary transition-colors flex-shrink-0" />
-            <span className="text-sm font-sans text-txt-secondary group-hover:text-txt-primary font-medium">
-              Search tasks, pages, habits...
-            </span>
-          </div>
-          <kbd className="hidden md:inline-flex items-center px-2 py-0.5 text-xs font-mono font-semibold text-txt-muted bg-bg-card border border-border rounded-md shadow-2xs">
-            Ctrl+K
+          <Search className="w-4 h-4 text-txt-muted group-hover:text-primary transition-colors shrink-0" />
+          <span className="hidden sm:inline text-xs text-txt-muted group-hover:text-txt-secondary font-medium">
+            Search...
+          </span>
+          <kbd className="hidden sm:inline-flex items-center text-[10px] font-mono bg-bg-subtle border border-border px-1.5 py-0.5 rounded text-txt-muted">
+            Ctrl K
           </kbd>
         </motion.button>
-      </div>
 
-      {/* Right controls */}
-      <div className="flex items-center gap-2 sm:gap-2.5">
-        {/* Mobile search trigger */}
+        {/* Dynamic Date / Calendar Shortcut */}
         <motion.button
-          whileTap={{ scale: 0.92 }}
-          onClick={() => setIsSearchOpen(true)}
-          className="sm:hidden w-10 h-10 rounded-xl hover:bg-bg-hover text-txt-secondary flex items-center justify-center transition-colors"
-          title="Search"
-          aria-label="Search"
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.96 }}
+          onClick={() => navigate('/calendar')}
+          className="h-9 px-3 rounded-xl border border-border bg-bg-card hover:bg-bg-hover hover:border-primary/50 text-txt-secondary hover:text-primary flex items-center gap-2 transition-all cursor-pointer shadow-2xs group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          title={`Today: ${formattedDate} — Click to open Calendar`}
+          aria-label="Open Calendar"
         >
-          <Search className="w-5 h-5" />
+          <Calendar className="w-4 h-4 text-txt-muted group-hover:text-primary transition-colors shrink-0" />
+          <span className="hidden md:inline text-xs font-semibold text-txt-secondary group-hover:text-primary">
+            {formattedDate}
+          </span>
         </motion.button>
 
-        {/* Date pill */}
-        <div className="hidden lg:flex items-center gap-2 h-9 px-3.5 rounded-xl bg-bg-subtle text-txt-secondary text-xs font-sans font-medium border border-border select-none">
-          <span className="text-sm">📅</span>
-          <span className="font-semibold text-txt-secondary">{formattedDate}</span>
-        </div>
-
-        {/* Notification bell (display) */}
+        {/* Light / Dark Mode Toggle */}
         <motion.button
           whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.92 }}
-          transition={{ type: "spring", stiffness: 500, damping: 30 }}
-          className="w-10 h-10 rounded-xl hover:bg-bg-hover text-txt-secondary flex items-center justify-center transition-colors relative cursor-pointer"
-          title="Notifications"
-          aria-label="Notifications"
-        >
-          <Bell className="w-5 h-5" />
-          <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-primary ring-2 ring-bg-card" />
-        </motion.button>
-
-        {/* Sliding Theme Toggle */}
-        <motion.button
           whileTap={{ scale: 0.95 }}
           onClick={toggleTheme}
-          aria-label={isDark ? "Switch to light theme" : "Switch to dark theme"}
-          title={isDark ? "Switch to light theme" : "Switch to dark theme"}
-          className="w-16 h-9 flex items-center rounded-xl p-1 transition-colors duration-200 border border-border bg-bg-subtle hover:bg-bg-hover cursor-pointer relative"
+          className="w-9 h-9 rounded-xl border border-border bg-bg-card hover:bg-bg-hover hover:border-primary/50 text-txt-secondary hover:text-txt-primary flex items-center justify-center transition-all cursor-pointer shadow-2xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
+          aria-label={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
         >
-          <motion.div
-            layout
-            transition={{ type: "spring", stiffness: 500, damping: 30 }}
-            className={`w-7 h-7 rounded-lg bg-primary flex items-center justify-center text-white shadow-xs ${
-              isDark ? 'ml-auto' : 'mr-auto'
-            }`}
-          >
-            {isDark ? (
-              <Moon className="w-4 h-4 text-white" />
-            ) : (
-              <Sun className="w-4 h-4 text-white" />
-            )}
-          </motion.div>
-        </motion.button>
-
-        {/* Settings Button */}
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.92 }}
-          transition={{ type: "spring", stiffness: 500, damping: 30 }}
-          onClick={() => setIsSettingsOpen(true)}
-          className="w-10 h-10 rounded-xl hover:bg-bg-hover text-txt-secondary flex items-center justify-center transition-colors cursor-pointer"
-          title="Settings"
-          aria-label="Open Settings"
-        >
-          <Settings className="w-5 h-5" />
+          {isDark ? (
+            <Sun className="w-4 h-4 text-amber-400 hover:text-amber-300 transition-colors" />
+          ) : (
+            <Moon className="w-4 h-4 text-txt-secondary hover:text-primary transition-colors" />
+          )}
         </motion.button>
       </div>
     </header>
