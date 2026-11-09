@@ -115,7 +115,7 @@ export const WeekView: React.FC<WeekViewProps> = ({
                     id: h.id,
                     type: 'habit',
                     title: h.name,
-                    color: h.color || '#0D9488',
+                    color: h.color || '#1A73E8',
                     completed: isDone,
                     raw: h,
                   });

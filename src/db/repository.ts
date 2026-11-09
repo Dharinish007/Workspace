@@ -512,7 +512,7 @@ export class Repository {
       id: generateUUID(),
       name: habitData.name.trim().slice(0, 60),
       icon: habitData.icon || 'Flame',
-      color: habitData.color || '#0D9488',
+      color: habitData.color || '#1A73E8',
       schedule: habitData.schedule,
       createdAt: now,
       updatedAt: now,
@@ -1199,7 +1199,7 @@ export class Repository {
           displayName: 'Dharinish',
           weekStart: 'monday',
           lastBackup: null,
-          habitDefaultColor: '#0D9488',
+          habitDefaultColor: '#1A73E8',
           eventDefaultColor: '#F97316',
           backgroundStyle: 'current',
         };

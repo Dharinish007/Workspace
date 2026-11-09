@@ -303,17 +303,17 @@ export const DashboardModule: React.FC = () => {
           whileHover={{ y: -3, transition: { type: "spring", stiffness: 450, damping: 25 } }}
           whileTap={{ scale: 0.98 }}
           onClick={() => navigate('/habits')}
-          className="bg-bg-card border border-border hover:border-teal-500 shadow-card hover:shadow-card-hover rounded-2xl p-5 sm:p-6 transition-all duration-150 cursor-pointer group select-none flex flex-col justify-between"
+          className="bg-bg-card border border-border hover:border-primary shadow-card hover:shadow-card-hover rounded-2xl p-5 sm:p-6 transition-all duration-150 cursor-pointer group select-none flex flex-col justify-between"
           role="button"
           tabIndex={0}
           aria-label="View Habits Scheduled Today"
         >
           <div>
             <div className="flex items-center justify-between mb-3">
-              <span className="text-[14px] sm:text-[15px] font-sans font-bold text-txt-secondary group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors">
+              <span className="text-[14px] sm:text-[15px] font-sans font-bold text-txt-secondary group-hover:text-primary transition-colors">
                 Habits
               </span>
-              <div className="w-10 h-10 rounded-xl bg-teal-500/10 border border-teal-500/20 text-teal-600 dark:text-teal-400 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 text-primary flex items-center justify-center">
                 <Activity className="w-5 h-5" />
               </div>
             </div>
@@ -328,7 +328,7 @@ export const DashboardModule: React.FC = () => {
           <div className="mt-4 pt-3 border-t border-border-subtle">
             <div className="w-full bg-bg-subtle h-2.5 rounded-full overflow-hidden border border-border-subtle">
               <div 
-                className="bg-teal-600 dark:bg-teal-400 h-full rounded-full transition-all duration-300"
+                className="bg-primary h-full rounded-full transition-all duration-300"
                 style={{ width: `${habitsScheduledToday.length > 0 ? habitsTodayPercent : 100}%` }}
               />
             </div>
@@ -376,7 +376,7 @@ export const DashboardModule: React.FC = () => {
         <motion.div 
           whileHover={{ y: -3, transition: { type: "spring", stiffness: 450, damping: 25 } }}
           whileTap={{ scale: 0.98 }}
-          onClick={() => navigate('/pages')}
+          onClick={() => navigate('/tasks')}
           className="bg-bg-card border border-border hover:border-purple-500 shadow-card hover:shadow-card-hover rounded-2xl p-5 sm:p-6 transition-all duration-150 cursor-pointer group select-none flex flex-col justify-between"
           role="button"
           tabIndex={0}
@@ -594,7 +594,7 @@ export const DashboardModule: React.FC = () => {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setIsHabitModalOpen(true)}
-                className="h-10 px-4 text-xs font-sans font-bold text-teal-700 dark:text-teal-300 bg-teal-500/10 hover:bg-teal-500/20 border border-teal-500/30 rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
+                className="h-10 px-4 text-xs font-sans font-bold text-primary bg-primary/10 hover:bg-primary/20 border border-primary/30 rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
                 title="Add Habit"
                 aria-label="Add Habit"
               >
@@ -607,7 +607,7 @@ export const DashboardModule: React.FC = () => {
               {habitsScheduledToday.length === 0 ? (
                 /* Structured Empty State */
                 <div className="py-8 px-4 text-center rounded-xl bg-bg-subtle/50 border border-dashed border-border-interactive flex flex-col items-center">
-                  <div className="w-12 h-12 rounded-2xl bg-teal-500/10 text-teal-600 dark:text-teal-400 border border-teal-500/20 flex items-center justify-center mb-3">
+                  <div className="w-12 h-12 rounded-2xl bg-primary/10 text-primary border border-primary/20 flex items-center justify-center mb-3">
                     <Flame className="w-6 h-6" />
                   </div>
                   <h4 className="text-base font-serif font-bold text-txt-primary">No habits scheduled today</h4>
@@ -617,7 +617,7 @@ export const DashboardModule: React.FC = () => {
                   <motion.button
                     whileTap={{ scale: 0.98 }}
                     onClick={() => setIsHabitModalOpen(true)}
-                    className="h-10 px-4 text-xs font-sans font-semibold text-teal-700 dark:text-teal-300 bg-bg-card hover:bg-bg-hover border border-border-interactive rounded-xl flex items-center gap-1.5 transition-colors shadow-2xs"
+                    className="h-10 px-4 text-xs font-sans font-semibold text-primary bg-bg-card hover:bg-bg-hover border border-border-interactive rounded-xl flex items-center gap-1.5 transition-colors shadow-2xs"
                   >
                     <Plus className="w-4 h-4" />
                     <span>Create Habit</span>
@@ -634,7 +634,7 @@ export const DashboardModule: React.FC = () => {
                       key={habit.id}
                       whileHover={{ x: 2 }}
                       transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                      className="flex items-center justify-between p-3.5 rounded-xl bg-bg-card hover:bg-bg-subtle/70 border border-border-interactive/70 hover:border-teal-500/70 transition-all duration-150 shadow-2xs"
+                      className="flex items-center justify-between p-3.5 rounded-xl bg-bg-card hover:bg-bg-subtle/70 border border-border-interactive/70 hover:border-primary/70 transition-all duration-150 shadow-2xs"
                     >
                       <div className="flex items-center gap-3">
                         <div
@@ -656,7 +656,7 @@ export const DashboardModule: React.FC = () => {
                       <div className="flex items-center gap-2.5">
                         <span className={`text-xs font-sans font-semibold px-2.5 py-1 rounded-md border ${
                           isChecked
-                            ? 'bg-teal-500/15 text-teal-700 dark:text-teal-300 border-teal-500/30'
+                            ? 'bg-primary/15 text-primary border-primary/30'
                             : 'bg-bg-card text-txt-secondary border-border-interactive'
                         }`}>
                           {isChecked ? 'Done' : 'Check In'}
@@ -665,10 +665,10 @@ export const DashboardModule: React.FC = () => {
                           whileTap={{ scale: 0.88 }}
                           transition={{ type: "spring", stiffness: 500, damping: 25 }}
                           onClick={() => toggleHabitLog(habit.id, todayStr)}
-                          className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all cursor-pointer border-2 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-teal-500 ${
+                          className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all cursor-pointer border-2 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary ${
                             isChecked
-                              ? 'bg-teal-600 border-teal-600 text-white shadow-xs'
-                              : 'border-border-interactive bg-bg-card hover:border-teal-500 text-transparent'
+                              ? 'bg-primary border-primary text-white shadow-xs'
+                              : 'border-border-interactive bg-bg-card hover:border-primary text-transparent'
                           }`}
                           title={isChecked ? 'Mark incomplete' : 'Mark completed'}
                           aria-label={isChecked ? `Mark ${habit.name} incomplete` : `Mark ${habit.name} complete`}
@@ -693,7 +693,7 @@ export const DashboardModule: React.FC = () => {
             </span>
             <button
               onClick={() => navigate('/habits')}
-              className="h-10 px-3.5 rounded-xl border border-teal-500/30 hover:border-teal-500 text-teal-700 dark:text-teal-400 font-bold hover:bg-teal-500/10 transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs self-start sm:self-auto"
+              className="h-10 px-3.5 rounded-xl border border-primary/30 hover:border-primary text-primary font-bold hover:bg-primary/10 transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs self-start sm:self-auto"
             >
               <span>Habit Tracker</span>
               <ArrowRight className="w-4 h-4" />
@@ -872,7 +872,7 @@ export const DashboardModule: React.FC = () => {
                   </div>
                   <div className="w-full bg-bg-subtle h-2.5 rounded-full overflow-hidden border border-border-interactive/60">
                     <div 
-                      className="bg-teal-600 h-full rounded-full transition-all duration-300"
+                      className="bg-primary h-full rounded-full transition-all duration-300"
                       style={{ 
                         width: `${weekProgressData.habitOccurrencesThisWeek > 0 
                           ? Math.round((weekProgressData.habitCompletionsThisWeek / weekProgressData.habitOccurrencesThisWeek) * 100) 

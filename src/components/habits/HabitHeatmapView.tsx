@@ -74,7 +74,7 @@ export const HabitHeatmapView: React.FC<HabitHeatmapViewProps> = ({ habits }) =>
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-xl font-serif font-bold text-txt-primary flex items-center gap-2 tracking-tight">
-            <Activity className="w-5 h-5 text-teal-600 dark:text-teal-400" />
+            <Activity className="w-5 h-5 text-primary" />
             <span>Habit Consistency Heatmap</span>
           </h2>
           <p className="text-xs font-sans text-txt-muted mt-0.5">
@@ -103,7 +103,7 @@ export const HabitHeatmapView: React.FC<HabitHeatmapViewProps> = ({ habits }) =>
           </div>
 
           {/* Overall Consistency % */}
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-teal-500/10 border border-teal-500/20 text-teal-600 dark:text-teal-400">
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-primary/10 border border-primary/20 text-primary">
             <span className="text-xs font-sans font-medium">Overall (90d):</span>
             <span className="text-base font-mono font-bold">{overallConsistency}%</span>
           </div>
@@ -140,9 +140,9 @@ export const HabitHeatmapView: React.FC<HabitHeatmapViewProps> = ({ habits }) =>
 
                     let bgClass = 'bg-bg-subtle/80 border border-border/40';
                     if (scheduledCount > 0) {
-                      if (level === 3) bgClass = 'bg-teal-600 dark:bg-teal-500 text-white shadow-2xs';
-                      else if (level === 2) bgClass = 'bg-teal-400 dark:bg-teal-600/80';
-                      else if (level === 1) bgClass = 'bg-teal-200 dark:bg-teal-900/50';
+                      if (level === 3) bgClass = 'bg-blue-600 dark:bg-blue-500 text-white shadow-2xs';
+                      else if (level === 2) bgClass = 'bg-blue-400 dark:bg-blue-600/80';
+                      else if (level === 1) bgClass = 'bg-blue-200 dark:bg-blue-900/50';
                       else bgClass = 'bg-bg-subtle border border-border';
                     }
 
@@ -171,9 +171,9 @@ export const HabitHeatmapView: React.FC<HabitHeatmapViewProps> = ({ habits }) =>
           <span>Less consistent</span>
           <div className="flex items-center gap-1">
             <span className="w-3 h-3 rounded-xs bg-bg-subtle border border-border" title="0% or unscheduled" />
-            <span className="w-3 h-3 rounded-xs bg-teal-200 dark:bg-teal-900/50" title="1–49%" />
-            <span className="w-3 h-3 rounded-xs bg-teal-400 dark:bg-teal-600/80" title="50–99%" />
-            <span className="w-3 h-3 rounded-xs bg-teal-600 dark:bg-teal-500" title="100%" />
+            <span className="w-3 h-3 rounded-xs bg-blue-200 dark:bg-blue-900/50" title="1–49%" />
+            <span className="w-3 h-3 rounded-xs bg-blue-400 dark:bg-blue-600/80" title="50–99%" />
+            <span className="w-3 h-3 rounded-xs bg-blue-600 dark:bg-blue-500" title="100%" />
           </div>
           <span>More consistent</span>
         </div>

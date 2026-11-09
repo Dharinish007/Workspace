@@ -56,8 +56,8 @@ export const HabitCardView: React.FC<HabitCardViewProps> = ({
               whileHover={{ y: -3, transition: { type: "spring", stiffness: 450, damping: 25 } }}
               className={`bg-bg-card border shadow-card hover:shadow-card-hover rounded-2xl p-6 flex flex-col justify-between transition-all duration-150 group select-none min-h-[300px] ${
                 isHighlighted
-                  ? 'ring-2 ring-teal-500 border-teal-500 bg-teal-500/5 shadow-md'
-                  : 'border-border hover:border-teal-500/60'
+                  ? 'ring-2 ring-primary border-primary bg-primary/5 shadow-md'
+                  : 'border-border hover:border-primary/60'
               }`}
             >
               <div>
@@ -72,7 +72,7 @@ export const HabitCardView: React.FC<HabitCardViewProps> = ({
                       <IconRenderer name={habit.icon} className="w-5 h-5" />
                     </motion.div>
                     <div className="overflow-hidden">
-                      <h3 className="font-bold text-[16px] sm:text-[17px] text-txt-primary group-hover:text-teal-700 dark:group-hover:text-teal-400 transition-colors tracking-tight truncate">
+                      <h3 className="font-bold text-[16px] sm:text-[17px] text-txt-primary group-hover:text-primary transition-colors tracking-tight truncate">
                         {habit.name}
                       </h3>
                       <p className="text-[13px] font-sans text-txt-secondary font-medium">
@@ -207,9 +207,9 @@ export const HabitCardView: React.FC<HabitCardViewProps> = ({
                             !scheduled
                               ? 'h-1 bg-border'
                               : done
-                              ? 'h-full bg-teal-600 shadow-2xs'
+                              ? 'h-full bg-primary shadow-2xs'
                               : 'h-2 bg-red-400/50'
-                          } ${isToday ? 'ring-1 ring-teal-500' : ''}`}
+                          } ${isToday ? 'ring-1 ring-primary' : ''}`}
                         />
                       </div>
                     );
@@ -217,7 +217,7 @@ export const HabitCardView: React.FC<HabitCardViewProps> = ({
                 </div>
                 <div className="flex justify-between items-center text-[10px] font-mono text-txt-muted mt-1 px-1">
                   <span>14d ago</span>
-                  <span className="font-bold text-teal-700 dark:text-teal-400">Today</span>
+                  <span className="font-bold text-primary">Today</span>
                 </div>
               </div>
             </motion.div>

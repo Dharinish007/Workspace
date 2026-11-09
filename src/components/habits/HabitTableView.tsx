@@ -85,11 +85,11 @@ export const HabitTableView: React.FC<HabitTableViewProps> = ({
                 <th
                   key={col.dateStr}
                   className={`py-2 px-1 text-center font-semibold min-w-[40px] ${
-                    col.isToday ? 'bg-teal-500/10 text-teal-700 dark:text-teal-400 font-bold' : ''
+                    col.isToday ? 'bg-primary/10 text-primary font-bold' : ''
                   }`}
                 >
                   <div className="text-[11px] uppercase font-sans font-semibold tracking-wider">{col.dayName}</div>
-                  <div className={`text-xs font-mono font-bold ${col.isToday ? 'text-teal-700 dark:text-teal-400' : 'text-txt-primary'}`}>{col.dayNum}</div>
+                  <div className={`text-xs font-mono font-bold ${col.isToday ? 'text-primary' : 'text-txt-primary'}`}>{col.dayNum}</div>
                 </th>
               ))}
               <th className="py-3.5 px-3 text-center min-w-[80px]">Streak</th>
@@ -114,7 +114,7 @@ export const HabitTableView: React.FC<HabitTableViewProps> = ({
                     key={habit.id}
                     className={`transition-colors ${
                       isHighlighted
-                        ? 'bg-teal-500/15'
+                        ? 'bg-primary/15'
                         : 'hover:bg-bg-hover/40'
                     }`}
                   >
@@ -153,7 +153,7 @@ export const HabitTableView: React.FC<HabitTableViewProps> = ({
                         <td
                           key={col.dateStr}
                           className={`py-2 px-1 text-center ${
-                            col.isToday ? 'bg-teal-500/5' : ''
+                            col.isToday ? 'bg-primary/5' : ''
                           }`}
                         >
                           {isScheduled ? (
@@ -161,11 +161,11 @@ export const HabitTableView: React.FC<HabitTableViewProps> = ({
                               whileTap={{ scale: 0.82 }}
                               transition={{ type: "spring", stiffness: 600, damping: 25 }}
                               onClick={() => toggleHabitLog(habit.id, col.dateStr)}
-                              className={`w-7 h-7 mx-auto rounded-lg flex items-center justify-center transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 ${
+                              className={`w-7 h-7 mx-auto rounded-lg flex items-center justify-center transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
                                 isCompleted
-                                  ? 'bg-teal-600 text-white shadow-2xs'
+                                  ? 'bg-primary text-white shadow-2xs'
                                   : col.isToday
-                                  ? 'border-2 border-teal-500 bg-teal-500/10 text-transparent hover:border-teal-600'
+                                  ? 'border-2 border-primary bg-primary/10 text-transparent hover:border-primary-hover'
                                   : isPast
                                   ? 'border border-border/80 bg-bg-subtle/50 text-txt-muted/40 hover:border-border'
                                   : 'border border-dashed border-border/70 bg-transparent text-transparent hover:border-border'
@@ -301,11 +301,11 @@ export const HabitTableView: React.FC<HabitTableViewProps> = ({
         <div className="flex flex-wrap items-center gap-3">
           <span className="font-bold text-txt-secondary uppercase tracking-wider text-[11px]">Legend:</span>
           <div className="flex items-center gap-1.5">
-            <span className="w-5 h-5 rounded-md bg-teal-600 text-white flex items-center justify-center text-[10px] shadow-2xs font-bold">✓</span>
+            <span className="w-5 h-5 rounded-md bg-primary text-white flex items-center justify-center text-[10px] shadow-2xs font-bold">✓</span>
             <span className="text-txt-primary font-medium">Completed</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="w-5 h-5 rounded-md border-2 border-teal-500 bg-teal-500/10 inline-block" />
+            <span className="w-5 h-5 rounded-md border-2 border-primary bg-primary/10 inline-block" />
             <span className="text-txt-primary font-medium">Pending (Today)</span>
           </div>
           <div className="flex items-center gap-1.5">

@@ -58,7 +58,7 @@ export const HabitModule: React.FC = () => {
           <div className="flex items-center gap-3">
             <motion.div
               whileHover={{ rotate: 15 }}
-              className="w-10 h-10 rounded-xl bg-teal-500/10 text-teal-700 dark:text-teal-400 flex items-center justify-center shadow-2xs"
+              className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shadow-2xs"
             >
               <Flame className="w-6 h-6" />
             </motion.div>
@@ -92,7 +92,7 @@ export const HabitModule: React.FC = () => {
                   {isSelected && (
                     <motion.div
                       layoutId="habitTemplatePill"
-                      className="absolute inset-0 bg-teal-700 dark:bg-teal-600 rounded-lg -z-10 shadow-xs"
+                      className="absolute inset-0 bg-primary rounded-lg -z-10 shadow-xs"
                       transition={{ type: "spring", stiffness: 450, damping: 35 }}
                     />
                   )}
@@ -167,7 +167,7 @@ export const HabitModule: React.FC = () => {
               setHabitToEdit(null);
               setIsModalOpen(true);
             }}
-            className="h-10 px-4 text-xs font-sans font-bold text-white bg-teal-700 hover:bg-teal-800 dark:bg-teal-600 dark:hover:bg-teal-700 rounded-xl flex items-center gap-2 shadow-xs transition-colors cursor-pointer"
+            className="h-10 px-4 text-xs font-sans font-bold text-white bg-primary hover:bg-primary-hover rounded-xl flex items-center gap-2 shadow-xs transition-colors cursor-pointer"
           >
             <Plus className="w-4 h-4" />
             <span>Add Habit</span>

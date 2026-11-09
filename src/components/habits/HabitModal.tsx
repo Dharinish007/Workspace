@@ -12,9 +12,10 @@ interface HabitModalProps {
 }
 
 const HABIT_COLORS = [
+  '#1A73E8', // Blue (Primary)
+  '#4285F4', // Sky Blue
   '#0D9488', // Teal
   '#34A853', // Green
-  '#4285F4', // Blue
   '#A142F4', // Purple
   '#EC4899', // Pink
   '#F97316', // Orange
@@ -41,7 +42,7 @@ export const HabitModal: React.FC<HabitModalProps> = ({
 
   const [name, setName] = useState('');
   const [icon, setIcon] = useState('Flame');
-  const [color, setColor] = useState('#0D9488');
+  const [color, setColor] = useState('#1A73E8');
   const [scheduleType, setScheduleType] = useState<'daily' | 'weekdays'>('daily');
   const [selectedDays, setSelectedDays] = useState<number[]>([1, 2, 3, 4, 5]);
   const [error, setError] = useState<string | null>(null);
@@ -50,7 +51,7 @@ export const HabitModal: React.FC<HabitModalProps> = ({
     if (habitToEdit) {
       setName(habitToEdit.name);
       setIcon(habitToEdit.icon);
-      setColor(habitToEdit.color || '#0D9488');
+      setColor(habitToEdit.color || '#1A73E8');
       if (habitToEdit.schedule.type === 'weekdays') {
         setScheduleType('weekdays');
         setSelectedDays(habitToEdit.schedule.days);
@@ -61,7 +62,7 @@ export const HabitModal: React.FC<HabitModalProps> = ({
     } else {
       setName('');
       setIcon('Flame');
-      setColor('#0D9488');
+      setColor('#1A73E8');
       setScheduleType('daily');
       setSelectedDays([1, 2, 3, 4, 5]);
     }
@@ -164,7 +165,7 @@ export const HabitModal: React.FC<HabitModalProps> = ({
                   value={name}
                   onChange={e => setName(e.target.value)}
                   placeholder="e.g. Exercise, Read 20 pages, Meditate, DSA..."
-                  className="w-full px-3.5 py-2 text-sm bg-bg-subtle border border-border rounded-xl text-txt-primary outline-hidden focus:border-teal-500"
+                  className="w-full px-3.5 py-2 text-sm bg-bg-subtle border border-border rounded-xl text-txt-primary outline-hidden focus:border-primary"
                 />
               </div>
 
@@ -179,7 +180,7 @@ export const HabitModal: React.FC<HabitModalProps> = ({
                     onClick={() => setScheduleType('daily')}
                     className={`py-2 px-3 text-xs font-semibold rounded-xl border transition-colors cursor-pointer ${
                       scheduleType === 'daily'
-                        ? 'border-teal-500 bg-teal-500/10 text-teal-600 dark:text-teal-400 font-bold'
+                        ? 'border-primary bg-primary/10 text-primary font-bold'
                         : 'border-border bg-bg-subtle text-txt-secondary hover:bg-bg-hover'
                     }`}
                   >
@@ -190,7 +191,7 @@ export const HabitModal: React.FC<HabitModalProps> = ({
                     onClick={() => setScheduleType('weekdays')}
                     className={`py-2 px-3 text-xs font-semibold rounded-xl border transition-colors cursor-pointer ${
                       scheduleType === 'weekdays'
-                        ? 'border-teal-500 bg-teal-500/10 text-teal-600 dark:text-teal-400 font-bold'
+                        ? 'border-primary bg-primary/10 text-primary font-bold'
                         : 'border-border bg-bg-subtle text-txt-secondary hover:bg-bg-hover'
                     }`}
                   >
@@ -211,7 +212,7 @@ export const HabitModal: React.FC<HabitModalProps> = ({
                           onClick={() => toggleDay(w.day)}
                           className={`w-9 h-8 text-xs font-semibold rounded-lg transition-colors cursor-pointer ${
                             isSelected
-                              ? 'bg-teal-500 text-white shadow-xs'
+                              ? 'bg-primary text-white shadow-xs'
                               : 'bg-bg-card text-txt-muted hover:text-txt-primary'
                           }`}
                         >
@@ -260,7 +261,7 @@ export const HabitModal: React.FC<HabitModalProps> = ({
                       onClick={() => setIcon(iconName)}
                       className={`p-2 rounded-lg flex items-center justify-center transition-colors cursor-pointer ${
                         icon === iconName
-                          ? 'bg-teal-500 text-white shadow-xs'
+                          ? 'bg-primary text-white shadow-xs'
                           : 'text-txt-secondary hover:bg-bg-hover hover:text-txt-primary'
                       }`}
                       title={iconName}
@@ -286,7 +287,7 @@ export const HabitModal: React.FC<HabitModalProps> = ({
                   whileTap={{ scale: 0.96 }}
                   transition={{ type: "spring", stiffness: 500, damping: 25 }}
                   type="submit"
-                  className="px-5 py-2 text-xs font-semibold text-white bg-teal-600 hover:bg-teal-700 rounded-xl shadow-xs transition-colors cursor-pointer"
+                  className="px-5 py-2 text-xs font-semibold text-white bg-primary hover:bg-primary-hover rounded-xl shadow-xs transition-colors cursor-pointer"
                 >
                   {habitToEdit ? 'Save Changes' : 'Create Habit'}
                 </motion.button>

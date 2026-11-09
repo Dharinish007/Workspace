@@ -139,7 +139,7 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     displayName: 'Dharinish',
     weekStart: 'monday',
     lastBackup: null,
-    habitDefaultColor: '#0D9488',
+    habitDefaultColor: '#1A73E8',
     eventDefaultColor: '#F97316',
     backgroundStyle: 'current',
   });

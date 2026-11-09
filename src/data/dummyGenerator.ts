@@ -610,7 +610,7 @@ export function generateDummyData(refDate: Date = new Date()): BackupData {
         displayName: 'Dharinish',
         weekStart: 'monday',
         lastBackup: now,
-        habitDefaultColor: '#0D9488',
+        habitDefaultColor: '#1A73E8',
         eventDefaultColor: '#F97316',
         backgroundStyle: 'current',
       },
