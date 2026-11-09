@@ -15,6 +15,7 @@ export const MobileNav: React.FC = () => {
     { id: 'calendar' as NavigationSection, label: 'Calendar', icon: Calendar, path: '/calendar' },
     { id: 'habits' as NavigationSection, label: 'Habits', icon: Flame, path: '/habits' },
     { id: 'notes' as NavigationSection, label: 'Notes', icon: FileText, path: '/notes' },
+    { id: 'timer' as NavigationSection, label: 'Timer', icon: Timer, path: '/timer' },
   ];
 
   return (

@@ -14,6 +14,7 @@ import { HabitModule } from './components/habits/HabitModule';
 import { JournalModule } from './components/journal/JournalModule';
 import { NotesModule } from './components/notes/NotesModule';
 import { SettingsView } from './components/settings/SettingsView';
+import { TimerModule } from './features/timer/pages/TimerModule';
 import { NotFoundPage } from './components/common/NotFoundPage';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -83,6 +84,8 @@ const WorkspaceContent: React.FC = () => {
                 <Route path="/journal/:date" element={<JournalModule />} />
                 <Route path="/notes" element={<NotesModule />} />
                 <Route path="/notes/:noteId" element={<NotesModule />} />
+                <Route path="/timer" element={<TimerModule />} />
+                <Route path="/activity" element={<TimerModule />} />
                 <Route path="/settings" element={<SettingsView />} />
                 <Route path="/todo" element={<Navigate to="/tasks" replace />} />
                 <Route path="*" element={<NotFoundPage />} />

@@ -13,7 +13,8 @@ import {
   RotateCcw,
   Palette,
   Sun,
-  Moon
+  Moon,
+  Timer
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { loadDemoData, resetToDefaultWorkspace } from '../../data';
@@ -39,6 +40,14 @@ export const SettingsContent: React.FC = () => {
   const [isLoadingDemo, setIsLoadingDemo] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const [timerForm, setTimerForm] = useState({
+    workMinutes: settings.timerConfig?.workMinutes ?? 25,
+    shortBreakMinutes: settings.timerConfig?.shortBreakMinutes ?? 5,
+    longBreakMinutes: settings.timerConfig?.longBreakMinutes ?? 15,
+    longBreakInterval: settings.timerConfig?.longBreakInterval ?? 4,
+    dailyGoalMinutes: settings.timerConfig?.dailyGoalMinutes ?? null,
+  });
 
   // Calculate days since last backup
   let daysSinceBackup: number | null = null;
@@ -600,6 +609,120 @@ export const SettingsContent: React.FC = () => {
               <option value="sunday">Sunday</option>
             </select>
           </div>
+        </div>
+      </div>
+
+      <hr className="border-border" />
+
+      {/* Section: Focus & Timer Configuration */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-serif font-bold tracking-tight text-txt-primary flex items-center gap-1.5">
+            <Timer className="w-4 h-4 text-[#2F5D50]" />
+            <span>Focus & Timer Settings</span>
+          </h3>
+          <span className="text-xs text-txt-muted">Default Pomodoro & Daily Goal</span>
+        </div>
+
+        <p className="text-xs text-txt-secondary leading-relaxed">
+          Customize your default Pomodoro session intervals, break cycles, and daily focus target.
+        </p>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Work Duration */}
+          <div>
+            <label className="block text-xs font-semibold text-txt-secondary mb-1">
+              Work Duration (min)
+            </label>
+            <input
+              type="number"
+              min="1"
+              max="120"
+              value={timerForm.workMinutes}
+              onChange={e => setTimerForm(prev => ({ ...prev, workMinutes: Math.max(1, parseInt(e.target.value, 10) || 25) }))}
+              className="w-full px-3 py-1.5 text-sm bg-bg-subtle border border-border rounded-lg text-txt-primary outline-hidden focus:border-[#2F5D50]"
+            />
+          </div>
+
+          {/* Short Break */}
+          <div>
+            <label className="block text-xs font-semibold text-txt-secondary mb-1">
+              Short Break (min)
+            </label>
+            <input
+              type="number"
+              min="1"
+              max="60"
+              value={timerForm.shortBreakMinutes}
+              onChange={e => setTimerForm(prev => ({ ...prev, shortBreakMinutes: Math.max(1, parseInt(e.target.value, 10) || 5) }))}
+              className="w-full px-3 py-1.5 text-sm bg-bg-subtle border border-border rounded-lg text-txt-primary outline-hidden focus:border-[#2F5D50]"
+            />
+          </div>
+
+          {/* Long Break */}
+          <div>
+            <label className="block text-xs font-semibold text-txt-secondary mb-1">
+              Long Break (min)
+            </label>
+            <input
+              type="number"
+              min="1"
+              max="90"
+              value={timerForm.longBreakMinutes}
+              onChange={e => setTimerForm(prev => ({ ...prev, longBreakMinutes: Math.max(1, parseInt(e.target.value, 10) || 15) }))}
+              className="w-full px-3 py-1.5 text-sm bg-bg-subtle border border-border rounded-lg text-txt-primary outline-hidden focus:border-[#2F5D50]"
+            />
+          </div>
+
+          {/* Long Break Interval */}
+          <div>
+            <label className="block text-xs font-semibold text-txt-secondary mb-1">
+              Long Break Interval
+            </label>
+            <input
+              type="number"
+              min="1"
+              max="12"
+              value={timerForm.longBreakInterval}
+              onChange={e => setTimerForm(prev => ({ ...prev, longBreakInterval: Math.max(1, parseInt(e.target.value, 10) || 4) }))}
+              className="w-full px-3 py-1.5 text-sm bg-bg-subtle border border-border rounded-lg text-txt-primary outline-hidden focus:border-[#2F5D50]"
+            />
+          </div>
+        </div>
+
+        {/* Daily Goal & Save Button */}
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pt-2">
+          <div className="max-w-xs w-full">
+            <label className="block text-xs font-semibold text-txt-secondary mb-1">
+              Daily Focus Goal (minutes, optional)
+            </label>
+            <input
+              type="number"
+              min="0"
+              max="1440"
+              placeholder="e.g. 120 (for 2 hours)"
+              value={timerForm.dailyGoalMinutes ?? ''}
+              onChange={e => {
+                const val = e.target.value.trim();
+                setTimerForm(prev => ({
+                  ...prev,
+                  dailyGoalMinutes: val === '' ? null : Math.max(0, parseInt(val, 10) || 0),
+                }));
+              }}
+              className="w-full px-3 py-1.5 text-sm bg-bg-subtle border border-border rounded-lg text-txt-primary outline-hidden focus:border-[#2F5D50]"
+            />
+          </div>
+
+          <motion.button
+            whileTap={{ scale: 0.95 }}
+            onClick={() => {
+              updateSetting('timerConfig', timerForm);
+              showToast('Timer settings saved!', undefined, undefined, 'success');
+            }}
+            className="h-9 px-5 bg-[#2F5D50] hover:bg-[#254C41] text-white text-xs font-bold rounded-lg transition-colors cursor-pointer shadow-2xs self-start sm:self-end"
+          >
+            Save Timer Settings
+          </motion.button>
         </div>
       </div>
 

@@ -91,6 +91,14 @@ export interface Note {
 
 export type BackgroundStyle = 'current' | 'paper' | 'notion';
 
+export interface TimerSettingsConfig {
+  workMinutes: number;
+  shortBreakMinutes: number;
+  longBreakMinutes: number;
+  longBreakInterval: number;
+  dailyGoalMinutes: number | null;
+}
+
 export interface UserSettings {
   theme: 'light' | 'dark';
   displayName: string;
@@ -99,10 +107,11 @@ export interface UserSettings {
   habitDefaultColor?: string;
   eventDefaultColor?: string;
   backgroundStyle?: BackgroundStyle;
+  timerConfig?: TimerSettingsConfig;
 }
 
 export interface SnapshotRecord {
-  storeName: 'pages' | 'tasks' | 'habits' | 'habitLogs' | 'events' | 'dayColors' | 'settings' | 'journalEntries' | 'notes';
+  storeName: 'pages' | 'tasks' | 'habits' | 'habitLogs' | 'events' | 'dayColors' | 'settings' | 'journalEntries' | 'notes' | 'timerSessions' | 'timerActiveState' | 'activityLogs';
   key: string | number;
   type: 'insert' | 'update' | 'delete';
   before: any;
@@ -130,10 +139,12 @@ export interface BackupData {
     settings: Record<string, any>;
     journalEntries?: JournalEntry[];
     notes?: Note[];
+    timerSessions?: any[];
+    activityLogs?: any[];
   };
 }
 
-export type NavigationSection = 'dashboard' | 'todo' | 'calendar' | 'habits' | 'pages' | 'journal' | 'notes';
+export type NavigationSection = 'dashboard' | 'todo' | 'calendar' | 'habits' | 'pages' | 'journal' | 'notes' | 'timer';
 
 export type TaskFilter = 'all' | 'open' | 'important' | 'completed' | 'today';
 export type CalendarView = 'month' | 'week' | 'day';

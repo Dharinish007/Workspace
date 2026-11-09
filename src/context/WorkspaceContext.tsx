@@ -151,6 +151,7 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     if (p.startsWith('/habits')) return 'habits';
     if (p.startsWith('/journal')) return 'journal';
     if (p.startsWith('/notes')) return 'notes';
+    if (p.startsWith('/timer') || p.startsWith('/activity')) return 'timer';
     if (p.startsWith('/pages')) return 'pages';
     if (p.startsWith('/tasks') || p.startsWith('/todo')) return 'todo';
     return 'dashboard';
@@ -175,6 +176,9 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         break;
       case 'notes':
         navigate('/notes');
+        break;
+      case 'timer':
+        navigate('/timer');
         break;
       case 'pages':
         navigate('/pages');

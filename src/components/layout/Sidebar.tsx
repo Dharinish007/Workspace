@@ -8,6 +8,7 @@ import {
   Flame, 
   BookOpen,
   FileText,
+  Timer,
   PanelLeftClose, 
   PanelLeftOpen, 
   X
@@ -28,6 +29,7 @@ const NAV_ITEMS: NavItem[] = [
   { id: 'habits', label: 'Habits', path: '/habits', icon: Flame },
   { id: 'journal', label: 'Journal', path: '/journal', icon: BookOpen },
   { id: 'notes', label: 'Notes', path: '/notes', icon: FileText },
+  { id: 'timer', label: 'Timer', path: '/timer', icon: Timer },
 ];
 
 export const Sidebar: React.FC = () => {

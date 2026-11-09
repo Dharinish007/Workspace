@@ -17,6 +17,7 @@ import {
   JournalEntry,
   Note 
 } from '../types';
+import { TimerRepository } from '../features/timer/repository/timerRepository';
 
 export class Repository {
   private static async getStore(storeName: string, mode: IDBTransactionMode = 'readonly'): Promise<{ db: IDBDatabase, tx: IDBTransaction, store: IDBObjectStore }> {
@@ -1225,7 +1226,7 @@ export class Repository {
   // --- BACKUP EXPORT / IMPORT ---
   static async exportBackup(): Promise<BackupData> {
     const db = await openDB();
-    const [pages, tasks, habits, habitLogs, events, dayColors, settings, journalEntries, notes] = await Promise.all([
+    const [pages, tasks, habits, habitLogs, events, dayColors, settings, journalEntries, notes, timerSessions, activityLogs] = await Promise.all([
       this.getAllPages(),
       this.getAllTasks(),
       this.getAllHabits(),
@@ -1235,6 +1236,8 @@ export class Repository {
       this.getAllSettings(),
       this.getAllJournalEntries(),
       this.getAllNotes(),
+      TimerRepository.getAllSessions(),
+      TimerRepository.getAllActivityLogs(),
     ]);
 
     const backup: BackupData = {
@@ -1251,6 +1254,8 @@ export class Repository {
         settings: settings as any,
         journalEntries,
         notes,
+        timerSessions,
+        activityLogs,
       },
     };
 
@@ -1300,7 +1305,7 @@ export class Repository {
 
     return new Promise((resolve, reject) => {
       const tx = db.transaction(
-        ['pages', 'tasks', 'habits', 'habitLogs', 'events', 'dayColors', 'settings', 'snapshots', 'journalEntries', 'notes'],
+        ['pages', 'tasks', 'habits', 'habitLogs', 'events', 'dayColors', 'settings', 'snapshots', 'journalEntries', 'notes', 'timerSessions', 'activityLogs'],
         'readwrite'
       );
 
@@ -1313,6 +1318,8 @@ export class Repository {
       const settingStore = tx.objectStore('settings');
       const journalStore = tx.objectStore('journalEntries');
       const noteStore = tx.objectStore('notes');
+      const timerSessionStore = tx.objectStore('timerSessions');
+      const activityLogStore = tx.objectStore('activityLogs');
 
       if (mode === 'replace') {
         pageStore.clear();
@@ -1323,6 +1330,8 @@ export class Repository {
         dayColorStore.clear();
         journalStore.clear();
         noteStore.clear();
+        timerSessionStore.clear();
+        activityLogStore.clear();
       }
 
       // Write imported data
@@ -1338,6 +1347,12 @@ export class Repository {
 
       const notes = (backup.data && backup.data.notes) || [];
       notes.forEach((n: Note) => noteStore.put(n));
+
+      const timerSessions = (backup.data && backup.data.timerSessions) || [];
+      timerSessions.forEach((s: any) => timerSessionStore.put(s));
+
+      const activityLogs = (backup.data && backup.data.activityLogs) || [];
+      activityLogs.forEach((a: any) => activityLogStore.put(a));
 
       if (settings && typeof settings === 'object') {
         Object.entries(settings).forEach(([k, v]) => {
