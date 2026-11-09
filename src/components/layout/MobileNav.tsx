@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useWorkspace } from '../../context/WorkspaceContext';
 import { NavigationSection } from '../../types';
-import { LayoutDashboard, CheckSquare, Calendar, Flame } from 'lucide-react';
+import { LayoutDashboard, CheckSquare, Calendar, Flame, BookOpen, FileText, Timer } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export const MobileNav: React.FC = () => {
@@ -11,9 +11,10 @@ export const MobileNav: React.FC = () => {
 
   const items = [
     { id: 'dashboard' as NavigationSection, label: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
-    { id: 'todo' as NavigationSection, label: 'To-Do', icon: CheckSquare, path: '/tasks' },
+    { id: 'todo' as NavigationSection, label: 'Tasks', icon: CheckSquare, path: '/tasks' },
     { id: 'calendar' as NavigationSection, label: 'Calendar', icon: Calendar, path: '/calendar' },
     { id: 'habits' as NavigationSection, label: 'Habits', icon: Flame, path: '/habits' },
+    { id: 'notes' as NavigationSection, label: 'Notes', icon: FileText, path: '/notes' },
   ];
 
   return (

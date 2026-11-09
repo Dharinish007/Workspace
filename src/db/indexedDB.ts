@@ -1,7 +1,7 @@
-import { Page, Task, Habit, HabitLog, CalendarEvent, DayColor, UserSettings, Snapshot, BackupData } from '../types';
+import { Page, Task, Habit, HabitLog, CalendarEvent, DayColor, UserSettings, Snapshot, BackupData, JournalEntry } from '../types';
 
-const DB_NAME = 'MyWorkspaceDB';
-const DB_VERSION = 1;
+export const DB_NAME = 'MyWorkspaceDB';
+export const DB_VERSION = 3;
 
 export class DatabaseError extends Error {
   public cause?: any;
@@ -16,20 +16,39 @@ export function openDB(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
     const request = indexedDB.open(DB_NAME, DB_VERSION);
 
+    request.onblocked = () => {
+      console.warn('IndexedDB database upgrade blocked by an existing open connection. Please close other tabs.');
+    };
+
     request.onupgradeneeded = (event) => {
       const db = request.result;
+      const tx = request.transaction;
 
       // 1. pages
+      let pagesStore: IDBObjectStore;
       if (!db.objectStoreNames.contains('pages')) {
-        const pagesStore = db.createObjectStore('pages', { keyPath: 'id' });
+        pagesStore = db.createObjectStore('pages', { keyPath: 'id' });
+      } else {
+        pagesStore = tx!.objectStore('pages');
+      }
+      if (!pagesStore.indexNames.contains('order')) {
         pagesStore.createIndex('order', 'order', { unique: false });
       }
 
       // 2. tasks
+      let tasksStore: IDBObjectStore;
       if (!db.objectStoreNames.contains('tasks')) {
-        const tasksStore = db.createObjectStore('tasks', { keyPath: 'id' });
+        tasksStore = db.createObjectStore('tasks', { keyPath: 'id' });
+      } else {
+        tasksStore = tx!.objectStore('tasks');
+      }
+      if (!tasksStore.indexNames.contains('pageId')) {
         tasksStore.createIndex('pageId', 'pageId', { unique: false });
+      }
+      if (!tasksStore.indexNames.contains('dueDate')) {
         tasksStore.createIndex('dueDate', 'dueDate', { unique: false });
+      }
+      if (!tasksStore.indexNames.contains('pageId_order')) {
         tasksStore.createIndex('pageId_order', ['pageId', 'order'], { unique: false });
       }
 
@@ -39,15 +58,27 @@ export function openDB(): Promise<IDBDatabase> {
       }
 
       // 4. habitLogs
+      let habitLogsStore: IDBObjectStore;
       if (!db.objectStoreNames.contains('habitLogs')) {
-        const habitLogsStore = db.createObjectStore('habitLogs', { keyPath: 'id' });
+        habitLogsStore = db.createObjectStore('habitLogs', { keyPath: 'id' });
+      } else {
+        habitLogsStore = tx!.objectStore('habitLogs');
+      }
+      if (!habitLogsStore.indexNames.contains('date')) {
         habitLogsStore.createIndex('date', 'date', { unique: false });
+      }
+      if (!habitLogsStore.indexNames.contains('habitId_date')) {
         habitLogsStore.createIndex('habitId_date', ['habitId', 'date'], { unique: true });
       }
 
       // 5. events
+      let eventsStore: IDBObjectStore;
       if (!db.objectStoreNames.contains('events')) {
-        const eventsStore = db.createObjectStore('events', { keyPath: 'id' });
+        eventsStore = db.createObjectStore('events', { keyPath: 'id' });
+      } else {
+        eventsStore = tx!.objectStore('events');
+      }
+      if (!eventsStore.indexNames.contains('date')) {
         eventsStore.createIndex('date', 'date', { unique: false });
       }
 
@@ -62,13 +93,45 @@ export function openDB(): Promise<IDBDatabase> {
       }
 
       // 8. snapshots
+      let snapshotsStore: IDBObjectStore;
       if (!db.objectStoreNames.contains('snapshots')) {
-        const snapshotsStore = db.createObjectStore('snapshots', { keyPath: 'id', autoIncrement: true });
+        snapshotsStore = db.createObjectStore('snapshots', { keyPath: 'id', autoIncrement: true });
+      } else {
+        snapshotsStore = tx!.objectStore('snapshots');
+      }
+      if (!snapshotsStore.indexNames.contains('timestamp')) {
         snapshotsStore.createIndex('timestamp', 'timestamp', { unique: false });
       }
+
+      // 9. journalEntries (keyed by calendar date YYYY-MM-DD for storage-layer uniqueness)
+      if (!db.objectStoreNames.contains('journalEntries')) {
+        db.createObjectStore('journalEntries', { keyPath: 'date' });
+      }
+
+      // 10. notes (keyed by UUID id)
+      let notesStore: IDBObjectStore;
+      if (!db.objectStoreNames.contains('notes')) {
+        notesStore = db.createObjectStore('notes', { keyPath: 'id' });
+      } else {
+        notesStore = tx!.objectStore('notes');
+      }
+      if (!notesStore.indexNames.contains('updatedAt')) {
+        notesStore.createIndex('updatedAt', 'updatedAt', { unique: false });
+      }
+      if (!notesStore.indexNames.contains('pinned')) {
+        notesStore.createIndex('pinned', 'pinned', { unique: false });
+      }
+
     };
 
-    request.onsuccess = () => resolve(request.result);
+    request.onsuccess = () => {
+      const db = request.result;
+      db.onversionchange = () => {
+        db.close();
+      };
+      resolve(db);
+    };
+
     request.onerror = () => reject(new DatabaseError('Failed to open IndexedDB', request.error));
   });
 }
@@ -217,7 +280,7 @@ export async function recordSnapshot(
 export async function undoLastSnapshot(db: IDBDatabase): Promise<{ action: string } | null> {
   return new Promise((resolve, reject) => {
     const tx = db.transaction(
-      ['snapshots', 'pages', 'tasks', 'habits', 'habitLogs', 'events', 'dayColors', 'settings'],
+      ['snapshots', 'pages', 'tasks', 'habits', 'habitLogs', 'events', 'dayColors', 'settings', 'journalEntries', 'notes'],
       'readwrite'
     );
     const snapStore = tx.objectStore('snapshots');

@@ -4,7 +4,9 @@ import {
   openDB, 
   seedInitialDataIfNeeded, 
   undoLastSnapshot,
-  formatLocalDate
+  formatLocalDate,
+  generateUUID,
+  nowISO
 } from '../db/indexedDB';
 import { Repository } from '../db/repository';
 import { 
@@ -15,7 +17,9 @@ import {
   CalendarEvent, 
   DayColor, 
   UserSettings, 
-  NavigationSection 
+  NavigationSection,
+  JournalEntry,
+  Note 
 } from '../types';
 
 export interface ToastInfo {
@@ -35,6 +39,8 @@ interface WorkspaceContextType {
   habitLogs: HabitLog[];
   events: CalendarEvent[];
   dayColors: DayColor[];
+  journalEntries: JournalEntry[];
+  notes: Note[];
   settings: UserSettings;
   activeSection: NavigationSection;
   selectedPageId: string | null;
@@ -96,6 +102,18 @@ interface WorkspaceContextType {
   setDayColor: (date: string, color: string) => Promise<void>;
   removeDayColor: (date: string) => Promise<void>;
 
+  // Journal
+  createOrGetJournalEntry: (date: string) => Promise<JournalEntry>;
+  saveJournalEntry: (entry: JournalEntry) => Promise<JournalEntry>;
+  deleteJournalEntry: (date: string) => Promise<void>;
+
+  // Notes
+  createNote: (data?: { title?: string; content?: string; tags?: string[]; pinned?: boolean; icon?: string }) => Promise<Note>;
+  updateNote: (id: string, data: Partial<Note>) => Promise<Note>;
+  deleteNote: (id: string) => Promise<void>;
+  reorderPinnedNotes: (orderedIds: string[]) => Promise<void>;
+  refreshNotes: () => Promise<void>;
+
   // Settings
   updateSetting: (key: string, value: any) => Promise<void>;
   toggleTheme: () => Promise<void>;
@@ -114,6 +132,8 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const [habitLogs, setHabitLogs] = useState<HabitLog[]>([]);
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [dayColors, setDayColors] = useState<DayColor[]>([]);
+  const [journalEntries, setJournalEntries] = useState<JournalEntry[]>([]);
+  const [notes, setNotes] = useState<Note[]>([]);
   const [settings, setSettings] = useState<UserSettings>({
     theme: 'light',
     displayName: 'Dharinish',
@@ -129,6 +149,8 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     const p = location.pathname;
     if (p.startsWith('/calendar')) return 'calendar';
     if (p.startsWith('/habits')) return 'habits';
+    if (p.startsWith('/journal')) return 'journal';
+    if (p.startsWith('/notes')) return 'notes';
     if (p.startsWith('/pages')) return 'pages';
     if (p.startsWith('/tasks') || p.startsWith('/todo')) return 'todo';
     return 'dashboard';
@@ -147,6 +169,12 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         break;
       case 'habits':
         navigate('/habits');
+        break;
+      case 'journal':
+        navigate('/journal');
+        break;
+      case 'notes':
+        navigate('/notes');
         break;
       case 'pages':
         navigate('/pages');
@@ -243,7 +271,7 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       const db = await openDB();
       await seedInitialDataIfNeeded(db);
 
-      const [p, t, h, hl, e, dc, s] = await Promise.all([
+      const [p, t, h, hl, e, dc, s, j] = await Promise.all([
         Repository.getAllPages(),
         Repository.getAllTasks(),
         Repository.getAllHabits(),
@@ -251,7 +279,13 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         Repository.getAllEvents(),
         Repository.getAllDayColors(),
         Repository.getAllSettings(),
+        Repository.getAllJournalEntries(),
       ]);
+
+      let n = await Repository.getAllNotes();
+      if (n.length === 0) {
+        n = await Repository.seedSampleNotesIfEmpty();
+      }
 
       setPages(p);
       setTasks(t);
@@ -259,6 +293,8 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       setHabitLogs(hl);
       setEvents(e);
       setDayColors(dc);
+      setJournalEntries(j);
+      setNotes(n);
       setSettings(s);
       setIsInitialized(true);
 
@@ -724,6 +760,89 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }
   }, [refreshAll, showToast]);
 
+  const createOrGetJournalEntry = useCallback(async (date: string): Promise<JournalEntry> => {
+    const existing = await Repository.getJournalEntryByDate(date);
+    if (existing) {
+      return existing;
+    }
+    const newEntry: JournalEntry = {
+      id: generateUUID(),
+      date,
+      title: null,
+      body: '',
+      mood: null,
+      tags: [],
+      createdAt: nowISO(),
+      updatedAt: nowISO()
+    };
+    const saved = await Repository.saveJournalEntry(newEntry);
+    setJournalEntries(prev => [saved, ...prev.filter(item => item.date !== date)].sort((a, b) => b.date.localeCompare(a.date)));
+    return saved;
+  }, []);
+
+  const saveJournalEntry = useCallback(async (entry: JournalEntry): Promise<JournalEntry> => {
+    const saved = await Repository.saveJournalEntry(entry);
+    setJournalEntries(prev => [saved, ...prev.filter(item => item.date !== saved.date)].sort((a, b) => b.date.localeCompare(a.date)));
+    return saved;
+  }, []);
+
+  const deleteJournalEntry = useCallback(async (date: string): Promise<void> => {
+    await Repository.deleteJournalEntry(date);
+    setJournalEntries(prev => prev.filter(item => item.date !== date));
+  }, []);
+
+  const refreshNotes = useCallback(async () => {
+    const allNotes = await Repository.getAllNotes();
+    setNotes(allNotes);
+  }, []);
+
+  const createNote = useCallback(async (data?: { title?: string; content?: string; tags?: string[]; pinned?: boolean; icon?: string }): Promise<Note> => {
+    const newNote = await Repository.createNote(data || {});
+    setNotes(prev => [newNote, ...prev]);
+    return newNote;
+  }, []);
+
+  const updateNote = useCallback(async (id: string, data: Partial<Note>): Promise<Note> => {
+    const updated = await Repository.updateNote(id, data);
+    setNotes(prev => {
+      const updatedList = prev.map(n => (n.id === id ? updated : n));
+      return updatedList.sort((a, b) => {
+        if (a.pinned && b.pinned) {
+          return (a.pinnedOrder ?? 0) - (b.pinnedOrder ?? 0);
+        }
+        if (a.pinned) return -1;
+        if (b.pinned) return 1;
+        return b.updatedAt.localeCompare(a.updatedAt);
+      });
+    });
+    return updated;
+  }, []);
+
+  const deleteNote = useCallback(async (id: string): Promise<void> => {
+    const target = notes.find(n => n.id === id);
+    await Repository.deleteNote(id);
+    setNotes(prev => prev.filter(n => n.id !== id));
+    if (target) {
+      showToast(`Note "${target.title}" deleted`, 'Undo', undo, 'info');
+    }
+  }, [notes, undo, showToast]);
+
+  const reorderPinnedNotes = useCallback(async (orderedIds: string[]): Promise<void> => {
+    setNotes(prev => {
+      const pinnedNotesMap = new Map(prev.filter(n => n.pinned).map(n => [n.id, n]));
+      const nonPinnedNotes = prev.filter(n => !n.pinned);
+      const reorderedPinned: Note[] = [];
+      orderedIds.forEach((id, idx) => {
+        const item = pinnedNotesMap.get(id);
+        if (item) {
+          reorderedPinned.push({ ...item, pinnedOrder: idx });
+        }
+      });
+      return [...reorderedPinned, ...nonPinnedNotes];
+    });
+    await Repository.reorderPinnedNotes(orderedIds);
+  }, []);
+
   const value = {
     isInitialized,
     pages,
@@ -732,6 +851,8 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     habitLogs,
     events,
     dayColors,
+    journalEntries,
+    notes,
     settings,
     activeSection,
     selectedPageId,
@@ -778,6 +899,14 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     deleteEvent,
     setDayColor,
     removeDayColor,
+    createOrGetJournalEntry,
+    saveJournalEntry,
+    deleteJournalEntry,
+    createNote,
+    updateNote,
+    deleteNote,
+    reorderPinnedNotes,
+    refreshNotes,
     updateSetting,
     toggleTheme,
   };

@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useWorkspace } from '../../context/WorkspaceContext';
-import { Search, Calendar, Sun, Moon, Menu } from 'lucide-react';
+import { Search, Calendar, Sun, Moon, Menu, Settings } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export const Header: React.FC = () => {
@@ -31,7 +31,10 @@ export const Header: React.FC = () => {
   const pageTitle = useMemo(() => {
     const p = location.pathname;
     if (p === '/dashboard' || p === '/') return 'Dashboard';
-    if (p === '/tasks' || p === '/todo') return 'Tasks';
+    if (p === '/tasks' || p === '/todo') return 'To-Do';
+    if (p.startsWith('/journal')) return 'Journal';
+    if (p.startsWith('/notes')) return 'Notes';
+    if (p.startsWith('/timer') || p.startsWith('/activity')) return 'Timer';
     if (p === '/pages') return 'Pages';
     if (p.startsWith('/pages/')) {
       const pageIdFromUrl = p.replace('/pages/', '');
@@ -76,7 +79,7 @@ export const Header: React.FC = () => {
         >
           <Search className="w-4 h-4 text-txt-muted group-hover:text-primary transition-colors shrink-0" />
           <span className="hidden sm:inline text-xs text-txt-muted group-hover:text-txt-secondary font-medium">
-            Search...
+            {location.pathname.startsWith('/notes') ? 'Search notes...' : 'Search...'}
           </span>
           <kbd className="hidden sm:inline-flex items-center text-[10px] font-mono bg-bg-subtle border border-border px-1.5 py-0.5 rounded text-txt-muted">
             Ctrl K
@@ -112,6 +115,18 @@ export const Header: React.FC = () => {
           ) : (
             <Moon className="w-4 h-4 text-txt-secondary hover:text-primary transition-colors" />
           )}
+        </motion.button>
+
+        {/* Settings Button */}
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => navigate('/settings')}
+          className="w-9 h-9 rounded-xl border border-border bg-bg-card hover:bg-bg-hover hover:border-primary/50 text-txt-secondary hover:text-txt-primary flex items-center justify-center transition-all cursor-pointer shadow-2xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          title="Settings"
+          aria-label="Settings"
+        >
+          <Settings className="w-4 h-4 text-txt-secondary hover:text-primary transition-colors" />
         </motion.button>
       </div>
     </header>

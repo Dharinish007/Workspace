@@ -14,7 +14,7 @@ export const TodoModule: React.FC = () => {
       {pageId ? (
         <PageView
           pageId={pageId}
-          onBackToOverview={() => navigate('/pages')}
+          onBackToOverview={() => navigate('/tasks')}
           onOpenArchived={() => setIsArchivedModalOpen(true)}
         />
       ) : (

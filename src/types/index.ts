@@ -64,6 +64,31 @@ export interface DayColor {
   color: string;
 }
 
+export type JournalMood = 'terrible' | 'bad' | 'neutral' | 'good' | 'great';
+
+export interface JournalEntry {
+  id: string;
+  date: string; // YYYY-MM-DD (unique key per calendar date)
+  title: string | null;
+  body: string;
+  mood: JournalMood | null;
+  tags: string[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Note {
+  id: string;
+  title: string;
+  content: string;
+  tags: string[];
+  pinned: boolean;
+  pinnedOrder: number;
+  icon?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export type BackgroundStyle = 'current' | 'paper' | 'notion';
 
 export interface UserSettings {
@@ -77,7 +102,7 @@ export interface UserSettings {
 }
 
 export interface SnapshotRecord {
-  storeName: 'pages' | 'tasks' | 'habits' | 'habitLogs' | 'events' | 'dayColors' | 'settings';
+  storeName: 'pages' | 'tasks' | 'habits' | 'habitLogs' | 'events' | 'dayColors' | 'settings' | 'journalEntries' | 'notes';
   key: string | number;
   type: 'insert' | 'update' | 'delete';
   before: any;
@@ -103,10 +128,12 @@ export interface BackupData {
     events: CalendarEvent[];
     dayColors: DayColor[];
     settings: Record<string, any>;
+    journalEntries?: JournalEntry[];
+    notes?: Note[];
   };
 }
 
-export type NavigationSection = 'dashboard' | 'todo' | 'calendar' | 'habits' | 'pages';
+export type NavigationSection = 'dashboard' | 'todo' | 'calendar' | 'habits' | 'pages' | 'journal' | 'notes';
 
 export type TaskFilter = 'all' | 'open' | 'important' | 'completed' | 'today';
 export type CalendarView = 'month' | 'week' | 'day';

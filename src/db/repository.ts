@@ -13,7 +13,9 @@ import {
   CalendarEvent, 
   DayColor, 
   UserSettings, 
-  BackupData 
+  BackupData,
+  JournalEntry,
+  Note 
 } from '../types';
 
 export class Repository {
@@ -854,6 +856,336 @@ export class Repository {
     });
   }
 
+  // --- JOURNAL ENTRIES ---
+  static async getAllJournalEntries(): Promise<JournalEntry[]> {
+    const { store } = await this.getStore('journalEntries', 'readonly');
+    return new Promise((resolve, reject) => {
+      const request = store.getAll();
+      request.onsuccess = () => {
+        const results = (request.result as JournalEntry[]) || [];
+        results.sort((a, b) => b.date.localeCompare(a.date));
+        resolve(results);
+      };
+      request.onerror = () => reject(request.error);
+    });
+  }
+
+  static async getJournalEntryByDate(date: string): Promise<JournalEntry | null> {
+    const { store } = await this.getStore('journalEntries', 'readonly');
+    return new Promise((resolve, reject) => {
+      const request = store.get(date);
+      request.onsuccess = () => resolve((request.result as JournalEntry) || null);
+      request.onerror = () => reject(request.error);
+    });
+  }
+
+  static async saveJournalEntry(entry: JournalEntry): Promise<JournalEntry> {
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(['journalEntries', 'snapshots'], 'readwrite');
+      const store = tx.objectStore('journalEntries');
+      const getReq = store.get(entry.date);
+
+      getReq.onsuccess = () => {
+        const existing = getReq.result as JournalEntry | undefined;
+        const normalizedEntry: JournalEntry = {
+          ...entry,
+          title: entry.title && entry.title.trim() ? entry.title.trim() : null,
+          updatedAt: nowISO()
+        };
+        store.put(normalizedEntry);
+
+        recordSnapshot(db, `Save journal entry for ${entry.date}`, [{
+          storeName: 'journalEntries' as any,
+          key: entry.date,
+          type: existing ? 'update' : 'insert',
+          before: existing || null,
+          after: normalizedEntry
+        }]);
+
+        tx.oncomplete = () => resolve(normalizedEntry);
+      };
+      tx.onerror = () => reject(tx.error);
+    });
+  }
+
+  static async deleteJournalEntry(date: string): Promise<void> {
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(['journalEntries', 'snapshots'], 'readwrite');
+      const store = tx.objectStore('journalEntries');
+      const getReq = store.get(date);
+
+      getReq.onsuccess = () => {
+        const existing = getReq.result as JournalEntry | undefined;
+        if (existing) {
+          store.delete(date);
+          recordSnapshot(db, `Delete journal entry for ${date}`, [{
+            storeName: 'journalEntries' as any,
+            key: date,
+            type: 'delete',
+            before: existing,
+            after: null
+          }]);
+        }
+        tx.oncomplete = () => resolve();
+      };
+      tx.onerror = () => reject(tx.error);
+    });
+  }
+
+  // --- NOTES ---
+  static async getAllNotes(): Promise<Note[]> {
+    const { store } = await this.getStore('notes', 'readonly');
+    return new Promise((resolve, reject) => {
+      const request = store.getAll();
+      request.onsuccess = () => {
+        const notes = (request.result as Note[]) || [];
+        notes.sort((a, b) => {
+          if (a.pinned && b.pinned) {
+            return (a.pinnedOrder ?? 0) - (b.pinnedOrder ?? 0);
+          }
+          if (a.pinned) return -1;
+          if (b.pinned) return 1;
+          return b.updatedAt.localeCompare(a.updatedAt);
+        });
+        resolve(notes);
+      };
+      request.onerror = () => reject(request.error);
+    });
+  }
+
+  static async getNoteById(id: string): Promise<Note | null> {
+    const { store } = await this.getStore('notes', 'readonly');
+    return new Promise((resolve, reject) => {
+      const request = store.get(id);
+      request.onsuccess = () => resolve((request.result as Note) || null);
+      request.onerror = () => reject(request.error);
+    });
+  }
+
+  static async createNote(data: {
+    title?: string;
+    content?: string;
+    tags?: string[];
+    pinned?: boolean;
+    pinnedOrder?: number;
+    icon?: string;
+  }): Promise<Note> {
+    const db = await openDB();
+    const now = nowISO();
+    const newNote: Note = {
+      id: generateUUID(),
+      title: data.title !== undefined ? data.title : 'Untitled Note',
+      content: data.content !== undefined ? data.content : '',
+      tags: data.tags || [],
+      pinned: !!data.pinned,
+      pinnedOrder: data.pinnedOrder ?? 0,
+      icon: data.icon,
+      createdAt: now,
+      updatedAt: now,
+    };
+
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(['notes', 'snapshots'], 'readwrite');
+      const store = tx.objectStore('notes');
+      store.add(newNote);
+
+      recordSnapshot(db, `Create note: ${newNote.title}`, [{
+        storeName: 'notes',
+        key: newNote.id,
+        type: 'insert',
+        before: null,
+        after: newNote,
+      }]);
+
+      tx.oncomplete = () => resolve(newNote);
+      tx.onerror = () => reject(tx.error);
+    });
+  }
+
+  static async updateNote(id: string, updates: Partial<Note>): Promise<Note> {
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(['notes', 'snapshots'], 'readwrite');
+      const store = tx.objectStore('notes');
+      const getReq = store.get(id);
+
+      getReq.onsuccess = () => {
+        const existing = getReq.result as Note | undefined;
+        if (!existing) {
+          reject(new Error(`Note with id ${id} not found`));
+          return;
+        }
+
+        const updated: Note = {
+          ...existing,
+          ...updates,
+          updatedAt: updates.updatedAt || nowISO(),
+        };
+
+        store.put(updated);
+
+        recordSnapshot(db, `Update note: ${updated.title}`, [{
+          storeName: 'notes',
+          key: id,
+          type: 'update',
+          before: existing,
+          after: updated,
+        }]);
+
+        tx.oncomplete = () => resolve(updated);
+      };
+      tx.onerror = () => reject(tx.error);
+    });
+  }
+
+  static async deleteNote(id: string): Promise<void> {
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(['notes', 'snapshots'], 'readwrite');
+      const store = tx.objectStore('notes');
+      const getReq = store.get(id);
+
+      getReq.onsuccess = () => {
+        const existing = getReq.result as Note | undefined;
+        if (existing) {
+          store.delete(id);
+          recordSnapshot(db, `Delete note: ${existing.title}`, [{
+            storeName: 'notes',
+            key: id,
+            type: 'delete',
+            before: existing,
+            after: null,
+          }]);
+        }
+        tx.oncomplete = () => resolve();
+      };
+      tx.onerror = () => reject(tx.error);
+    });
+  }
+
+  static async reorderPinnedNotes(orderedIds: string[]): Promise<void> {
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(['notes'], 'readwrite');
+      const store = tx.objectStore('notes');
+
+      orderedIds.forEach((id, index) => {
+        const getReq = store.get(id);
+        getReq.onsuccess = () => {
+          const item = getReq.result as Note | undefined;
+          if (item) {
+            item.pinned = true;
+            item.pinnedOrder = index;
+            store.put(item);
+          }
+        };
+      });
+
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+  }
+
+  static async seedSampleNotesIfEmpty(): Promise<Note[]> {
+    const existing = await this.getAllNotes();
+    if (existing.length > 0) return existing;
+
+    const now = Date.now();
+    const today = new Date(now).toISOString();
+    const yesterday = new Date(now - 86400000).toISOString();
+    const twoDaysAgo = new Date(now - 2 * 86400000).toISOString();
+    const threeDaysAgo = new Date(now - 3 * 86400000).toISOString();
+
+    const sampleNotes: Note[] = [
+      {
+        id: generateUUID(),
+        title: 'Spring Boot Notes',
+        content: '# Spring Boot Notes\n\nKey concepts and core dependencies for modern backend development.\n\n## Architecture\n- Controller, Service, Repository layers\n- Auto-configuration and starters\n- Dependency injection (IoC)\n- Embedded server (Tomcat)',
+        tags: ['java', 'spring'],
+        pinned: true,
+        pinnedOrder: 0,
+        icon: 'Code',
+        createdAt: threeDaysAgo,
+        updatedAt: today,
+      },
+      {
+        id: generateUUID(),
+        title: 'RAG Concepts',
+        content: '# Retrieval-Augmented Generation (RAG)\n\nBridging the gap between LLM reasoning and domain data.\n\n- Vector embeddings and nearest-neighbor search\n- Chunking strategies & token overlap\n- Re-ranking and contextual compression',
+        tags: ['ai', 'rag'],
+        pinned: true,
+        pinnedOrder: 1,
+        icon: 'BookOpen',
+        createdAt: threeDaysAgo,
+        updatedAt: yesterday,
+      },
+      {
+        id: generateUUID(),
+        title: 'Goals & Plan',
+        content: '# Personal Goals & Strategy\n\nQuarterly focus areas for engineering craft and health.\n\n1. Ship Notes module with zero-regression\n2. Build daily reflection habit\n3. Deep-dive into distributed systems',
+        tags: ['personal', 'goals'],
+        pinned: true,
+        pinnedOrder: 2,
+        icon: 'Target',
+        createdAt: threeDaysAgo,
+        updatedAt: twoDaysAgo,
+      },
+      {
+        id: generateUUID(),
+        title: 'Sprint Plan',
+        content: 'Tasks for this week and next steps...\n\n- Implement Notes overview\n- Implement Note Editor with markdown preview\n- Drag and drop pinned notes',
+        tags: ['work', 'plan'],
+        pinned: false,
+        pinnedOrder: 0,
+        createdAt: today,
+        updatedAt: today,
+      },
+      {
+        id: generateUUID(),
+        title: 'Book Notes – Atomic Habits',
+        content: 'Key takeaways and actionable points...\n\n- 1% better every day\n- Systems over goals\n- Identity-based habits',
+        tags: ['reading'],
+        pinned: false,
+        pinnedOrder: 0,
+        createdAt: yesterday,
+        updatedAt: yesterday,
+      },
+      {
+        id: generateUUID(),
+        title: 'RAG Architecture',
+        content: 'Full flow, components and use cases...\n\nIngestion pipeline -> Vector Database -> Retriever -> LLM Generator',
+        tags: ['ai'],
+        pinned: false,
+        pinnedOrder: 0,
+        createdAt: threeDaysAgo,
+        updatedAt: threeDaysAgo,
+      },
+      {
+        id: generateUUID(),
+        title: 'Java Collections',
+        content: 'List, Set, Map and common operations...\n\nArrayList vs LinkedList, HashMap internals, ConcurrentHashMap',
+        tags: ['java'],
+        pinned: false,
+        pinnedOrder: 0,
+        createdAt: threeDaysAgo,
+        updatedAt: threeDaysAgo,
+      },
+    ];
+
+    const db = await openDB();
+    await new Promise<void>((resolve, reject) => {
+      const tx = db.transaction(['notes'], 'readwrite');
+      const store = tx.objectStore('notes');
+      sampleNotes.forEach(n => store.put(n));
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+
+    return sampleNotes;
+  }
+
   // --- SETTINGS ---
   static async getAllSettings(): Promise<UserSettings> {
     const { store } = await this.getStore('settings', 'readonly');
@@ -893,7 +1225,7 @@ export class Repository {
   // --- BACKUP EXPORT / IMPORT ---
   static async exportBackup(): Promise<BackupData> {
     const db = await openDB();
-    const [pages, tasks, habits, habitLogs, events, dayColors, settings] = await Promise.all([
+    const [pages, tasks, habits, habitLogs, events, dayColors, settings, journalEntries, notes] = await Promise.all([
       this.getAllPages(),
       this.getAllTasks(),
       this.getAllHabits(),
@@ -901,6 +1233,8 @@ export class Repository {
       this.getAllEvents(),
       this.getAllDayColors(),
       this.getAllSettings(),
+      this.getAllJournalEntries(),
+      this.getAllNotes(),
     ]);
 
     const backup: BackupData = {
@@ -915,6 +1249,8 @@ export class Repository {
         events,
         dayColors,
         settings: settings as any,
+        journalEntries,
+        notes,
       },
     };
 
@@ -964,7 +1300,7 @@ export class Repository {
 
     return new Promise((resolve, reject) => {
       const tx = db.transaction(
-        ['pages', 'tasks', 'habits', 'habitLogs', 'events', 'dayColors', 'settings', 'snapshots'],
+        ['pages', 'tasks', 'habits', 'habitLogs', 'events', 'dayColors', 'settings', 'snapshots', 'journalEntries', 'notes'],
         'readwrite'
       );
 
@@ -975,6 +1311,8 @@ export class Repository {
       const eventStore = tx.objectStore('events');
       const dayColorStore = tx.objectStore('dayColors');
       const settingStore = tx.objectStore('settings');
+      const journalStore = tx.objectStore('journalEntries');
+      const noteStore = tx.objectStore('notes');
 
       if (mode === 'replace') {
         pageStore.clear();
@@ -983,6 +1321,8 @@ export class Repository {
         logStore.clear();
         eventStore.clear();
         dayColorStore.clear();
+        journalStore.clear();
+        noteStore.clear();
       }
 
       // Write imported data
@@ -993,6 +1333,12 @@ export class Repository {
       events.forEach((e: CalendarEvent) => eventStore.put(e));
       dayColors.forEach((d: DayColor) => dayColorStore.put(d));
 
+      const journalEntries = (backup.data && backup.data.journalEntries) || [];
+      journalEntries.forEach((j: JournalEntry) => journalStore.put(j));
+
+      const notes = (backup.data && backup.data.notes) || [];
+      notes.forEach((n: Note) => noteStore.put(n));
+
       if (settings && typeof settings === 'object') {
         Object.entries(settings).forEach(([k, v]) => {
           settingStore.put({ key: k, value: v });
@@ -1001,7 +1347,7 @@ export class Repository {
 
       tx.oncomplete = () => {
         resolve({
-          message: `Successfully imported (${mode}): ${pages.length} pages, ${tasks.length} tasks, ${habits.length} habits, ${events.length} events.`
+          message: `Successfully imported (${mode}): ${pages.length} pages, ${tasks.length} tasks, ${habits.length} habits, ${events.length} events, ${notes.length} notes.`
         });
       };
       tx.onerror = () => reject(new DatabaseError('Import transaction failed', tx.error));

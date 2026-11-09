@@ -20,9 +20,9 @@ import {
 } from '../src/utils/habitCalculations.ts';
 
 test('Section 14 Phase 1: Foundation Acceptance Criteria', async (t) => {
-  await t.test('IndexedDB opens with version 1 and seeds 4 default pages', async () => {
+  await t.test('IndexedDB opens with current version and seeds 4 default pages', async () => {
     const db = await openDB();
-    assert.equal(db.version, 1);
+    assert.equal(db.version, 3);
     assert.ok(db.objectStoreNames.contains('pages'));
     assert.ok(db.objectStoreNames.contains('tasks'));
     assert.ok(db.objectStoreNames.contains('habits'));

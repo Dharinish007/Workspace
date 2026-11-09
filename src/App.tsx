@@ -10,6 +10,8 @@ import { DashboardModule } from './components/dashboard/DashboardModule';
 import { TodoModule } from './components/todo/TodoModule';
 import { CalendarModule } from './components/calendar/CalendarModule';
 import { HabitModule } from './components/habits/HabitModule';
+import { JournalModule } from './components/journal/JournalModule';
+import { NotesModule } from './components/notes/NotesModule';
 import { SettingsView } from './components/settings/SettingsView';
 import { NotFoundPage } from './components/common/NotFoundPage';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -76,6 +78,10 @@ const WorkspaceContent: React.FC = () => {
                 <Route path="/pages/:pageId" element={<TodoModule />} />
                 <Route path="/calendar" element={<CalendarModule />} />
                 <Route path="/habits" element={<HabitModule />} />
+                <Route path="/journal" element={<JournalModule />} />
+                <Route path="/journal/:date" element={<JournalModule />} />
+                <Route path="/notes" element={<NotesModule />} />
+                <Route path="/notes/:noteId" element={<NotesModule />} />
                 <Route path="/settings" element={<SettingsView />} />
                 <Route path="/todo" element={<Navigate to="/tasks" replace />} />
                 <Route path="*" element={<NotFoundPage />} />
@@ -95,8 +101,8 @@ const WorkspaceContent: React.FC = () => {
 export function App() {
   return (
     <WorkspaceProvider>
-      <WorkspaceContent />
-    </WorkspaceProvider>
+        <WorkspaceContent />
+      </WorkspaceProvider>
   );
 }
 

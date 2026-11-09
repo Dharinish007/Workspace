@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useWorkspace } from '../../context/WorkspaceContext';
-import { Search, X, CheckSquare, Folder, Calendar, ArrowRight } from 'lucide-react';
+import { Search, X, CheckSquare, Folder, Calendar, ArrowRight, BookOpen, FileText } from 'lucide-react';
 import { IconRenderer } from '../common/IconRegistry';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export const SearchModal: React.FC = () => {
+  const navigate = useNavigate();
   const { 
     isSearchOpen, 
     setIsSearchOpen, 
@@ -12,6 +14,8 @@ export const SearchModal: React.FC = () => {
     tasks, 
     habits, 
     events, 
+    journalEntries,
+    notes,
     navigateToTask, 
     navigateToHabit,
     setActiveSection,
@@ -49,11 +53,26 @@ export const SearchModal: React.FC = () => {
     ? events.filter(e => e.title.toLowerCase().includes(trimmedQuery))
     : [];
 
+  const matchingJournal = trimmedQuery
+    ? journalEntries.filter(j => 
+        (j.title && j.title.toLowerCase().includes(trimmedQuery)) ||
+        (j.body && j.body.toLowerCase().includes(trimmedQuery))
+      )
+    : [];
+
+  const matchingNotes = trimmedQuery
+    ? notes.filter(n =>
+        n.title.toLowerCase().includes(trimmedQuery) ||
+        n.content.toLowerCase().includes(trimmedQuery) ||
+        (n.tags && n.tags.some(t => t.toLowerCase().includes(trimmedQuery)))
+      )
+    : [];
+
   // Flattened list for keyboard navigation
   const flatResults = React.useMemo(() => {
     const list: {
       id: string;
-      type: 'page' | 'task' | 'habit' | 'event';
+      type: 'page' | 'task' | 'habit' | 'event' | 'journal' | 'note';
       onSelect: () => void;
     }[] = [];
 
@@ -77,6 +96,28 @@ export const SearchModal: React.FC = () => {
       })
     );
 
+    matchingJournal.forEach(j =>
+      list.push({
+        id: `journal-${j.date}`,
+        type: 'journal',
+        onSelect: () => {
+          navigate(`/journal/${j.date}`);
+          setIsSearchOpen(false);
+        },
+      })
+    );
+
+    matchingNotes.forEach(n =>
+      list.push({
+        id: `note-${n.id}`,
+        type: 'note',
+        onSelect: () => {
+          navigate(`/notes/${n.id}`);
+          setIsSearchOpen(false);
+        },
+      })
+    );
+
     matchingHabits.forEach(h =>
       list.push({
         id: `habit-${h.id}`,
@@ -97,7 +138,7 @@ export const SearchModal: React.FC = () => {
     );
 
     return list;
-  }, [matchingPages, matchingTasks, matchingHabits, matchingEvents, setActiveSection, setSelectedPageId, setIsSearchOpen, navigateToTask, navigateToHabit]);
+  }, [matchingPages, matchingTasks, matchingJournal, matchingNotes, matchingHabits, matchingEvents, setActiveSection, setSelectedPageId, setIsSearchOpen, navigateToTask, navigateToHabit, navigate]);
 
   // Reset selected index when query changes
   useEffect(() => {
@@ -297,6 +338,84 @@ export const SearchModal: React.FC = () => {
                             })}
                           </div>
                         </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Journal Entries */}
+              {matchingJournal.length > 0 && (
+                <div>
+                  <div className="text-[11px] font-bold text-txt-muted uppercase tracking-wider mb-2 px-1">
+                    Journal ({matchingJournal.length})
+                  </div>
+                  <div className="space-y-1">
+                    {matchingJournal.map(j => {
+                      const isSelected = flatResults[selectedIndex]?.id === `journal-${j.date}`;
+                      return (
+                        <motion.button
+                          key={j.date}
+                          whileTap={{ scale: 0.98 }}
+                          onClick={() => {
+                            navigate(`/journal/${j.date}`);
+                            setIsSearchOpen(false);
+                          }}
+                          className={`w-full flex items-center justify-between p-2.5 rounded-xl text-left transition-all cursor-pointer ${
+                            isSelected
+                              ? 'ring-2 ring-primary bg-bg-hover shadow-2xs'
+                              : 'hover:bg-bg-hover'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2 overflow-hidden flex-1 mr-2">
+                            <BookOpen className="w-4 h-4 text-primary shrink-0" />
+                            <span className="font-medium text-sm text-txt-primary truncate">
+                              {j.title || `Journal Entry (${j.date})`}
+                            </span>
+                          </div>
+                          <span className="text-xs font-mono text-txt-muted shrink-0">{j.date}</span>
+                        </motion.button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Notes */}
+              {matchingNotes.length > 0 && (
+                <div>
+                  <div className="text-xs font-bold uppercase tracking-wider text-txt-muted px-2 mb-1.5">
+                    Notes ({matchingNotes.length})
+                  </div>
+                  <div className="space-y-1">
+                    {matchingNotes.map(n => {
+                      const isSelected = flatResults[selectedIndex]?.id === `note-${n.id}`;
+                      return (
+                        <motion.button
+                          key={n.id}
+                          whileTap={{ scale: 0.98 }}
+                          onClick={() => {
+                            navigate(`/notes/${n.id}`);
+                            setIsSearchOpen(false);
+                          }}
+                          className={`w-full flex items-center justify-between p-2.5 rounded-xl text-left transition-all cursor-pointer ${
+                            isSelected
+                              ? 'ring-2 ring-primary bg-bg-hover shadow-2xs'
+                              : 'hover:bg-bg-hover'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2 overflow-hidden flex-1 mr-2">
+                            <FileText className="w-4 h-4 text-primary shrink-0" />
+                            <span className="font-medium text-sm text-txt-primary truncate">
+                              {n.title || 'Untitled Note'}
+                            </span>
+                          </div>
+                          {n.tags && n.tags.length > 0 && (
+                            <span className="text-[11px] text-txt-muted shrink-0">
+                              #{n.tags[0]}
+                            </span>
+                          )}
+                        </motion.button>
                       );
                     })}
                   </div>
