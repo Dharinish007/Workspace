@@ -122,6 +122,50 @@ export function openDB(): Promise<IDBDatabase> {
         notesStore.createIndex('pinned', 'pinned', { unique: false });
       }
 
+      // 11. timerSessions (keyed by UUID id)
+      let timerSessionsStore: IDBObjectStore;
+      if (!db.objectStoreNames.contains('timerSessions')) {
+        timerSessionsStore = db.createObjectStore('timerSessions', { keyPath: 'id' });
+      } else {
+        timerSessionsStore = tx!.objectStore('timerSessions');
+      }
+      if (!timerSessionsStore.indexNames.contains('startedAt')) {
+        timerSessionsStore.createIndex('startedAt', 'startedAt', { unique: false });
+      }
+      if (!timerSessionsStore.indexNames.contains('taskId')) {
+        timerSessionsStore.createIndex('taskId', 'taskId', { unique: false });
+      }
+      if (!timerSessionsStore.indexNames.contains('localDate')) {
+        timerSessionsStore.createIndex('localDate', 'localDate', { unique: false });
+      }
+      if (!timerSessionsStore.indexNames.contains('status')) {
+        timerSessionsStore.createIndex('status', 'status', { unique: false });
+      }
+
+      // 12. timerActiveState (keyed by id 'current')
+      if (!db.objectStoreNames.contains('timerActiveState')) {
+        db.createObjectStore('timerActiveState', { keyPath: 'id' });
+      }
+
+      // 13. activityLogs (keyed by UUID id)
+      let activityLogsStore: IDBObjectStore;
+      if (!db.objectStoreNames.contains('activityLogs')) {
+        activityLogsStore = db.createObjectStore('activityLogs', { keyPath: 'id' });
+      } else {
+        activityLogsStore = tx!.objectStore('activityLogs');
+      }
+      if (!activityLogsStore.indexNames.contains('timestamp')) {
+        activityLogsStore.createIndex('timestamp', 'timestamp', { unique: false });
+      }
+      if (!activityLogsStore.indexNames.contains('entity')) {
+        activityLogsStore.createIndex('entity', 'entity', { unique: false });
+      }
+      if (!activityLogsStore.indexNames.contains('entityId')) {
+        activityLogsStore.createIndex('entityId', 'entityId', { unique: false });
+      }
+      if (!activityLogsStore.indexNames.contains('action')) {
+        activityLogsStore.createIndex('action', 'action', { unique: false });
+      }
     };
 
     request.onsuccess = () => {
@@ -222,7 +266,7 @@ export async function seedInitialDataIfNeeded(db: IDBDatabase): Promise<void> {
         settingsStore.put({ key: 'displayName', value: 'Dharinish' });
         settingsStore.put({ key: 'weekStart', value: 'monday' });
         settingsStore.put({ key: 'lastBackup', value: null });
-        settingsStore.put({ key: 'habitDefaultColor', value: '#0D9488' });
+        settingsStore.put({ key: 'habitDefaultColor', value: '#1A73E8' });
         settingsStore.put({ key: 'eventDefaultColor', value: '#F97316' });
         settingsStore.put({ key: 'backgroundStyle', value: 'current' });
       }
