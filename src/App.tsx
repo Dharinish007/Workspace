@@ -1,6 +1,7 @@
 import React from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { WorkspaceProvider, useWorkspace } from './context/WorkspaceContext';
+import { AuthProvider } from './context/AuthContext';
 import { Header } from './components/layout/Header';
 import { Sidebar } from './components/layout/Sidebar';
 import { MobileNav } from './components/layout/MobileNav';
@@ -100,9 +101,11 @@ const WorkspaceContent: React.FC = () => {
 
 export function App() {
   return (
-    <WorkspaceProvider>
+    <AuthProvider>
+      <WorkspaceProvider>
         <WorkspaceContent />
       </WorkspaceProvider>
+    </AuthProvider>
   );
 }
 
