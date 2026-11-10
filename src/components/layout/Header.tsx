@@ -46,7 +46,7 @@ export const Header: React.FC = () => {
     if (p === '/habits') return 'Habit Tracker';
     if (p === '/settings') return 'Settings';
     return 'My Workspace';
-  }, [location.pathname, pages, selectedPageId]);
+  }, [location.pathname, location.pathname.startsWith('/pages/') ? pages : null, selectedPageId]);
 
   return (
     <header className="h-16 px-4 md:px-6 lg:px-8 border-b border-border bg-bg-card/95 backdrop-blur-md sticky top-0 z-20 flex items-center justify-between shrink-0 transition-colors duration-200">

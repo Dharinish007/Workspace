@@ -159,7 +159,7 @@ export interface BackupData {
     habitLogs: HabitLog[];
     events: CalendarEvent[];
     dayColors: DayColor[];
-    settings: Record<string, any>;
+    settings: Partial<UserSettings> & Record<string, any>;
     journalEntries?: JournalEntry[];
     notes?: Note[];
     timerSessions?: TimerSession[];

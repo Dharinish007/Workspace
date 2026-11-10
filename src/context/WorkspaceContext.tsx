@@ -333,9 +333,9 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       } catch (e) {
         // Ignore storage errors in sandboxed contexts
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to initialize database:', err);
-      setErrorMessage(err?.message || 'Database initialization error');
+      setErrorMessage(getErrorMessage(err) || 'Database initialization error');
     }
   }, []);
 
@@ -354,9 +354,9 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       } else {
         showToast('Nothing to undo', undefined, undefined, 'info');
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Undo failed:', err);
-      showToast(`Undo failed: ${err.message}`, undefined, undefined, 'error');
+      showToast(`Undo failed: ${getErrorMessage(err)}`, undefined, undefined, 'error');
     }
   }, [refreshAll, showToast]);
 
@@ -473,12 +473,12 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
     try {
       await Repository.updateSetting(key, value);
-    } catch (err: any) {
+    } catch (err: unknown) {
       setSettings(prev => ({ ...prev, [key]: prevVal }));
       if (key === 'backgroundStyle') {
         document.documentElement.setAttribute('data-bg-style', prevVal || 'current');
       }
-      showToast(`Failed to update setting: ${err.message}`, undefined, undefined, 'error');
+      showToast(`Failed to update setting: ${getErrorMessage(err)}`, undefined, undefined, 'error');
     }
   }, [settings, showToast]);
 
@@ -489,8 +489,8 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       await refreshAll();
       showToast(`Created page "${newPage.name}"`, 'Undo', undo, 'success');
       return newPage;
-    } catch (err: any) {
-      showToast(err.message, undefined, undefined, 'error');
+    } catch (err: unknown) {
+      showToast(getErrorMessage(err), undefined, undefined, 'error');
       throw err;
     }
   }, [refreshAll, showToast, undo]);
@@ -502,9 +502,9 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     try {
       await Repository.updatePage(id, data);
       await refreshAll();
-    } catch (err: any) {
+    } catch (err: unknown) {
       setPages(p => p.map(item => item.id === id ? prev : item));
-      showToast(`Failed to update page: ${err.message}`, undefined, undefined, 'error');
+      showToast(`Failed to update page: ${getErrorMessage(err)}`, undefined, undefined, 'error');
     }
   }, [pages, refreshAll, showToast]);
 
@@ -517,9 +517,9 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     setPages(newPages);
     try {
       await Repository.reorderPages(orderedIds);
-    } catch (err: any) {
+    } catch (err: unknown) {
       setPages(prev);
-      showToast(`Failed to reorder pages: ${err.message}`, undefined, undefined, 'error');
+      showToast(`Failed to reorder pages: ${getErrorMessage(err)}`, undefined, undefined, 'error');
     }
   }, [pages, showToast]);
 
@@ -528,8 +528,8 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       const page = await Repository.setPageArchived(id, true);
       await refreshAll();
       showToast(`Archived "${page.name}"`, 'Undo', undo, 'info');
-    } catch (err: any) {
-      showToast(`Failed to archive page: ${err.message}`, undefined, undefined, 'error');
+    } catch (err: unknown) {
+      showToast(`Failed to archive page: ${getErrorMessage(err)}`, undefined, undefined, 'error');
     }
   }, [refreshAll, showToast, undo]);
 
@@ -538,8 +538,8 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       const page = await Repository.setPageArchived(id, false);
       await refreshAll();
       showToast(`Restored "${page.name}"`, 'Undo', undo, 'success');
-    } catch (err: any) {
-      showToast(`Failed to restore page: ${err.message}`, undefined, undefined, 'error');
+    } catch (err: unknown) {
+      showToast(`Failed to restore page: ${getErrorMessage(err)}`, undefined, undefined, 'error');
     }
   }, [refreshAll, showToast, undo]);
 
@@ -549,8 +549,8 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       await refreshAll();
       if (selectedPageId === id) setSelectedPageId(null);
       showToast(`Permanently deleted page and its tasks`, 'Undo', undo, 'info');
-    } catch (err: any) {
-      showToast(err.message, undefined, undefined, 'error');
+    } catch (err: unknown) {
+      showToast(getErrorMessage(err), undefined, undefined, 'error');
       throw err;
     }
   }, [refreshAll, selectedPageId, showToast, undo]);
@@ -562,8 +562,8 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       await refreshAll();
       showToast(`Created task "${newTask.title}"`, 'Undo', undo, 'success');
       return newTask;
-    } catch (err: any) {
-      showToast(err.message, undefined, undefined, 'error');
+    } catch (err: unknown) {
+      showToast(getErrorMessage(err), undefined, undefined, 'error');
       throw err;
     }
   }, [refreshAll, showToast, undo]);
@@ -575,9 +575,9 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     try {
       await Repository.updateTask(id, data);
       await refreshAll();
-    } catch (err: any) {
+    } catch (err: unknown) {
       setTasks(t => t.map(item => item.id === id ? prev : item));
-      showToast(`Failed to update task: ${err.message}`, undefined, undefined, 'error');
+      showToast(`Failed to update task: ${getErrorMessage(err)}`, undefined, undefined, 'error');
     }
   }, [refreshAll, showToast, tasks]);
 
@@ -596,9 +596,9 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         undo,
         'info'
       );
-    } catch (err: any) {
+    } catch (err: unknown) {
       setTasks(t => t.map(item => item.id === id ? target : item));
-      showToast(`Failed to update task: ${err.message}`, undefined, undefined, 'error');
+      showToast(`Failed to update task: ${getErrorMessage(err)}`, undefined, undefined, 'error');
     }
   }, [refreshAll, showToast, tasks, undo]);
 
@@ -610,9 +610,9 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       await Repository.deleteTask(id);
       await refreshAll();
       showToast(`Deleted task "${target.title}"`, 'Undo', undo, 'info');
-    } catch (err: any) {
+    } catch (err: unknown) {
       setTasks(t => [...t, target]);
-      showToast(`Failed to delete task: ${err.message}`, undefined, undefined, 'error');
+      showToast(`Failed to delete task: ${getErrorMessage(err)}`, undefined, undefined, 'error');
     }
   }, [refreshAll, showToast, tasks, undo]);
 
@@ -621,8 +621,8 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       await Repository.moveTaskToPage(taskId, targetPageId);
       await refreshAll();
       showToast('Moved task to page', 'Undo', undo, 'info');
-    } catch (err: any) {
-      showToast(`Failed to move task: ${err.message}`, undefined, undefined, 'error');
+    } catch (err: unknown) {
+      showToast(`Failed to move task: ${getErrorMessage(err)}`, undefined, undefined, 'error');
     }
   }, [refreshAll, showToast, undo]);
 
@@ -642,9 +642,9 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
     try {
       await Repository.reorderTasksInPage(pageId, orderedIds);
-    } catch (err: any) {
+    } catch (err: unknown) {
       setTasks(prev);
-      showToast(`Failed to reorder tasks: ${err.message}`, undefined, undefined, 'error');
+      showToast(`Failed to reorder tasks: ${getErrorMessage(err)}`, undefined, undefined, 'error');
     }
   }, [showToast, tasks]);
 
@@ -655,8 +655,8 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       await refreshAll();
       showToast(`Created habit "${newHabit.name}"`, 'Undo', undo, 'success');
       return newHabit;
-    } catch (err: any) {
-      showToast(err.message, undefined, undefined, 'error');
+    } catch (err: unknown) {
+      showToast(getErrorMessage(err), undefined, undefined, 'error');
       throw err;
     }
   }, [refreshAll, showToast, undo]);
@@ -668,9 +668,9 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     try {
       await Repository.updateHabit(id, data);
       await refreshAll();
-    } catch (err: any) {
+    } catch (err: unknown) {
       setHabits(h => h.map(item => item.id === id ? prev : item));
-      showToast(`Failed to update habit: ${err.message}`, undefined, undefined, 'error');
+      showToast(`Failed to update habit: ${getErrorMessage(err)}`, undefined, undefined, 'error');
     }
   }, [habits, refreshAll, showToast]);
 
@@ -682,9 +682,9 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       await Repository.deleteHabit(id);
       await refreshAll();
       showToast(`Deleted habit "${target.name}"`, 'Undo', undo, 'info');
-    } catch (err: any) {
+    } catch (err: unknown) {
       setHabits(h => [...h, target]);
-      showToast(`Failed to delete habit: ${err.message}`, undefined, undefined, 'error');
+      showToast(`Failed to delete habit: ${getErrorMessage(err)}`, undefined, undefined, 'error');
     }
   }, [habits, refreshAll, showToast, undo]);
 
@@ -693,7 +693,7 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     const existingLog = habitLogs.find(l => l.habitId === habitId && l.date === date);
     const nextCompleted = existingLog ? !existingLog.completed : true;
 
-    // Optimistic
+    // Optimistic local update
     setHabitLogs(logs => {
       const idx = logs.findIndex(l => l.habitId === habitId && l.date === date);
       if (idx !== -1) {
@@ -703,19 +703,32 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     });
 
     try {
-      await Repository.toggleHabitLog(habitId, date);
-      await refreshAll();
+      const updatedLog = await Repository.toggleHabitLog(habitId, date);
+      setHabitLogs(logs => {
+        const idx = logs.findIndex(l => l.habitId === habitId && l.date === date);
+        if (idx !== -1) {
+          return logs.map((l, i) => i === idx ? updatedLog : l);
+        }
+        return [...logs, updatedLog];
+      });
       showToast(
         nextCompleted ? `Completed "${target?.name || 'habit'}" on ${date}` : `Unchecked "${target?.name || 'habit'}" on ${date}`,
         'Undo',
         undo,
         'info'
       );
-    } catch (err: any) {
-      await refreshAll();
-      showToast(`Failed to update habit log: ${err.message}`, undefined, undefined, 'error');
+    } catch (err: unknown) {
+      // Localized rollback without refreshAll()
+      setHabitLogs(logs => {
+        if (existingLog) {
+          return logs.map(l => (l.habitId === habitId && l.date === date) ? existingLog : l);
+        } else {
+          return logs.filter(l => !(l.habitId === habitId && l.date === date));
+        }
+      });
+      showToast(`Failed to update habit log: ${getErrorMessage(err)}`, undefined, undefined, 'error');
     }
-  }, [habitLogs, habits, refreshAll, showToast, undo]);
+  }, [habitLogs, habits, showToast, undo]);
 
   // --- Calendar Event operations ---
   const createEvent = useCallback(async (data: { title: string; date: string; startTime?: string | null; endTime?: string | null; color?: string; category?: string }) => {
@@ -724,8 +737,8 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       await refreshAll();
       showToast(`Created event "${newEvent.title}"`, 'Undo', undo, 'success');
       return newEvent;
-    } catch (err: any) {
-      showToast(err.message, undefined, undefined, 'error');
+    } catch (err: unknown) {
+      showToast(getErrorMessage(err), undefined, undefined, 'error');
       throw err;
     }
   }, [refreshAll, showToast, undo]);
@@ -737,9 +750,9 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     try {
       await Repository.updateEvent(id, data);
       await refreshAll();
-    } catch (err: any) {
+    } catch (err: unknown) {
       setEvents(e => e.map(item => item.id === id ? prev : item));
-      showToast(`Failed to update event: ${err.message}`, undefined, undefined, 'error');
+      showToast(`Failed to update event: ${getErrorMessage(err)}`, undefined, undefined, 'error');
     }
   }, [events, refreshAll, showToast]);
 
@@ -751,14 +764,15 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       await Repository.deleteEvent(id);
       await refreshAll();
       showToast(`Deleted event "${target.title}"`, 'Undo', undo, 'info');
-    } catch (err: any) {
+    } catch (err: unknown) {
       setEvents(e => [...e, target]);
-      showToast(`Failed to delete event: ${err.message}`, undefined, undefined, 'error');
+      showToast(`Failed to delete event: ${getErrorMessage(err)}`, undefined, undefined, 'error');
     }
   }, [events, refreshAll, showToast, undo]);
 
   // --- Day Color operations ---
   const setDayColor = useCallback(async (date: string, color: string) => {
+    const prevColor = dayColors.find(d => d.date === date);
     setDayColors(prev => {
       const exists = prev.some(d => d.date === date);
       if (exists) {
@@ -768,21 +782,28 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     });
     try {
       await Repository.setDayColor(date, color);
-    } catch (err: any) {
-      await refreshAll();
-      showToast(`Failed to set day color: ${err.message}`, undefined, undefined, 'error');
+    } catch (err: unknown) {
+      setDayColors(prev => {
+        if (prevColor) {
+          return prev.map(d => d.date === date ? prevColor : d);
+        }
+        return prev.filter(d => d.date !== date);
+      });
+      showToast(`Failed to set day color: ${getErrorMessage(err)}`, undefined, undefined, 'error');
     }
-  }, [refreshAll, showToast]);
+  }, [dayColors, showToast]);
 
   const removeDayColor = useCallback(async (date: string) => {
+    const prevColor = dayColors.find(d => d.date === date);
+    if (!prevColor) return;
     setDayColors(prev => prev.filter(d => d.date !== date));
     try {
       await Repository.removeDayColor(date);
-    } catch (err: any) {
-      await refreshAll();
-      showToast(`Failed to remove day color: ${err.message}`, undefined, undefined, 'error');
+    } catch (err: unknown) {
+      setDayColors(prev => [...prev, prevColor]);
+      showToast(`Failed to remove day color: ${getErrorMessage(err)}`, undefined, undefined, 'error');
     }
-  }, [refreshAll, showToast]);
+  }, [dayColors, showToast]);
 
   const createOrGetJournalEntry = useCallback(async (date: string): Promise<JournalEntry> => {
     const existing = await Repository.getJournalEntryByDate(date);

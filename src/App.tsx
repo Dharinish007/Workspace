@@ -85,7 +85,7 @@ const WorkspaceContent: React.FC = () => {
                 <Route path="/notes" element={<NotesModule />} />
                 <Route path="/notes/:noteId" element={<NotesModule />} />
                 <Route path="/timer" element={<TimerModule />} />
-                <Route path="/activity" element={<TimerModule />} />
+                <Route path="/activity" element={<Navigate to="/timer" replace />} />
                 <Route path="/settings" element={<SettingsView />} />
                 <Route path="/todo" element={<Navigate to="/tasks" replace />} />
                 <Route path="*" element={<NotFoundPage />} />

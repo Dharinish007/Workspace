@@ -42,9 +42,21 @@ export const DashboardModule: React.FC = () => {
   const [inlineTaskPageId, setInlineTaskPageId] = useState('');
   const [showInlineAdd, setShowInlineAdd] = useState(false);
 
-  const activePages = pages.filter(p => !p.archived);
-  const now = new Date();
-  const todayStr = formatLocalDate(now);
+  const activePages = useMemo(() => pages.filter(p => !p.archived), [pages]);
+  const pagesMap = useMemo(() => new Map(pages.map(p => [p.id, p])), [pages]);
+  const todayStr = useMemo(() => formatLocalDate(new Date()), []);
+  const now = useMemo(() => new Date(), [todayStr]);
+
+  // Fast set of completed habit keys: `${habitId}_${date}`
+  const completedHabitLogKeys = useMemo(() => {
+    const set = new Set<string>();
+    for (const l of habitLogs) {
+      if (l.completed) {
+        set.add(`${l.habitId}_${l.date}`);
+      }
+    }
+    return set;
+  }, [habitLogs]);
 
   // Time-based greeting
   const hour = now.getHours();
@@ -56,12 +68,18 @@ export const DashboardModule: React.FC = () => {
   const currentDayOfWeek = (now.getDay() + 6) % 7 + 1;
 
   // 1. Tasks Card: Tasks due today & Overdue
-  const tasksDueToday = tasks.filter(t => t.dueDate === todayStr);
-  const tasksDueTodayCompleted = tasksDueToday.filter(t => t.completed).length;
-  const overdueTasks = tasks.filter(t => !t.completed && t.dueDate && t.dueDate < todayStr);
-  const tasksDueTodayPercent = tasksDueToday.length > 0
-    ? Math.round((tasksDueTodayCompleted / tasksDueToday.length) * 100)
-    : 100;
+  const { tasksDueToday, tasksDueTodayCompleted, overdueTasks, tasksDueTodayPercent } = useMemo(() => {
+    const due = tasks.filter(t => t.dueDate === todayStr);
+    const comp = due.filter(t => t.completed).length;
+    const od = tasks.filter(t => !t.completed && t.dueDate && t.dueDate < todayStr);
+    const pct = due.length > 0 ? Math.round((comp / due.length) * 100) : 100;
+    return {
+      tasksDueToday: due,
+      tasksDueTodayCompleted: comp,
+      overdueTasks: od,
+      tasksDueTodayPercent: pct,
+    };
+  }, [tasks, todayStr]);
 
   // 2. Habits Card: Habits scheduled today
   const isHabitScheduledForDate = (habit: Habit, _dateStr: string, dayOfWeek: number) => {
@@ -72,17 +90,19 @@ export const DashboardModule: React.FC = () => {
     return false;
   };
 
-  const habitsScheduledToday = habits.filter(h => isHabitScheduledForDate(h, todayStr, currentDayOfWeek));
-  const habitsCompletedToday = habitsScheduledToday.filter(h => {
-    const log = habitLogs.find(l => l.habitId === h.id && l.date === todayStr);
-    return log?.completed;
-  }).length;
-  const habitsTodayPercent = habitsScheduledToday.length > 0
-    ? Math.round((habitsCompletedToday / habitsScheduledToday.length) * 100)
-    : 100;
+  const { habitsScheduledToday, habitsCompletedToday, habitsTodayPercent } = useMemo(() => {
+    const scheduled = habits.filter(h => isHabitScheduledForDate(h, todayStr, currentDayOfWeek));
+    const completed = scheduled.filter(h => completedHabitLogKeys.has(`${h.id}_${todayStr}`)).length;
+    const pct = scheduled.length > 0 ? Math.round((completed / scheduled.length) * 100) : 100;
+    return {
+      habitsScheduledToday: scheduled,
+      habitsCompletedToday: completed,
+      habitsTodayPercent: pct,
+    };
+  }, [habits, todayStr, currentDayOfWeek, completedHabitLogKeys]);
 
   // 3. Events Card: Count of events today
-  const eventsToday = events.filter(e => e.date === todayStr);
+  const eventsToday = useMemo(() => events.filter(e => e.date === todayStr), [events, todayStr]);
 
   // 4. Pages Card: Non-archived pages
   const activePagesCount = activePages.length;
@@ -130,7 +150,7 @@ export const DashboardModule: React.FC = () => {
 
     tasks.forEach(t => {
       if (!t.completed && t.dueDate && t.dueDate >= todayStr && t.dueDate <= endStr) {
-        const page = pages.find(p => p.id === t.pageId);
+        const page = pagesMap.get(t.pageId);
         items.push({
           id: t.id,
           title: t.title,
@@ -156,7 +176,7 @@ export const DashboardModule: React.FC = () => {
     });
 
     return items.sort((a, b) => a.date.localeCompare(b.date));
-  }, [events, now, pages, tasks, todayStr]);
+  }, [events, now, pagesMap, tasks, todayStr]);
 
   // 7. Weekly Progress
   const weekProgressData = useMemo(() => {
@@ -187,8 +207,7 @@ export const DashboardModule: React.FC = () => {
       weekDates.forEach(({ dateStr, dayOfWeek }) => {
         if (isHabitScheduledForDate(h, dateStr, dayOfWeek)) {
           habitOccurrencesThisWeek++;
-          const log = habitLogs.find(l => l.habitId === h.id && l.date === dateStr);
-          if (log?.completed) {
+          if (completedHabitLogKeys.has(`${h.id}_${dateStr}`)) {
             habitCompletionsThisWeek++;
           }
         }
@@ -209,7 +228,7 @@ export const DashboardModule: React.FC = () => {
       habitCompletionsThisWeek,
       eventsThisWeek,
     };
-  }, [events, habitLogs, habits, now, tasks]);
+  }, [completedHabitLogKeys, events, habits, now, tasks]);
 
   // Handle inline quick add task
   const handleInlineAddTask = async (e: React.FormEvent) => {

@@ -70,6 +70,9 @@ export const Sidebar: React.FC = () => {
     if (path === '/notes') {
       return location.pathname.startsWith('/notes');
     }
+    if (path === '/timer') {
+      return location.pathname.startsWith('/timer') || location.pathname.startsWith('/activity');
+    }
     return location.pathname === path;
   };
 

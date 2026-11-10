@@ -95,6 +95,41 @@ export const MonthView: React.FC<MonthViewProps> = ({
 
   const todayStr = formatLocalDate(new Date());
 
+  const pagesMap = React.useMemo(() => new Map(pages.map(p => [p.id, p])), [pages]);
+  const dayColorsMap = React.useMemo(() => new Map(dayColors.map(c => [c.date, c])), [dayColors]);
+
+  const tasksByDate = React.useMemo(() => {
+    const map = new Map<string, typeof tasks>();
+    for (const t of tasks) {
+      if (t.dueDate) {
+        const arr = map.get(t.dueDate) || [];
+        arr.push(t);
+        map.set(t.dueDate, arr);
+      }
+    }
+    return map;
+  }, [tasks]);
+
+  const eventsByDate = React.useMemo(() => {
+    const map = new Map<string, typeof events>();
+    for (const e of events) {
+      const arr = map.get(e.date) || [];
+      arr.push(e);
+      map.set(e.date, arr);
+    }
+    return map;
+  }, [events]);
+
+  const completedHabitLogKeys = React.useMemo(() => {
+    const set = new Set<string>();
+    for (const l of habitLogs) {
+      if (l.completed) {
+        set.add(`${l.habitId}_${l.date}`);
+      }
+    }
+    return set;
+  }, [habitLogs]);
+
   return (
     <div className="bg-bg-card border border-border rounded-2xl shadow-card overflow-hidden">
       {/* Day of Week Headers */}
@@ -111,7 +146,7 @@ export const MonthView: React.FC<MonthViewProps> = ({
         {days.map(day => {
           const isToday = day.dateStr === todayStr;
           const isSelected = day.dateStr === selectedDate;
-          const dayColorEntry = dayColors.find(c => c.date === day.dateStr);
+          const dayColorEntry = dayColorsMap.get(day.dateStr);
 
           const cellDate = new Date(day.dateStr);
           const dow = (cellDate.getDay() + 6) % 7 + 1;
@@ -126,10 +161,11 @@ export const MonthView: React.FC<MonthViewProps> = ({
           }[] = [];
 
           if (showTodos) {
-            tasks.forEach(t => {
-              if (t.dueDate === day.dateStr) {
+            const dateTasks = tasksByDate.get(day.dateStr);
+            if (dateTasks) {
+              dateTasks.forEach(t => {
                 if (showCompleted || !t.completed) {
-                  const page = pages.find(p => p.id === t.pageId);
+                  const page = pagesMap.get(t.pageId);
                   cellActivities.push({
                     id: t.id,
                     type: 'task',
@@ -139,8 +175,8 @@ export const MonthView: React.FC<MonthViewProps> = ({
                     raw: t,
                   });
                 }
-              }
-            });
+              });
+            }
           }
 
           if (showHabits) {
@@ -149,8 +185,7 @@ export const MonthView: React.FC<MonthViewProps> = ({
                 h.schedule.type === 'daily' ||
                 (h.schedule.type === 'weekdays' && h.schedule.days.includes(dow));
               if (isScheduled) {
-                const log = habitLogs.find(l => l.habitId === h.id && l.date === day.dateStr);
-                const isDone = !!log?.completed;
+                const isDone = completedHabitLogKeys.has(`${h.id}_${day.dateStr}`);
                 if (showCompleted || !isDone) {
                   cellActivities.push({
                     id: h.id,
@@ -166,8 +201,9 @@ export const MonthView: React.FC<MonthViewProps> = ({
           }
 
           if (showEvents) {
-            events.forEach(e => {
-              if (e.date === day.dateStr) {
+            const dateEvents = eventsByDate.get(day.dateStr);
+            if (dateEvents) {
+              dateEvents.forEach(e => {
                 cellActivities.push({
                   id: e.id,
                   type: 'event',
@@ -175,8 +211,8 @@ export const MonthView: React.FC<MonthViewProps> = ({
                   color: e.color || '#F97316',
                   raw: e,
                 });
-              }
-            });
+              });
+            }
           }
 
           const maxVisible = 3;
