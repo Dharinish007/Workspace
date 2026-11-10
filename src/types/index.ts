@@ -110,13 +110,36 @@ export interface UserSettings {
   timerConfig?: TimerSettingsConfig;
 }
 
-export interface SnapshotRecord {
-  storeName: 'pages' | 'tasks' | 'habits' | 'habitLogs' | 'events' | 'dayColors' | 'settings' | 'journalEntries' | 'notes' | 'timerSessions' | 'timerActiveState' | 'activityLogs';
+import type { TimerSession, ActiveTimerState, ActivityLogEvent } from '../features/timer/types';
+
+export interface StoreEntityMap {
+  pages: Page;
+  tasks: Task;
+  habits: Habit;
+  habitLogs: HabitLog;
+  events: CalendarEvent;
+  dayColors: DayColor;
+  settings: { key: string; value: any };
+  journalEntries: JournalEntry;
+  notes: Note;
+  timerSessions: TimerSession;
+  timerActiveState: ActiveTimerState;
+  activityLogs: ActivityLogEvent;
+}
+
+export type SnapshotStoreName = keyof StoreEntityMap;
+
+export interface TypedSnapshotRecord<K extends SnapshotStoreName = SnapshotStoreName> {
+  storeName: K;
   key: string | number;
   type: 'insert' | 'update' | 'delete';
-  before: any;
-  after: any;
+  before: StoreEntityMap[K] | null;
+  after: StoreEntityMap[K] | null;
 }
+
+export type SnapshotRecord = {
+  [K in SnapshotStoreName]: TypedSnapshotRecord<K>;
+}[SnapshotStoreName];
 
 export interface Snapshot {
   id?: number;
@@ -139,8 +162,8 @@ export interface BackupData {
     settings: Record<string, any>;
     journalEntries?: JournalEntry[];
     notes?: Note[];
-    timerSessions?: any[];
-    activityLogs?: any[];
+    timerSessions?: TimerSession[];
+    activityLogs?: ActivityLogEvent[];
   };
 }
 

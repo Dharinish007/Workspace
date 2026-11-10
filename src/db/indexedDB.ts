@@ -1,7 +1,8 @@
-import { Page, Task, Habit, HabitLog, CalendarEvent, DayColor, UserSettings, Snapshot, BackupData, JournalEntry } from '../types';
+import { Page, Task, Habit, HabitLog, CalendarEvent, DayColor, UserSettings, Snapshot, SnapshotRecord, BackupData, JournalEntry } from '../types';
 
 export const DB_NAME = 'MyWorkspaceDB';
 export const DB_VERSION = 3;
+export const MAX_SNAPSHOTS = 30;
 
 export class DatabaseError extends Error {
   public cause?: any;
@@ -12,8 +13,33 @@ export class DatabaseError extends Error {
   }
 }
 
+// Connection caching singleton
+let cachedDbPromise: Promise<IDBDatabase> | null = null;
+
+export function getDb(): Promise<IDBDatabase> {
+  return openDB();
+}
+
+export function closeDB(): void {
+  if (cachedDbPromise) {
+    const p = cachedDbPromise;
+    cachedDbPromise = null;
+    p.then((db) => {
+      try {
+        db.close();
+      } catch {
+        // ignore errors during close
+      }
+    }).catch(() => {});
+  }
+}
+
 export function openDB(): Promise<IDBDatabase> {
-  return new Promise((resolve, reject) => {
+  if (cachedDbPromise) {
+    return cachedDbPromise;
+  }
+
+  cachedDbPromise = new Promise((resolve, reject) => {
     const request = indexedDB.open(DB_NAME, DB_VERSION);
 
     request.onblocked = () => {
@@ -170,14 +196,37 @@ export function openDB(): Promise<IDBDatabase> {
 
     request.onsuccess = () => {
       const db = request.result;
-      db.onversionchange = () => {
-        db.close();
+
+      // Wrap db.close so that if caller explicitly closes connection, cached promise is reset
+      const originalClose = db.close.bind(db);
+      db.close = () => {
+        cachedDbPromise = null;
+        return originalClose();
       };
+
+      db.onversionchange = () => {
+        cachedDbPromise = null;
+        try {
+          db.close();
+        } catch {
+          // ignore
+        }
+      };
+
+      db.onclose = () => {
+        cachedDbPromise = null;
+      };
+
       resolve(db);
     };
 
-    request.onerror = () => reject(new DatabaseError('Failed to open IndexedDB', request.error));
+    request.onerror = () => {
+      cachedDbPromise = null;
+      reject(new DatabaseError('Failed to open IndexedDB', request.error));
+    };
   });
+
+  return cachedDbPromise;
 }
 
 // Generate cryptographically secure RFC4122 v4 UUID
@@ -293,27 +342,32 @@ export async function seedInitialDataIfNeeded(db: IDBDatabase): Promise<void> {
 export async function recordSnapshot(
   db: IDBDatabase,
   action: string,
-  records: Snapshot['records']
+  records: SnapshotRecord[]
 ): Promise<number | undefined> {
   return new Promise((resolve, reject) => {
     const tx = db.transaction(['snapshots'], 'readwrite');
     const store = tx.objectStore('snapshots');
+
+    // Safe deep clone to decouple from caller object references and avoid unintended state mutation
+    const cleanRecords: SnapshotRecord[] = JSON.parse(JSON.stringify(records));
+
     const snapshot: Snapshot = {
       timestamp: nowISO(),
       action,
-      records,
+      records: cleanRecords,
     };
 
+    let newId: number | undefined;
     const addReq = store.add(snapshot);
     addReq.onsuccess = () => {
-      const newId = addReq.result as number;
-      // Prune snapshots older than 30
+      newId = addReq.result as number;
+      // Prune snapshots older than MAX_SNAPSHOTS
       const index = store.index('timestamp');
       const countReq = store.count();
       countReq.onsuccess = () => {
         const total = countReq.result;
-        if (total > 30) {
-          const deleteCount = total - 30;
+        if (total > MAX_SNAPSHOTS) {
+          const deleteCount = total - MAX_SNAPSHOTS;
           let deleted = 0;
           const cursorReq = index.openCursor();
           cursorReq.onsuccess = () => {
@@ -326,9 +380,11 @@ export async function recordSnapshot(
           };
         }
       };
-      resolve(newId);
     };
+
+    tx.oncomplete = () => resolve(newId);
     tx.onerror = () => reject(tx.error);
+    tx.onabort = () => reject(new DatabaseError('Snapshot transaction aborted', tx.error));
   });
 }
 
@@ -336,7 +392,21 @@ export async function recordSnapshot(
 export async function undoLastSnapshot(db: IDBDatabase): Promise<{ action: string } | null> {
   return new Promise((resolve, reject) => {
     const tx = db.transaction(
-      ['snapshots', 'pages', 'tasks', 'habits', 'habitLogs', 'events', 'dayColors', 'settings', 'journalEntries', 'notes'],
+      [
+        'snapshots',
+        'pages',
+        'tasks',
+        'habits',
+        'habitLogs',
+        'events',
+        'dayColors',
+        'settings',
+        'journalEntries',
+        'notes',
+        'timerSessions',
+        'timerActiveState',
+        'activityLogs',
+      ],
       'readwrite'
     );
     const snapStore = tx.objectStore('snapshots');
@@ -357,6 +427,9 @@ export async function undoLastSnapshot(db: IDBDatabase): Promise<{ action: strin
       // Revert each record in reverse order
       for (let i = snap.records.length - 1; i >= 0; i--) {
         const rec = snap.records[i];
+        if (!db.objectStoreNames.contains(rec.storeName)) {
+          continue;
+        }
         const targetStore = tx.objectStore(rec.storeName);
 
         if (rec.type === 'insert') {

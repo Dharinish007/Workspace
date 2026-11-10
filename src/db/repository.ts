@@ -1,5 +1,7 @@
 import { 
   openDB, 
+  getDb,
+  closeDB,
   generateUUID, 
   nowISO, 
   recordSnapshot, 
@@ -15,7 +17,10 @@ import {
   UserSettings, 
   BackupData,
   JournalEntry,
-  Note 
+  Note,
+  SnapshotRecord,
+  SnapshotStoreName,
+  StoreEntityMap
 } from '../types';
 import { TimerRepository } from '../features/timer/repository/timerRepository';
 
@@ -25,6 +30,76 @@ export class Repository {
     const tx = db.transaction(storeName, mode);
     const store = tx.objectStore(storeName);
     return { db, tx, store };
+  }
+
+  /**
+   * Generic, type-safe mutate helper for single-record CRUD operations.
+   * Handles transaction lifecycle, retrieval, user mutation logic,
+   * snapshot creation with undo capability, and database commit.
+   */
+  static async mutate<K extends SnapshotStoreName>(
+    storeName: K,
+    key: string | number,
+    action: string | ((before: StoreEntityMap[K] | null, after: StoreEntityMap[K] | null) => string),
+    mutator: (current: StoreEntityMap[K] | null) => StoreEntityMap[K] | null,
+    extraStoreNames: SnapshotStoreName[] = []
+  ): Promise<{ before: StoreEntityMap[K] | null; after: StoreEntityMap[K] | null }> {
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+      const stores = Array.from(new Set([storeName, ...extraStoreNames]));
+      const tx = db.transaction(stores, 'readwrite');
+      const store = tx.objectStore(storeName);
+      const getReq = store.get(key);
+
+      getReq.onsuccess = () => {
+        try {
+          const existing = (getReq.result as StoreEntityMap[K]) || null;
+          const next = mutator(existing);
+
+          let snapshotType: 'insert' | 'update' | 'delete' | null = null;
+
+          if (existing === null && next !== null) {
+            snapshotType = 'insert';
+            store.add(next);
+          } else if (existing !== null && next === null) {
+            snapshotType = 'delete';
+            store.delete(key);
+          } else if (existing !== null && next !== null) {
+            snapshotType = 'update';
+            store.put(next);
+          } else {
+            // Both are null - no-op
+            tx.oncomplete = () => resolve({ before: null, after: null });
+            return;
+          }
+
+          const actionText = typeof action === 'function' ? action(existing, next) : action;
+
+          tx.oncomplete = async () => {
+            try {
+              if (actionText && snapshotType) {
+                const snapRecord: SnapshotRecord = {
+                  storeName,
+                  key,
+                  type: snapshotType,
+                  before: existing,
+                  after: next,
+                } as SnapshotRecord;
+
+                await recordSnapshot(db, actionText, [snapRecord]);
+              }
+              resolve({ before: existing, after: next });
+            } catch {
+              resolve({ before: existing, after: next });
+            }
+          };
+        } catch (err) {
+          reject(err);
+        }
+      };
+
+      tx.onerror = () => reject(tx.error);
+    });
   }
 
   // --- PAGES ---
@@ -81,39 +156,22 @@ export class Repository {
   }
 
   static async updatePage(id: string, updates: Partial<Pick<Page, 'name' | 'icon' | 'color'>>): Promise<Page> {
-    const db = await openDB();
-    return new Promise((resolve, reject) => {
-      const tx = db.transaction(['pages', 'snapshots'], 'readwrite');
-      const store = tx.objectStore('pages');
-      const getReq = store.get(id);
-
-      getReq.onsuccess = () => {
-        const existing = getReq.result as Page | undefined;
+    const res = await this.mutate(
+      'pages',
+      id,
+      (b, a) => `Update page "${a?.name}"`,
+      (existing) => {
         if (!existing) {
-          reject(new Error('Page not found'));
-          return;
+          throw new Error('Page not found');
         }
-
-        const now = nowISO();
-        const updated: Page = {
+        return {
           ...existing,
           ...updates,
-          updatedAt: now,
+          updatedAt: nowISO(),
         };
-
-        store.put(updated);
-        recordSnapshot(db, `Update page "${updated.name}"`, [{
-          storeName: 'pages',
-          key: id,
-          type: 'update',
-          before: existing,
-          after: updated
-        }]);
-
-        tx.oncomplete = () => resolve(updated);
-      };
-      tx.onerror = () => reject(tx.error);
-    });
+      }
+    );
+    return res.after!;
   }
 
   static async reorderPages(orderedPageIds: string[]): Promise<void> {
@@ -157,37 +215,22 @@ export class Repository {
   }
 
   static async setPageArchived(id: string, archived: boolean): Promise<Page> {
-    const db = await openDB();
-    return new Promise((resolve, reject) => {
-      const tx = db.transaction(['pages', 'snapshots'], 'readwrite');
-      const store = tx.objectStore('pages');
-      const getReq = store.get(id);
-
-      getReq.onsuccess = () => {
-        const page = getReq.result as Page | undefined;
-        if (!page) {
-          reject(new Error('Page not found'));
-          return;
+    const res = await this.mutate(
+      'pages',
+      id,
+      (b, a) => `${archived ? 'Archive' : 'Restore'} page "${a?.name}"`,
+      (existing) => {
+        if (!existing) {
+          throw new Error('Page not found');
         }
-
-        const now = nowISO();
-        const before = { ...page };
-        page.archived = archived;
-        page.updatedAt = now;
-        store.put(page);
-
-        recordSnapshot(db, `${archived ? 'Archive' : 'Restore'} page "${page.name}"`, [{
-          storeName: 'pages',
-          key: id,
-          type: 'update',
-          before,
-          after: page
-        }]);
-
-        tx.oncomplete = () => resolve(page);
-      };
-      tx.onerror = () => reject(tx.error);
-    });
+        return {
+          ...existing,
+          archived,
+          updatedAt: nowISO(),
+        };
+      }
+    );
+    return res.after!;
   }
 
   static async deletePagePermanently(id: string, confirmedName: string): Promise<void> {
@@ -300,153 +343,89 @@ export class Repository {
   }
 
   static async updateTask(id: string, updates: Partial<Task>): Promise<Task> {
-    const db = await openDB();
-    return new Promise((resolve, reject) => {
-      const tx = db.transaction(['tasks', 'snapshots'], 'readwrite');
-      const store = tx.objectStore('tasks');
-      const getReq = store.get(id);
-
-      getReq.onsuccess = () => {
-        const existing = getReq.result as Task | undefined;
+    const res = await this.mutate(
+      'tasks',
+      id,
+      (b, a) => `Update task "${a?.title}"`,
+      (existing) => {
         if (!existing) {
-          reject(new Error('Task not found'));
-          return;
+          throw new Error('Task not found');
         }
-
         const now = nowISO();
         let completedAt = existing.completedAt;
         if (updates.completed !== undefined) {
           completedAt = updates.completed ? now : null;
         }
-
-        const updated: Task = {
+        return {
           ...existing,
           ...updates,
           completedAt,
           updatedAt: now,
         };
-
-        store.put(updated);
-        recordSnapshot(db, `Update task "${updated.title}"`, [{
-          storeName: 'tasks',
-          key: id,
-          type: 'update',
-          before: existing,
-          after: updated
-        }]);
-
-        tx.oncomplete = () => resolve(updated);
-      };
-      tx.onerror = () => reject(tx.error);
-    });
+      }
+    );
+    return res.after!;
   }
 
   static async toggleTaskCompleted(id: string): Promise<Task> {
-    const db = await openDB();
-    return new Promise((resolve, reject) => {
-      const tx = db.transaction(['tasks', 'snapshots'], 'readwrite');
-      const store = tx.objectStore('tasks');
-      const getReq = store.get(id);
-
-      getReq.onsuccess = () => {
-        const existing = getReq.result as Task | undefined;
+    const res = await this.mutate(
+      'tasks',
+      id,
+      (b, a) => `${a?.completed ? 'Complete' : 'Reopen'} task "${a?.title}"`,
+      (existing) => {
         if (!existing) {
-          reject(new Error('Task not found'));
-          return;
+          throw new Error('Task not found');
         }
-
         const now = nowISO();
         const nextCompleted = !existing.completed;
-        const updated: Task = {
+        return {
           ...existing,
           completed: nextCompleted,
           completedAt: nextCompleted ? now : null,
           updatedAt: now,
         };
-
-        store.put(updated);
-        recordSnapshot(db, `${nextCompleted ? 'Complete' : 'Reopen'} task "${updated.title}"`, [{
-          storeName: 'tasks',
-          key: id,
-          type: 'update',
-          before: existing,
-          after: updated
-        }]);
-
-        tx.oncomplete = () => resolve(updated);
-      };
-      tx.onerror = () => reject(tx.error);
-    });
+      }
+    );
+    return res.after!;
   }
 
   static async deleteTask(id: string): Promise<Task> {
-    const db = await openDB();
-    return new Promise((resolve, reject) => {
-      const tx = db.transaction(['tasks', 'snapshots'], 'readwrite');
-      const store = tx.objectStore('tasks');
-      const getReq = store.get(id);
-
-      getReq.onsuccess = () => {
-        const existing = getReq.result as Task | undefined;
+    const res = await this.mutate(
+      'tasks',
+      id,
+      (b) => `Delete task "${b?.title}"`,
+      (existing) => {
         if (!existing) {
-          reject(new Error('Task not found'));
-          return;
+          throw new Error('Task not found');
         }
-
-        store.delete(id);
-        recordSnapshot(db, `Delete task "${existing.title}"`, [{
-          storeName: 'tasks',
-          key: id,
-          type: 'delete',
-          before: existing,
-          after: null
-        }]);
-
-        tx.oncomplete = () => resolve(existing);
-      };
-      tx.onerror = () => reject(tx.error);
-    });
+        return null;
+      }
+    );
+    return res.before!;
   }
 
   static async moveTaskToPage(taskId: string, targetPageId: string): Promise<Task> {
-    const db = await openDB();
     const allTasks = await this.getAllTasks();
     const targetPageTasks = allTasks.filter(t => t.pageId === targetPageId);
     const maxOrder = targetPageTasks.reduce((max, t) => Math.max(max, t.order), -1);
 
-    return new Promise((resolve, reject) => {
-      const tx = db.transaction(['tasks', 'snapshots'], 'readwrite');
-      const store = tx.objectStore('tasks');
-      const getReq = store.get(taskId);
-
-      getReq.onsuccess = () => {
-        const existing = getReq.result as Task | undefined;
+    const res = await this.mutate(
+      'tasks',
+      taskId,
+      (b, a) => `Move task "${a?.title}"`,
+      (existing) => {
         if (!existing) {
-          reject(new Error('Task not found'));
-          return;
+          throw new Error('Task not found');
         }
-
-        const now = nowISO();
-        const updated: Task = {
+        return {
           ...existing,
           pageId: targetPageId,
           order: maxOrder + 1,
-          updatedAt: now,
+          updatedAt: nowISO(),
         };
-
-        store.put(updated);
-        recordSnapshot(db, `Move task "${updated.title}"`, [{
-          storeName: 'tasks',
-          key: taskId,
-          type: 'update',
-          before: existing,
-          after: updated
-        }]);
-
-        tx.oncomplete = () => resolve(updated);
-      };
-      tx.onerror = () => reject(tx.error);
-    });
+      }
+    );
+    return res.after!;
   }
 
   static async reorderTasksInPage(pageId: string, orderedTaskIds: string[]): Promise<void> {
@@ -537,39 +516,22 @@ export class Repository {
   }
 
   static async updateHabit(id: string, updates: Partial<Omit<Habit, 'id' | 'createdAt'>>): Promise<Habit> {
-    const db = await openDB();
-    return new Promise((resolve, reject) => {
-      const tx = db.transaction(['habits', 'snapshots'], 'readwrite');
-      const store = tx.objectStore('habits');
-      const getReq = store.get(id);
-
-      getReq.onsuccess = () => {
-        const existing = getReq.result as Habit | undefined;
+    const res = await this.mutate(
+      'habits',
+      id,
+      (b, a) => `Update habit "${a?.name}"`,
+      (existing) => {
         if (!existing) {
-          reject(new Error('Habit not found'));
-          return;
+          throw new Error('Habit not found');
         }
-
-        const now = nowISO();
-        const updated: Habit = {
+        return {
           ...existing,
           ...updates,
-          updatedAt: now,
+          updatedAt: nowISO(),
         };
-
-        store.put(updated);
-        recordSnapshot(db, `Update habit "${updated.name}"`, [{
-          storeName: 'habits',
-          key: id,
-          type: 'update',
-          before: existing,
-          after: updated
-        }]);
-
-        tx.oncomplete = () => resolve(updated);
-      };
-      tx.onerror = () => reject(tx.error);
-    });
+      }
+    );
+    return res.after!;
   }
 
   static async deleteHabit(id: string): Promise<Habit> {
@@ -630,55 +592,30 @@ export class Repository {
   }
 
   static async toggleHabitLog(habitId: string, date: string): Promise<HabitLog> {
-    const db = await openDB();
     const logId = `${habitId}_${date}`;
-
-    return new Promise((resolve, reject) => {
-      const tx = db.transaction(['habitLogs', 'snapshots'], 'readwrite');
-      const store = tx.objectStore('habitLogs');
-      const getReq = store.get(logId);
-
-      getReq.onsuccess = () => {
-        const existing = getReq.result as HabitLog | undefined;
+    const res = await this.mutate(
+      'habitLogs',
+      logId,
+      (b, a) => b ? `Toggle habit on ${date}` : `Check habit on ${date}`,
+      (existing) => {
         const now = nowISO();
-        let log: HabitLog;
-
         if (existing) {
-          log = {
+          return {
             ...existing,
             completed: !existing.completed,
             updatedAt: now,
           };
-          store.put(log);
-          recordSnapshot(db, `Toggle habit on ${date}`, [{
-            storeName: 'habitLogs',
-            key: logId,
-            type: 'update',
-            before: existing,
-            after: log
-          }]);
-        } else {
-          log = {
-            id: logId,
-            habitId,
-            date,
-            completed: true,
-            updatedAt: now,
-          };
-          store.add(log);
-          recordSnapshot(db, `Check habit on ${date}`, [{
-            storeName: 'habitLogs',
-            key: logId,
-            type: 'insert',
-            before: null,
-            after: log
-          }]);
         }
-
-        tx.oncomplete = () => resolve(log);
-      };
-      tx.onerror = () => reject(tx.error);
-    });
+        return {
+          id: logId,
+          habitId,
+          date,
+          completed: true,
+          updatedAt: now,
+        };
+      }
+    );
+    return res.after!;
   }
 
   // --- CALENDAR EVENTS ---
@@ -732,68 +669,37 @@ export class Repository {
   }
 
   static async updateEvent(id: string, updates: Partial<Omit<CalendarEvent, 'id' | 'createdAt'>>): Promise<CalendarEvent> {
-    const db = await openDB();
-    return new Promise((resolve, reject) => {
-      const tx = db.transaction(['events', 'snapshots'], 'readwrite');
-      const store = tx.objectStore('events');
-      const getReq = store.get(id);
-
-      getReq.onsuccess = () => {
-        const existing = getReq.result as CalendarEvent | undefined;
+    const res = await this.mutate(
+      'events',
+      id,
+      (b, a) => `Update event "${a?.title}"`,
+      (existing) => {
         if (!existing) {
-          reject(new Error('Event not found'));
-          return;
+          throw new Error('Event not found');
         }
-
-        const now = nowISO();
-        const updated: CalendarEvent = {
+        return {
           ...existing,
           ...updates,
-          updatedAt: now,
+          updatedAt: nowISO(),
         };
-
-        store.put(updated);
-        recordSnapshot(db, `Update event "${updated.title}"`, [{
-          storeName: 'events',
-          key: id,
-          type: 'update',
-          before: existing,
-          after: updated
-        }]);
-
-        tx.oncomplete = () => resolve(updated);
-      };
-      tx.onerror = () => reject(tx.error);
-    });
+      }
+    );
+    return res.after!;
   }
 
   static async deleteEvent(id: string): Promise<CalendarEvent> {
-    const db = await openDB();
-    return new Promise((resolve, reject) => {
-      const tx = db.transaction(['events', 'snapshots'], 'readwrite');
-      const store = tx.objectStore('events');
-      const getReq = store.get(id);
-
-      getReq.onsuccess = () => {
-        const existing = getReq.result as CalendarEvent | undefined;
+    const res = await this.mutate(
+      'events',
+      id,
+      (b) => `Delete event "${b?.title}"`,
+      (existing) => {
         if (!existing) {
-          reject(new Error('Event not found'));
-          return;
+          throw new Error('Event not found');
         }
-
-        store.delete(id);
-        recordSnapshot(db, `Delete event "${existing.title}"`, [{
-          storeName: 'events',
-          key: id,
-          type: 'delete',
-          before: existing,
-          after: null
-        }]);
-
-        tx.oncomplete = () => resolve(existing);
-      };
-      tx.onerror = () => reject(tx.error);
-    });
+        return null;
+      }
+    );
+    return res.before!;
   }
 
   // --- DAY BACKGROUND COLORS ---
@@ -807,54 +713,21 @@ export class Repository {
   }
 
   static async setDayColor(date: string, color: string): Promise<void> {
-    const db = await openDB();
-    return new Promise((resolve, reject) => {
-      const tx = db.transaction(['dayColors', 'snapshots'], 'readwrite');
-      const store = tx.objectStore('dayColors');
-      const getReq = store.get(date);
-
-      getReq.onsuccess = () => {
-        const existing = getReq.result as DayColor | undefined;
-        const entry: DayColor = { date, color };
-        store.put(entry);
-
-        recordSnapshot(db, `Set day color for ${date}`, [{
-          storeName: 'dayColors',
-          key: date,
-          type: existing ? 'update' : 'insert',
-          before: existing || null,
-          after: entry
-        }]);
-
-        tx.oncomplete = () => resolve();
-      };
-      tx.onerror = () => reject(tx.error);
-    });
+    await this.mutate(
+      'dayColors',
+      date,
+      `Set day color for ${date}`,
+      () => ({ date, color })
+    );
   }
 
   static async removeDayColor(date: string): Promise<void> {
-    const db = await openDB();
-    return new Promise((resolve, reject) => {
-      const tx = db.transaction(['dayColors', 'snapshots'], 'readwrite');
-      const store = tx.objectStore('dayColors');
-      const getReq = store.get(date);
-
-      getReq.onsuccess = () => {
-        const existing = getReq.result as DayColor | undefined;
-        if (existing) {
-          store.delete(date);
-          recordSnapshot(db, `Remove day color for ${date}`, [{
-            storeName: 'dayColors',
-            key: date,
-            type: 'delete',
-            before: existing,
-            after: null
-          }]);
-        }
-        tx.oncomplete = () => resolve();
-      };
-      tx.onerror = () => reject(tx.error);
-    });
+    await this.mutate(
+      'dayColors',
+      date,
+      (b) => b ? `Remove day color for ${date}` : '',
+      (existing) => (existing ? null : null)
+    );
   }
 
   // --- JOURNAL ENTRIES ---
@@ -881,58 +754,26 @@ export class Repository {
   }
 
   static async saveJournalEntry(entry: JournalEntry): Promise<JournalEntry> {
-    const db = await openDB();
-    return new Promise((resolve, reject) => {
-      const tx = db.transaction(['journalEntries', 'snapshots'], 'readwrite');
-      const store = tx.objectStore('journalEntries');
-      const getReq = store.get(entry.date);
-
-      getReq.onsuccess = () => {
-        const existing = getReq.result as JournalEntry | undefined;
-        const normalizedEntry: JournalEntry = {
-          ...entry,
-          title: entry.title && entry.title.trim() ? entry.title.trim() : null,
-          updatedAt: nowISO()
-        };
-        store.put(normalizedEntry);
-
-        recordSnapshot(db, `Save journal entry for ${entry.date}`, [{
-          storeName: 'journalEntries' as any,
-          key: entry.date,
-          type: existing ? 'update' : 'insert',
-          before: existing || null,
-          after: normalizedEntry
-        }]);
-
-        tx.oncomplete = () => resolve(normalizedEntry);
-      };
-      tx.onerror = () => reject(tx.error);
-    });
+    const res = await this.mutate(
+      'journalEntries',
+      entry.date,
+      `Save journal entry for ${entry.date}`,
+      () => ({
+        ...entry,
+        title: entry.title && entry.title.trim() ? entry.title.trim() : null,
+        updatedAt: nowISO()
+      })
+    );
+    return res.after!;
   }
 
   static async deleteJournalEntry(date: string): Promise<void> {
-    const db = await openDB();
-    return new Promise((resolve, reject) => {
-      const tx = db.transaction(['journalEntries', 'snapshots'], 'readwrite');
-      const store = tx.objectStore('journalEntries');
-      const getReq = store.get(date);
-
-      getReq.onsuccess = () => {
-        const existing = getReq.result as JournalEntry | undefined;
-        if (existing) {
-          store.delete(date);
-          recordSnapshot(db, `Delete journal entry for ${date}`, [{
-            storeName: 'journalEntries' as any,
-            key: date,
-            type: 'delete',
-            before: existing,
-            after: null
-          }]);
-        }
-        tx.oncomplete = () => resolve();
-      };
-      tx.onerror = () => reject(tx.error);
-    });
+    await this.mutate(
+      'journalEntries',
+      date,
+      (b) => b ? `Delete journal entry for ${date}` : '',
+      (existing) => (existing ? null : null)
+    );
   }
 
   // --- NOTES ---
@@ -1006,64 +847,31 @@ export class Repository {
   }
 
   static async updateNote(id: string, updates: Partial<Note>): Promise<Note> {
-    const db = await openDB();
-    return new Promise((resolve, reject) => {
-      const tx = db.transaction(['notes', 'snapshots'], 'readwrite');
-      const store = tx.objectStore('notes');
-      const getReq = store.get(id);
-
-      getReq.onsuccess = () => {
-        const existing = getReq.result as Note | undefined;
+    const res = await this.mutate(
+      'notes',
+      id,
+      (b, a) => `Update note: ${a?.title}`,
+      (existing) => {
         if (!existing) {
-          reject(new Error(`Note with id ${id} not found`));
-          return;
+          throw new Error(`Note with id ${id} not found`);
         }
-
-        const updated: Note = {
+        return {
           ...existing,
           ...updates,
           updatedAt: updates.updatedAt || nowISO(),
         };
-
-        store.put(updated);
-
-        recordSnapshot(db, `Update note: ${updated.title}`, [{
-          storeName: 'notes',
-          key: id,
-          type: 'update',
-          before: existing,
-          after: updated,
-        }]);
-
-        tx.oncomplete = () => resolve(updated);
-      };
-      tx.onerror = () => reject(tx.error);
-    });
+      }
+    );
+    return res.after!;
   }
 
   static async deleteNote(id: string): Promise<void> {
-    const db = await openDB();
-    return new Promise((resolve, reject) => {
-      const tx = db.transaction(['notes', 'snapshots'], 'readwrite');
-      const store = tx.objectStore('notes');
-      const getReq = store.get(id);
-
-      getReq.onsuccess = () => {
-        const existing = getReq.result as Note | undefined;
-        if (existing) {
-          store.delete(id);
-          recordSnapshot(db, `Delete note: ${existing.title}`, [{
-            storeName: 'notes',
-            key: id,
-            type: 'delete',
-            before: existing,
-            after: null,
-          }]);
-        }
-        tx.oncomplete = () => resolve();
-      };
-      tx.onerror = () => reject(tx.error);
-    });
+    await this.mutate(
+      'notes',
+      id,
+      (b) => b ? `Delete note: ${b.title}` : '',
+      (existing) => (existing ? null : null)
+    );
   }
 
   static async reorderPinnedNotes(orderedIds: string[]): Promise<void> {
@@ -1076,8 +884,7 @@ export class Repository {
         const getReq = store.get(id);
         getReq.onsuccess = () => {
           const item = getReq.result as Note | undefined;
-          if (item) {
-            item.pinned = true;
+          if (item && item.pinned) {
             item.pinnedOrder = index;
             store.put(item);
           }
