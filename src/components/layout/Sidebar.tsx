@@ -43,25 +43,17 @@ export const Sidebar: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Prevent background scrolling and handle Escape when mobile drawer is open
+  // Prevent background scrolling when mobile drawer is open (Escape is handled globally in WorkspaceContext)
   useEffect(() => {
     if (isMobileSidebarOpen) {
       const prevOverflow = document.body.style.overflow;
       document.body.style.overflow = 'hidden';
 
-      const handleKeyDown = (e: KeyboardEvent) => {
-        if (e.key === 'Escape') {
-          setIsMobileSidebarOpen(false);
-        }
-      };
-      window.addEventListener('keydown', handleKeyDown);
-
       return () => {
         document.body.style.overflow = prevOverflow;
-        window.removeEventListener('keydown', handleKeyDown);
       };
     }
-  }, [isMobileSidebarOpen, setIsMobileSidebarOpen]);
+  }, [isMobileSidebarOpen]);
 
   // Determine active item from current route
   const isItemActive = (path: string) => {

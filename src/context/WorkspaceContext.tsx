@@ -21,6 +21,7 @@ import {
   JournalEntry,
   Note 
 } from '../types';
+import { getErrorMessage } from '../utils/errorUtils';
 
 export interface ToastInfo {
   id: string;
@@ -253,7 +254,7 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const toastTimerRef = useRef<number | null>(null);
 
   const clearToast = useCallback(() => {
-    if (toastTimerRef.current) {
+    if (toastTimerRef.current !== null) {
       window.clearTimeout(toastTimerRef.current);
       toastTimerRef.current = null;
     }
@@ -261,14 +262,33 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   }, []);
 
   const showToast = useCallback((message: string, actionLabel?: string, onAction?: () => void, type: ToastInfo['type'] = 'info') => {
-    clearToast();
+    // Clear any active timer immediately before scheduling next
+    if (toastTimerRef.current !== null) {
+      window.clearTimeout(toastTimerRef.current);
+      toastTimerRef.current = null;
+    }
     const id = Date.now().toString();
-    setToast({ id, message, actionLabel, onAction, type });
+    const wrappedAction = onAction ? () => {
+      clearToast();
+      onAction();
+    } : undefined;
+    setToast({ id, message, actionLabel, onAction: wrappedAction, type });
     // Keep toast visible for 6.5s (Section 10: 6-7 seconds)
     toastTimerRef.current = window.setTimeout(() => {
       setToast(null);
+      toastTimerRef.current = null;
     }, 6500);
   }, [clearToast]);
+
+  // Clean up timer on unmount to prevent memory leaks and state updates on unmounted component
+  useEffect(() => {
+    return () => {
+      if (toastTimerRef.current !== null) {
+        window.clearTimeout(toastTimerRef.current);
+        toastTimerRef.current = null;
+      }
+    };
+  }, []);
 
   const refreshAll = useCallback(async () => {
     try {

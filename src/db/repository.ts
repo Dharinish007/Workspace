@@ -23,6 +23,9 @@ import {
   StoreEntityMap
 } from '../types';
 import { TimerRepository } from '../features/timer/repository/timerRepository';
+import { SchemaValidationError, getErrorMessage } from '../utils/errorUtils';
+
+export { SchemaValidationError };
 
 export class Repository {
   private static async getStore(storeName: string, mode: IDBTransactionMode = 'readonly'): Promise<{ db: IDBDatabase, tx: IDBTransaction, store: IDBObjectStore }> {
@@ -251,7 +254,7 @@ export class Repository {
           return;
         }
 
-        if (page.name.trim() !== confirmedName.trim()) {
+        if (!confirmedName || typeof confirmedName !== 'string' || page.name.trim().normalize() !== confirmedName.trim().normalize()) {
           reject(new Error('Page name confirmation does not match'));
           return;
         }
@@ -877,16 +880,32 @@ export class Repository {
   static async reorderPinnedNotes(orderedIds: string[]): Promise<void> {
     const db = await openDB();
     return new Promise((resolve, reject) => {
-      const tx = db.transaction(['notes'], 'readwrite');
+      const tx = db.transaction(['notes', 'snapshots'], 'readwrite');
       const store = tx.objectStore('notes');
+      const recordsToSnapshot: SnapshotRecord[] = [];
+      const now = nowISO();
 
+      let completedCount = 0;
       orderedIds.forEach((id, index) => {
         const getReq = store.get(id);
         getReq.onsuccess = () => {
           const item = getReq.result as Note | undefined;
-          if (item && item.pinned) {
+          if (item && item.pinned && item.pinnedOrder !== index) {
+            const before = { ...item };
             item.pinnedOrder = index;
+            item.updatedAt = now;
             store.put(item);
+            recordsToSnapshot.push({
+              storeName: 'notes',
+              key: id,
+              type: 'update',
+              before,
+              after: item,
+            });
+          }
+          completedCount++;
+          if (completedCount === orderedIds.length && recordsToSnapshot.length > 0) {
+            recordSnapshot(db, 'Reorder pinned notes', recordsToSnapshot);
           }
         };
       });
@@ -1073,40 +1092,136 @@ export class Repository {
   }
 
   static async importBackup(backup: any, mode: 'merge' | 'replace'): Promise<{ message: string }> {
-    // 1. Validate
+    // 1. Root Structure Validation
     if (!backup || typeof backup !== 'object') {
-      throw new Error('Invalid JSON: Not an object.');
+      throw new SchemaValidationError('Invalid JSON: Not an object.');
     }
     if (backup.app !== 'my-workspace') {
-      throw new Error('Invalid file: Application ID must be "my-workspace".');
+      throw new SchemaValidationError('Invalid file: Application ID must be "my-workspace".');
     }
     if (typeof backup.schemaVersion !== 'number' || backup.schemaVersion > 1) {
-      throw new Error(`Unsupported schema version: ${backup.schemaVersion}. This app supports up to version 1.`);
+      throw new SchemaValidationError(`Unsupported schema version: ${backup.schemaVersion}. This app supports up to version 1.`);
     }
     if (!backup.data || typeof backup.data !== 'object') {
-      throw new Error('Invalid format: Missing "data" payload.');
+      throw new SchemaValidationError('Invalid format: Missing "data" payload.');
     }
 
-    const { pages = [], tasks = [], habits = [], habitLogs = [], events = [], dayColors = [], settings = {} } = backup.data;
+    const { 
+      pages = [], 
+      tasks = [], 
+      habits = [], 
+      habitLogs = [], 
+      events = [], 
+      dayColors = [], 
+      settings = {},
+      journalEntries = [],
+      notes = [],
+      timerSessions = [],
+      activityLogs = []
+    } = backup.data;
 
-    // Validate IDs on required arrays
-    const validateArray = (arr: any[], name: string, keyField: string = 'id') => {
+    // Strict date format regex: YYYY-MM-DD
+    const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
+
+    // Helper to validate array structure and individual records before opening transaction
+    const validateArray = (
+      arr: any[], 
+      name: string, 
+      keyField: string = 'id',
+      extraCheck?: (item: any, idx: number) => void
+    ) => {
       if (!Array.isArray(arr)) {
-        throw new Error(`Data format error: "${name}" must be an array.`);
+        throw new SchemaValidationError(`Data format error: "${name}" must be an array.`, name);
       }
       for (let i = 0; i < arr.length; i++) {
-        if (!arr[i] || typeof arr[i] !== 'object' || !arr[i][keyField]) {
-          throw new Error(`Corrupted record in "${name}" at index ${i}: missing unique "${keyField}".`);
+        const item = arr[i];
+        if (!item || typeof item !== 'object' || item[keyField] === undefined || item[keyField] === null || item[keyField] === '') {
+          throw new SchemaValidationError(
+            `Corrupted record in "${name}" at index ${i}: missing unique "${keyField}".`,
+            name,
+            i,
+            keyField
+          );
+        }
+        if (extraCheck) {
+          extraCheck(item, i);
         }
       }
     };
 
-    validateArray(pages, 'pages');
-    validateArray(tasks, 'tasks');
-    validateArray(habits, 'habits');
-    validateArray(habitLogs, 'habitLogs');
-    validateArray(events, 'events');
-    validateArray(dayColors, 'dayColors', 'date');
+    // Pre-validate all 10 entity stores
+    validateArray(pages, 'pages', 'id', (p, i) => {
+      if (typeof p.name !== 'string' || !p.name.trim()) {
+        throw new SchemaValidationError(`Corrupted record in "pages" at index ${i}: page name is required.`, 'pages', i, 'name');
+      }
+    });
+
+    validateArray(tasks, 'tasks', 'id', (t, i) => {
+      if (typeof t.pageId !== 'string' || !t.pageId) {
+        throw new SchemaValidationError(`Corrupted record in "tasks" at index ${i}: task requires pageId.`, 'tasks', i, 'pageId');
+      }
+      if (typeof t.title !== 'string') {
+        throw new SchemaValidationError(`Corrupted record in "tasks" at index ${i}: task title must be a string.`, 'tasks', i, 'title');
+      }
+      if (t.dueDate && (typeof t.dueDate !== 'string' || !DATE_REGEX.test(t.dueDate))) {
+        throw new SchemaValidationError(`Corrupted record in "tasks" at index ${i}: invalid dueDate format.`, 'tasks', i, 'dueDate');
+      }
+    });
+
+    validateArray(habits, 'habits', 'id', (h, i) => {
+      if (typeof h.name !== 'string' || !h.name.trim()) {
+        throw new SchemaValidationError(`Corrupted record in "habits" at index ${i}: habit name is required.`, 'habits', i, 'name');
+      }
+    });
+
+    validateArray(habitLogs, 'habitLogs', 'id', (hl, i) => {
+      if (typeof hl.date !== 'string' || !DATE_REGEX.test(hl.date)) {
+        throw new SchemaValidationError(`Corrupted record in "habitLogs" at index ${i}: invalid date format.`, 'habitLogs', i, 'date');
+      }
+    });
+
+    validateArray(events, 'events', 'id', (e, i) => {
+      if (typeof e.date !== 'string' || !DATE_REGEX.test(e.date)) {
+        throw new SchemaValidationError(`Corrupted record in "events" at index ${i}: invalid date format.`, 'events', i, 'date');
+      }
+      if (typeof e.title !== 'string') {
+        throw new SchemaValidationError(`Corrupted record in "events" at index ${i}: title must be a string.`, 'events', i, 'title');
+      }
+    });
+
+    validateArray(dayColors, 'dayColors', 'date', (d, i) => {
+      if (typeof d.date !== 'string' || !DATE_REGEX.test(d.date)) {
+        throw new SchemaValidationError(`Corrupted record in "dayColors" at index ${i}: invalid date format.`, 'dayColors', i, 'date');
+      }
+    });
+
+    validateArray(journalEntries, 'journalEntries', 'date', (j, i) => {
+      if (typeof j.date !== 'string' || !DATE_REGEX.test(j.date)) {
+        throw new SchemaValidationError(`Corrupted record in "journalEntries" at index ${i}: invalid date format.`, 'journalEntries', i, 'date');
+      }
+    });
+
+    validateArray(notes, 'notes', 'id', (n, i) => {
+      if (typeof n.title !== 'string') {
+        throw new SchemaValidationError(`Corrupted record in "notes" at index ${i}: title must be a string.`, 'notes', i, 'title');
+      }
+    });
+
+    validateArray(timerSessions, 'timerSessions', 'id', (s, i) => {
+      if (typeof s.startedAt !== 'number' || typeof s.endedAt !== 'number') {
+        throw new SchemaValidationError(`Corrupted record in "timerSessions" at index ${i}: startedAt and endedAt must be numbers.`, 'timerSessions', i);
+      }
+    });
+
+    validateArray(activityLogs, 'activityLogs', 'id', (a, i) => {
+      if (typeof a.timestamp !== 'number') {
+        throw new SchemaValidationError(`Corrupted record in "activityLogs" at index ${i}: timestamp must be a number.`, 'activityLogs', i);
+      }
+    });
+
+    if (settings && typeof settings !== 'object') {
+      throw new SchemaValidationError('Data format error: "settings" must be an object.');
+    }
 
     const db = await openDB();
 
@@ -1148,17 +1263,9 @@ export class Repository {
       habitLogs.forEach((l: HabitLog) => logStore.put(l));
       events.forEach((e: CalendarEvent) => eventStore.put(e));
       dayColors.forEach((d: DayColor) => dayColorStore.put(d));
-
-      const journalEntries = (backup.data && backup.data.journalEntries) || [];
       journalEntries.forEach((j: JournalEntry) => journalStore.put(j));
-
-      const notes = (backup.data && backup.data.notes) || [];
       notes.forEach((n: Note) => noteStore.put(n));
-
-      const timerSessions = (backup.data && backup.data.timerSessions) || [];
       timerSessions.forEach((s: any) => timerSessionStore.put(s));
-
-      const activityLogs = (backup.data && backup.data.activityLogs) || [];
       activityLogs.forEach((a: any) => activityLogStore.put(a));
 
       if (settings && typeof settings === 'object') {
