@@ -264,6 +264,42 @@ function parseMarkdown(md: string): React.ReactNode[] {
   return elements;
 }
 
+/**
+ * Validates URLs in markdown links to prevent XSS via javascript:, vbscript:, data:, etc.
+ * Only http:, https:, mailto:, or relative paths are permitted.
+ */
+export function isSafeUrl(rawUrl: string): boolean {
+  if (!rawUrl || typeof rawUrl !== 'string') return false;
+  const trimmed = rawUrl.trim();
+  if (!trimmed) return false;
+
+  // Disallow ASCII control characters, zero-width characters, and non-printable bytes
+  if (/[\u0000-\u001F\u007F-\u009F\u200B-\u200D\uFEFF]/.test(trimmed)) {
+    return false;
+  }
+
+  // Block dangerous schemes even if case-altered or obfuscated
+  const lower = trimmed.toLowerCase();
+  if (lower.startsWith('javascript:') || lower.startsWith('vbscript:') || lower.startsWith('data:')) {
+    return false;
+  }
+
+  // Allow relative internal anchors and paths
+  if (trimmed.startsWith('/') || trimmed.startsWith('./') || trimmed.startsWith('#')) {
+    return true;
+  }
+
+  try {
+    const parsed = new URL(trimmed, 'https://workspace.local');
+    const protocol = parsed.protocol.toLowerCase();
+    
+    // Explicit whitelist of benign protocols
+    return protocol === 'http:' || protocol === 'https:' || protocol === 'mailto:';
+  } catch {
+    return false;
+  }
+}
+
 // Inline formatting: Bold, Italic, Underline, Inline Code, Links
 function renderInlineMarkdown(text: string): React.ReactNode {
   if (!text) return text;
@@ -285,19 +321,33 @@ function renderInlineMarkdown(text: string): React.ReactNode {
     const linkMatch = remaining.match(/^\[([^\]]+)\]\(([^)]+)\)/);
     if (linkMatch) {
       const label = linkMatch[1];
-      const url = linkMatch[2];
-      tokens.push(
-        <a
-          key={`link-${keyIndex++}`}
-          href={url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-primary font-semibold hover:underline inline-flex items-center gap-1 group/link"
-        >
-          <span>{label}</span>
-          <ExternalLink className="w-3 h-3 opacity-60 group-hover/link:opacity-100 transition-opacity" />
-        </a>
-      );
+      const rawUrl = linkMatch[2];
+      const safe = isSafeUrl(rawUrl);
+
+      if (safe) {
+        tokens.push(
+          <a
+            key={`link-${keyIndex++}`}
+            href={rawUrl.trim()}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary font-semibold hover:underline inline-flex items-center gap-1 group/link"
+          >
+            <span>{label}</span>
+            <ExternalLink className="w-3 h-3 opacity-60 group-hover/link:opacity-100 transition-opacity" />
+          </a>
+        );
+      } else {
+        tokens.push(
+          <span
+            key={`unsafe-link-${keyIndex++}`}
+            className="text-txt-secondary line-through font-medium cursor-not-allowed"
+            title="Link blocked: unsafe protocol detected"
+          >
+            {label}
+          </span>
+        );
+      }
       remaining = remaining.slice(linkMatch[0].length);
       continue;
     }

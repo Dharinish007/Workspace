@@ -1,6 +1,9 @@
-import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
 import type { User, Session } from '@supabase/supabase-js';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
+
+const MAX_FAILED_ATTEMPTS = 5;
+const COOLDOWN_SECONDS = 30;
 
 interface AuthContextType {
   user: User | null;
@@ -29,6 +32,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(isSupabaseConfigured);
   const [authError, setAuthError] = useState<string | null>(null);
+
+  const failedAttemptsRef = useRef<number>(0);
+  const cooldownUntilRef = useRef<number>(0);
 
   useEffect(() => {
     if (!isSupabaseConfigured) {
@@ -73,20 +79,42 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return { success: false, error: err };
     }
 
+    const now = Date.now();
+    if (cooldownUntilRef.current > now) {
+      const waitSeconds = Math.ceil((cooldownUntilRef.current - now) / 1000);
+      const err = `Too many failed sign-in attempts. Please wait ${waitSeconds}s before trying again.`;
+      setAuthError(err);
+      return { success: false, error: err };
+    }
+
     setIsLoading(true);
     setAuthError(null);
 
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
-        email,
+        email: email.trim(),
         password,
       });
 
       if (error) {
+        failedAttemptsRef.current += 1;
+        if (failedAttemptsRef.current >= MAX_FAILED_ATTEMPTS) {
+          cooldownUntilRef.current = Date.now() + COOLDOWN_SECONDS * 1000;
+          failedAttemptsRef.current = 0;
+          const msg = `Too many failed sign-in attempts. Please wait ${COOLDOWN_SECONDS}s before trying again.`;
+          setAuthError(msg);
+          setIsLoading(false);
+          return { success: false, error: msg };
+        }
+
         setAuthError(error.message);
         setIsLoading(false);
         return { success: false, error: error.message };
       }
+
+      // Reset throttle on successful authentication
+      failedAttemptsRef.current = 0;
+      cooldownUntilRef.current = 0;
 
       setSession(data.session);
       setUser(data.user);
