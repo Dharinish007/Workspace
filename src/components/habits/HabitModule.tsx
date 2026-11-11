@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useWorkspace } from '../../context/WorkspaceContext';
 import { HabitViewTemplate, Habit } from '../../types';
 import { HabitTableView } from './HabitTableView';
@@ -12,12 +13,14 @@ import {
   Plus, 
   Calendar, 
   ChevronLeft, 
-  ChevronRight 
+  ChevronRight,
+  Settings
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export const HabitModule: React.FC = () => {
-  const { habits, deleteHabit } = useWorkspace();
+  const { habits, deleteHabit, settings } = useWorkspace();
+  const navigate = useNavigate();
 
   const [viewTemplate, setViewTemplate] = useState<HabitViewTemplate>('table');
   const [timeframe, setTimeframe] = useState<'week' | 'month'>('week');
@@ -25,6 +28,9 @@ export const HabitModule: React.FC = () => {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [habitToEdit, setHabitToEdit] = useState<Habit | null>(null);
+
+  const showArchived = settings?.modules?.habits?.showArchived ?? false;
+  const displayedHabits = showArchived ? habits : habits.filter(h => !(h as any).archived);
 
   const handlePrev = () => {
     const next = new Date(currentDate);
@@ -172,13 +178,25 @@ export const HabitModule: React.FC = () => {
             <Plus className="w-4 h-4" />
             <span>Add Habit</span>
           </motion.button>
+
+          {/* Module Settings Shortcut */}
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => navigate('/settings?tab=habits')}
+            className="h-10 w-10 bg-bg-card border border-border hover:bg-bg-hover text-txt-secondary hover:text-txt-primary rounded-xl flex items-center justify-center shadow-2xs transition-colors cursor-pointer"
+            title="Habit Settings"
+            aria-label="Habit Settings"
+          >
+            <Settings className="w-4 h-4" />
+          </motion.button>
         </div>
       </div>
 
       {/* Main View Content */}
       {viewTemplate === 'table' && (
         <HabitTableView
-          habits={habits}
+          habits={displayedHabits}
           timeframe={timeframe}
           currentDate={currentDate}
           onEditHabit={h => {
@@ -191,7 +209,7 @@ export const HabitModule: React.FC = () => {
 
       {viewTemplate === 'card' && (
         <HabitCardView
-          habits={habits}
+          habits={displayedHabits}
           onEditHabit={h => {
             setHabitToEdit(h);
             setIsModalOpen(true);
@@ -201,7 +219,7 @@ export const HabitModule: React.FC = () => {
       )}
 
       {viewTemplate === 'heatmap' && (
-        <HabitHeatmapView habits={habits} />
+        <HabitHeatmapView habits={displayedHabits} />
       )}
 
       {/* Habit Create / Edit Modal */}

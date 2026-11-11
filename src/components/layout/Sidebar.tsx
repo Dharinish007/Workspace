@@ -38,10 +38,20 @@ export const Sidebar: React.FC = () => {
     toggleSidebar,
     isMobileSidebarOpen,
     setIsMobileSidebarOpen,
-    setSelectedPageId
+    setSelectedPageId,
+    settings
   } = useWorkspace();
   const location = useLocation();
   const navigate = useNavigate();
+
+  // Filter visible nav items by module enabled status
+  const visibleNavItems = React.useMemo(() => {
+    return NAV_ITEMS.filter((item) => {
+      if (item.id === 'dashboard') return true;
+      const mod = settings?.modules?.[item.id as keyof typeof settings.modules];
+      return mod ? mod.enabled !== false : true;
+    });
+  }, [settings?.modules]);
 
   // Prevent background scrolling when mobile drawer is open (Escape is handled globally in WorkspaceContext)
   useEffect(() => {
@@ -134,7 +144,7 @@ export const Sidebar: React.FC = () => {
 
         {/* Scrollable Workspace Navigation List */}
         <div className="flex-1 overflow-y-auto overflow-x-hidden p-2 space-y-1.5 scrollbar-thin">
-          {NAV_ITEMS.map((item) => {
+          {visibleNavItems.map((item) => {
             const Icon = item.icon;
             const active = isItemActive(item.path);
 
@@ -242,7 +252,7 @@ export const Sidebar: React.FC = () => {
 
               {/* Drawer Navigation List */}
               <div className="flex-1 overflow-y-auto p-3 space-y-1.5 scrollbar-thin">
-                {NAV_ITEMS.map((item) => {
+                {visibleNavItems.map((item) => {
                   const Icon = item.icon;
                   const active = isItemActive(item.path);
 

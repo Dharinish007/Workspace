@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTimer } from '../hooks/useTimer';
 import { TimerSession } from '../types';
 
@@ -19,13 +20,15 @@ import { ActivityLogModal } from '../components/ActivityLogModal';
 import { 
   Activity, 
   Timer as TimerIcon, 
-  ListFilter 
+  ListFilter,
+  Settings
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export type TimerPageTab = 'focus' | 'records';
 
 export const TimerModule: React.FC = () => {
+  const navigate = useNavigate();
   const {
     state,
     config,
@@ -182,6 +185,19 @@ export const TimerModule: React.FC = () => {
               <span>Records ({sessions.filter(s => s.status === 'saved').length})</span>
             </button>
           </div>
+
+          {/* Module Settings Shortcut */}
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            type="button"
+            onClick={() => navigate('/settings?tab=timer')}
+            className="h-10 w-10 bg-bg-card border border-border hover:bg-bg-hover text-txt-secondary hover:text-txt-primary rounded-xl flex items-center justify-center shadow-2xs transition-colors cursor-pointer"
+            title="Focus Timer Settings"
+            aria-label="Focus Timer Settings"
+          >
+            <Settings className="w-4 h-4" />
+          </motion.button>
         </div>
       </div>
 

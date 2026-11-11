@@ -1,4 +1,6 @@
 import React, { useState, useMemo, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useWorkspace } from '../../context/WorkspaceContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Plus, 
@@ -10,7 +12,8 @@ import {
   ChevronDown, 
   Search, 
   FileText,
-  X
+  X,
+  Settings
 } from 'lucide-react';
 import { Note } from '../../types';
 import { PinnedNotesSection } from './PinnedNotesSection';
@@ -39,11 +42,18 @@ export const NotesOverview: React.FC<NotesOverviewProps> = ({
   onReorderPinnedNotes,
   onImportNotes,
 }) => {
+  const { settings } = useWorkspace();
+  const navigate = useNavigate();
+
   // Filters & View State
   const [isPinnedOnly, setIsPinnedOnly] = useState(false);
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
-  const [sortOption, setSortOption] = useState<SortOption>('recent');
-  const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
+  const [sortOption, setSortOption] = useState<SortOption>(() => {
+    return (settings?.modules?.notes?.defaultSort as SortOption) || 'recent';
+  });
+  const [viewMode, setViewMode] = useState<'list' | 'grid'>(() => {
+    return settings?.modules?.notes?.defaultViewMode === 'grid' ? 'grid' : 'list';
+  });
 
   // Dropdown states
   const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false);
@@ -211,6 +221,19 @@ export const NotesOverview: React.FC<NotesOverviewProps> = ({
             <Plus className="w-4 h-4 group-hover:rotate-90 transition-transform duration-200" />
             <span>New Note</span>
           </button>
+
+          {/* Module Settings Shortcut */}
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            type="button"
+            onClick={() => navigate('/settings?tab=journal_notes')}
+            className="h-10 w-10 bg-bg-card border border-border hover:bg-bg-hover text-txt-secondary hover:text-txt-primary rounded-xl flex items-center justify-center shadow-2xs transition-colors cursor-pointer"
+            title="Journal & Notes Settings"
+            aria-label="Journal & Notes Settings"
+          >
+            <Settings className="w-4 h-4" />
+          </motion.button>
         </div>
       </div>
 

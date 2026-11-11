@@ -19,9 +19,14 @@ import {
   UserSettings, 
   NavigationSection,
   JournalEntry,
-  Note 
+  Note,
+  GeneralSettings,
+  AppearanceSettings,
+  GlobalPreferences,
+  ModuleSettingsMap
 } from '../types';
 import { getErrorMessage } from '../utils/errorUtils';
+import { createDefaultUserSettings } from '../utils/defaultSettings';
 
 export interface ToastInfo {
   id: string;
@@ -117,10 +122,44 @@ interface WorkspaceContextType {
 
   // Settings
   updateSetting: (key: string, value: any) => Promise<void>;
+  updateGeneralSettings: (updates: Partial<GeneralSettings>) => Promise<void>;
+  updateAppearanceSettings: (updates: Partial<AppearanceSettings>) => Promise<void>;
+  updateGlobalPreferences: (updates: Partial<GlobalPreferences>) => Promise<void>;
+  updateModuleSettings: <K extends keyof ModuleSettingsMap>(module: K, updates: Partial<ModuleSettingsMap[K]>) => Promise<void>;
   toggleTheme: () => Promise<void>;
 }
 
 const WorkspaceContext = createContext<WorkspaceContextType | null>(null);
+
+export function applyAppearanceToDom(appearance?: AppearanceSettings) {
+  if (!appearance || typeof document === 'undefined') return;
+  let activeTheme = appearance.themeMode;
+  if (activeTheme === 'system') {
+    if (typeof window !== 'undefined' && window.matchMedia) {
+      activeTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    } else {
+      activeTheme = 'light';
+    }
+  }
+
+  document.documentElement.setAttribute('data-theme', activeTheme);
+  document.documentElement.setAttribute('data-bg-style', appearance.backgroundStyle || 'current');
+  document.documentElement.setAttribute('data-accent', appearance.accentColor || 'blue');
+  document.documentElement.setAttribute('data-font-size', appearance.fontSize || 'md');
+  document.documentElement.setAttribute('data-density', appearance.density || 'comfortable');
+  document.documentElement.setAttribute('data-animations', appearance.animations || 'full');
+
+  try {
+    localStorage.setItem('my_workspace_theme', activeTheme);
+    localStorage.setItem('my_workspace_bg_style', appearance.backgroundStyle || 'current');
+    localStorage.setItem('my_workspace_accent', appearance.accentColor || 'blue');
+    localStorage.setItem('my_workspace_font_size', appearance.fontSize || 'md');
+    localStorage.setItem('my_workspace_density', appearance.density || 'comfortable');
+    localStorage.setItem('my_workspace_animations', appearance.animations || 'full');
+  } catch {
+    // Ignore storage errors in sandboxed contexts
+  }
+}
 
 export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const navigate = useNavigate();
@@ -135,15 +174,7 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const [dayColors, setDayColors] = useState<DayColor[]>([]);
   const [journalEntries, setJournalEntries] = useState<JournalEntry[]>([]);
   const [notes, setNotes] = useState<Note[]>([]);
-  const [settings, setSettings] = useState<UserSettings>({
-    theme: 'light',
-    displayName: 'Dharinish',
-    weekStart: 'monday',
-    lastBackup: null,
-    habitDefaultColor: '#1A73E8',
-    eventDefaultColor: '#F97316',
-    backgroundStyle: 'current',
-  });
+  const [settings, setSettings] = useState<UserSettings>(createDefaultUserSettings);
 
   // Derive active section from URL pathname
   const activeSection = React.useMemo<NavigationSection>(() => {
@@ -322,17 +353,8 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       setSettings(s);
       setIsInitialized(true);
 
-      // Apply theme and background style to document element
-      const activeTheme = s.theme || 'light';
-      const activeBgStyle = s.backgroundStyle || 'current';
-      document.documentElement.setAttribute('data-theme', activeTheme);
-      document.documentElement.setAttribute('data-bg-style', activeBgStyle);
-      try {
-        localStorage.setItem('my_workspace_theme', activeTheme);
-        localStorage.setItem('my_workspace_bg_style', activeBgStyle);
-      } catch (e) {
-        // Ignore storage errors in sandboxed contexts
-      }
+      // Apply appearance settings to document element
+      applyAppearanceToDom(s.appearance);
     } catch (err: unknown) {
       console.error('Failed to initialize database:', err);
       setErrorMessage(getErrorMessage(err) || 'Database initialization error');
@@ -434,23 +456,160 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     navigate('/habits');
   }, [navigate]);
 
+  // Listen for OS system theme changes when in 'system' mode
+  useEffect(() => {
+    if (settings.appearance?.themeMode !== 'system' || typeof window === 'undefined' || !window.matchMedia) {
+      return;
+    }
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleChange = () => {
+      applyAppearanceToDom(settings.appearance);
+    };
+    mediaQuery.addEventListener('change', handleChange);
+    return () => mediaQuery.removeEventListener('change', handleChange);
+  }, [settings.appearance]);
+
+  const updateAppearanceSettings = useCallback(async (updates: Partial<AppearanceSettings>) => {
+    const prevAppearance = settings.appearance;
+    const newAppearance: AppearanceSettings = {
+      ...prevAppearance,
+      ...updates,
+    };
+    applyAppearanceToDom(newAppearance);
+
+    const resolvedTheme: 'light' | 'dark' = newAppearance.themeMode === 'system'
+      ? (typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+      : (newAppearance.themeMode === 'dark' ? 'dark' : 'light');
+
+    setSettings(prev => ({
+      ...prev,
+      theme: resolvedTheme,
+      backgroundStyle: newAppearance.backgroundStyle,
+      appearance: newAppearance,
+    }));
+
+    try {
+      await Repository.updateSetting('appearance', newAppearance);
+      await Repository.updateSetting('theme', resolvedTheme);
+      await Repository.updateSetting('backgroundStyle', newAppearance.backgroundStyle);
+      showToast('Appearance settings updated', undefined, undefined, 'success');
+    } catch (err: unknown) {
+      applyAppearanceToDom(prevAppearance);
+      setSettings(prev => ({
+        ...prev,
+        theme: prevAppearance.themeMode === 'dark' ? 'dark' : 'light',
+        backgroundStyle: prevAppearance.backgroundStyle,
+        appearance: prevAppearance,
+      }));
+      showToast(`Failed to update appearance: ${getErrorMessage(err)}`, undefined, undefined, 'error');
+    }
+  }, [settings.appearance, showToast]);
+
   // Theme toggle
   const toggleTheme = useCallback(async () => {
-    const nextTheme = settings.theme === 'light' ? 'dark' : 'light';
-    // Optimistic
-    document.documentElement.setAttribute('data-theme', nextTheme);
+    const currentTheme = settings.appearance?.themeMode === 'system'
+      ? (typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+      : (settings.theme || 'light');
+    const nextTheme: 'light' | 'dark' = currentTheme === 'light' ? 'dark' : 'light';
+    await updateAppearanceSettings({ themeMode: nextTheme });
+  }, [settings.appearance, settings.theme, updateAppearanceSettings]);
+
+  const updateGeneralSettings = useCallback(async (updates: Partial<GeneralSettings>) => {
+    const prevGeneral = settings.general;
+    const newGeneral: GeneralSettings = {
+      ...prevGeneral,
+      ...updates,
+    };
+
+    setSettings(prev => ({
+      ...prev,
+      displayName: newGeneral.displayName,
+      weekStart: newGeneral.weekStart,
+      general: newGeneral,
+    }));
+
     try {
-      localStorage.setItem('my_workspace_theme', nextTheme);
-    } catch (e) {}
-    setSettings(prev => ({ ...prev, theme: nextTheme }));
-    try {
-      await Repository.updateSetting('theme', nextTheme);
-    } catch (err) {
-      document.documentElement.setAttribute('data-theme', settings.theme);
-      setSettings(prev => ({ ...prev, theme: settings.theme }));
-      showToast('Failed to save theme setting', undefined, undefined, 'error');
+      await Repository.updateSetting('general', newGeneral);
+      if (updates.displayName !== undefined) {
+        await Repository.updateSetting('displayName', newGeneral.displayName);
+      }
+      if (updates.weekStart !== undefined) {
+        await Repository.updateSetting('weekStart', newGeneral.weekStart);
+      }
+      showToast('General preferences updated', undefined, undefined, 'success');
+    } catch (err: unknown) {
+      setSettings(prev => ({
+        ...prev,
+        displayName: prevGeneral.displayName,
+        weekStart: prevGeneral.weekStart,
+        general: prevGeneral,
+      }));
+      showToast(`Failed to update general preferences: ${getErrorMessage(err)}`, undefined, undefined, 'error');
     }
-  }, [settings.theme, showToast]);
+  }, [settings.general, showToast]);
+
+  const updateGlobalPreferences = useCallback(async (updates: Partial<GlobalPreferences>) => {
+    const prevGlobal = settings.globalPreferences;
+    const newGlobal: GlobalPreferences = {
+      ...prevGlobal,
+      ...updates,
+    };
+
+    setSettings(prev => ({
+      ...prev,
+      globalPreferences: newGlobal,
+    }));
+
+    try {
+      await Repository.updateSetting('globalPreferences', newGlobal);
+      showToast('Global preferences updated', undefined, undefined, 'success');
+    } catch (err: unknown) {
+      setSettings(prev => ({ ...prev, globalPreferences: prevGlobal }));
+      showToast(`Failed to update preferences: ${getErrorMessage(err)}`, undefined, undefined, 'error');
+    }
+  }, [settings.globalPreferences, showToast]);
+
+  const updateModuleSettings = useCallback(async <K extends keyof ModuleSettingsMap>(
+    moduleName: K,
+    updates: Partial<ModuleSettingsMap[K]>
+  ) => {
+    const prevModules = settings.modules;
+    const prevModule = settings.modules[moduleName];
+    const newModule = {
+      ...prevModule,
+      ...updates,
+    };
+    const newModules: ModuleSettingsMap = {
+      ...prevModules,
+      [moduleName]: newModule,
+    };
+
+    setSettings(prev => ({
+      ...prev,
+      modules: newModules,
+      ...(moduleName === 'timer' ? {
+        timerConfig: {
+          workMinutes: (newModule as any).workMinutes,
+          shortBreakMinutes: (newModule as any).shortBreakMinutes,
+          longBreakMinutes: (newModule as any).longBreakMinutes,
+          longBreakInterval: (newModule as any).longBreakInterval,
+          dailyGoalMinutes: (newModule as any).dailyGoalMinutes,
+        }
+      } : {})
+    }));
+
+    try {
+      await Repository.updateSetting('modules', newModules);
+      await Repository.updateSetting(`module_${moduleName}`, newModule);
+      if (moduleName === 'timer') {
+        await Repository.updateSetting('timerConfig', newModule);
+      }
+      showToast(`${moduleName.charAt(0).toUpperCase() + moduleName.slice(1)} settings saved`, undefined, undefined, 'success');
+    } catch (err: unknown) {
+      setSettings(prev => ({ ...prev, modules: prevModules }));
+      showToast(`Failed to update ${moduleName} settings: ${getErrorMessage(err)}`, undefined, undefined, 'error');
+    }
+  }, [settings.modules, showToast]);
 
   const updateSetting = useCallback(async (key: string, value: any) => {
     const prevVal = (settings as any)[key];
@@ -953,6 +1112,10 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     reorderPinnedNotes,
     refreshNotes,
     updateSetting,
+    updateGeneralSettings,
+    updateAppearanceSettings,
+    updateGlobalPreferences,
+    updateModuleSettings,
     toggleTheme,
   };
 

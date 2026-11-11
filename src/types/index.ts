@@ -89,26 +89,8 @@ export interface Note {
   updatedAt: string;
 }
 
-export type BackgroundStyle = 'current' | 'paper' | 'notion';
-
-export interface TimerSettingsConfig {
-  workMinutes: number;
-  shortBreakMinutes: number;
-  longBreakMinutes: number;
-  longBreakInterval: number;
-  dailyGoalMinutes: number | null;
-}
-
-export interface UserSettings {
-  theme: 'light' | 'dark';
-  displayName: string;
-  weekStart: 'monday' | 'sunday';
-  lastBackup: string | null;
-  habitDefaultColor?: string;
-  eventDefaultColor?: string;
-  backgroundStyle?: BackgroundStyle;
-  timerConfig?: TimerSettingsConfig;
-}
+export * from './settings';
+import type { UserSettings } from './settings';
 
 import type { TimerSession, ActiveTimerState, ActivityLogEvent } from '../features/timer/types';
 

@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useWorkspace } from '../../context/WorkspaceContext';
 import { JournalEntry, JournalMood } from '../../types';
 import { formatLocalDate } from '../../db/indexedDB';
@@ -10,7 +11,8 @@ import {
   ChevronDown, 
   Calendar as CalendarIcon, 
   Trash2,
-  Edit2
+  Edit2,
+  Settings
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -35,7 +37,8 @@ interface JournalListProps {
 }
 
 export const JournalList: React.FC<JournalListProps> = ({ onOpenDate }) => {
-  const { journalEntries, deleteJournalEntry } = useWorkspace();
+  const { journalEntries, deleteJournalEntry, settings } = useWorkspace();
+  const navigate = useNavigate();
 
   // Search query & sort order
   const [searchQuery, setSearchQuery] = useState('');
@@ -161,14 +164,15 @@ export const JournalList: React.FC<JournalListProps> = ({ onOpenDate }) => {
 
   const handleDeleteEntry = async (e: React.MouseEvent, dateStr: string) => {
     e.stopPropagation();
-    if (window.confirm(`Delete journal entry for ${formatRowDate(dateStr)}?`)) {
+    const shouldConfirm = settings?.globalPreferences?.confirmBeforeDelete ?? true;
+    if (!shouldConfirm || window.confirm(`Delete journal entry for ${formatRowDate(dateStr)}?`)) {
       await deleteJournalEntry(dateStr);
     }
   };
 
   return (
     <div className="max-w-6xl mx-auto p-4 md:p-6 lg:p-8 space-y-6 sm:space-y-8">
-      {/* Top Banner Row: Title, Subtitle & "+ New Entry" button */}
+      {/* Top Banner Row: Title, Subtitle & Action buttons */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-serif font-bold text-txt-primary flex items-center gap-2">
@@ -180,16 +184,30 @@ export const JournalList: React.FC<JournalListProps> = ({ onOpenDate }) => {
           </p>
         </div>
 
-        {/* "+ New Entry" Button (opens or creates today's entry) */}
-        <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          onClick={() => onOpenDate(todayDateStr)}
-          className="self-start sm:self-center px-4 py-2.5 rounded-xl bg-primary hover:bg-primary-hover text-white text-xs sm:text-sm font-semibold flex items-center gap-2 shadow-xs transition-colors cursor-pointer"
-        >
-          <Plus className="w-4 h-4" />
-          <span>New Entry</span>
-        </motion.button>
+        <div className="flex items-center gap-2.5 self-start sm:self-center">
+          {/* "+ New Entry" Button (opens or creates today's entry) */}
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => onOpenDate(todayDateStr)}
+            className="px-4 py-2.5 rounded-xl bg-primary hover:bg-primary-hover text-white text-xs sm:text-sm font-semibold flex items-center gap-2 shadow-xs transition-colors cursor-pointer"
+          >
+            <Plus className="w-4 h-4" />
+            <span>New Entry</span>
+          </motion.button>
+
+          {/* Module Settings Shortcut */}
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => navigate('/settings?tab=journal_notes')}
+            className="h-10 w-10 bg-bg-card border border-border hover:bg-bg-hover text-txt-secondary hover:text-txt-primary rounded-xl flex items-center justify-center shadow-2xs transition-colors cursor-pointer"
+            title="Journal & Notes Settings"
+            aria-label="Journal & Notes Settings"
+          >
+            <Settings className="w-4 h-4" />
+          </motion.button>
+        </div>
       </div>
 
       {/* Two Summary Cards: Mini Calendar & This Month Stats */}

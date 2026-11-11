@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useWorkspace } from '../../context/WorkspaceContext';
 import { Task, Priority } from '../../types';
+import { formatLocalDate } from '../../db/indexedDB';
 import { X, Calendar, Star, Flag, Folder } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -17,7 +18,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({
   taskToEdit,
   defaultPageId,
 }) => {
-  const { pages, createTask, updateTask, moveTaskToPage } = useWorkspace();
+  const { pages, createTask, updateTask, moveTaskToPage, settings } = useWorkspace();
 
   const activePages = pages.filter(p => !p.archived);
 
@@ -38,12 +39,23 @@ export const TaskModal: React.FC<TaskModalProps> = ({
     } else {
       setTitle('');
       setPageId(defaultPageId || activePages[0]?.id || '');
-      setPriority('medium');
+      const defPriority = settings?.modules?.todo?.defaultPriority ?? 'medium';
+      setPriority(defPriority);
       setImportant(false);
-      setDueDate('');
+
+      let initialDue = '';
+      const defDueDate = settings?.modules?.todo?.defaultDueDate ?? 'none';
+      if (defDueDate === 'today') {
+        initialDue = formatLocalDate(new Date());
+      } else if (defDueDate === 'tomorrow') {
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        initialDue = formatLocalDate(tomorrow);
+      }
+      setDueDate(initialDue);
     }
     setError(null);
-  }, [taskToEdit, defaultPageId, activePages, isOpen]);
+  }, [taskToEdit, defaultPageId, activePages, isOpen, settings]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

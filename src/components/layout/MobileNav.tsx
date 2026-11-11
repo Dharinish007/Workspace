@@ -7,7 +7,7 @@ import { motion } from 'framer-motion';
 
 export const MobileNav: React.FC = () => {
   const navigate = useNavigate();
-  const { activeSection } = useWorkspace();
+  const { activeSection, settings } = useWorkspace();
 
   const items = [
     { id: 'dashboard' as NavigationSection, label: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
@@ -16,7 +16,11 @@ export const MobileNav: React.FC = () => {
     { id: 'habits' as NavigationSection, label: 'Habits', icon: Flame, path: '/habits' },
     { id: 'notes' as NavigationSection, label: 'Notes', icon: FileText, path: '/notes' },
     { id: 'timer' as NavigationSection, label: 'Timer', icon: Timer, path: '/timer' },
-  ];
+  ].filter((item) => {
+    if (item.id === 'dashboard') return true;
+    const mod = settings?.modules?.[item.id as keyof typeof settings.modules];
+    return mod ? mod.enabled !== false : true;
+  });
 
   return (
     <nav 

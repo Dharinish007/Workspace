@@ -18,9 +18,32 @@ import { TimerModule } from './features/timer/pages/TimerModule';
 import { NotFoundPage } from './components/common/NotFoundPage';
 import { motion, AnimatePresence } from 'framer-motion';
 
+const RootRedirect: React.FC = () => {
+  const { settings } = useWorkspace();
+  const startupBehavior = settings.globalPreferences?.startupBehavior ?? 'landing_page';
+
+  if (startupBehavior === 'last_visited') {
+    const lastRoute = localStorage.getItem('my_workspace_last_route');
+    if (lastRoute && lastRoute !== '/' && !lastRoute.startsWith('/settings')) {
+      return <Navigate to={lastRoute} replace />;
+    }
+  }
+
+  const landing = settings.general?.defaultLandingPage || 'dashboard';
+  const target = landing === 'tasks' ? '/tasks' : `/${landing}`;
+  return <Navigate to={target} replace />;
+};
+
 const WorkspaceContent: React.FC = () => {
   const { isInitialized, errorMessage } = useWorkspace();
   const location = useLocation();
+
+  // Track last visited route for 'last_visited' startup behavior
+  React.useEffect(() => {
+    if (location.pathname && location.pathname !== '/' && !location.pathname.startsWith('/settings')) {
+      localStorage.setItem('my_workspace_last_route', location.pathname + location.search);
+    }
+  }, [location.pathname, location.search]);
 
   if (errorMessage) {
     return (
@@ -73,7 +96,7 @@ const WorkspaceContent: React.FC = () => {
               transition={{ duration: 0.16, ease: 'easeOut' }}
             >
               <Routes location={location}>
-                <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                <Route path="/" element={<RootRedirect />} />
                 <Route path="/dashboard" element={<DashboardModule />} />
                 <Route path="/tasks" element={<TodoModule />} />
                 <Route path="/pages" element={<TodoModule />} />

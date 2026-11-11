@@ -51,6 +51,108 @@
 }
 
 /* ==========================================================================
+   Accent Colors: Custom Palette (Overridable via data-accent)
+   ========================================================================== */
+[data-accent="blue"] {
+  --color-primary: #1A73E8;
+  --color-primary-hover: #1557B0;
+  --color-primary-light: #E8F0FE;
+}
+[data-theme="dark"][data-accent="blue"] {
+  --color-primary: #1A73E8;
+  --color-primary-hover: #1557B0;
+  --color-primary-light: #1C2D47;
+}
+
+[data-accent="indigo"] {
+  --color-primary: #4F46E5;
+  --color-primary-hover: #4338CA;
+  --color-primary-light: #EEF2FF;
+}
+[data-theme="dark"][data-accent="indigo"] {
+  --color-primary: #6366F1;
+  --color-primary-hover: #4F46E5;
+  --color-primary-light: #1E1B4B;
+}
+
+[data-accent="violet"] {
+  --color-primary: #7C3AED;
+  --color-primary-hover: #6D28D9;
+  --color-primary-light: #F5F3FF;
+}
+[data-theme="dark"][data-accent="violet"] {
+  --color-primary: #8B5CF6;
+  --color-primary-hover: #7C3AED;
+  --color-primary-light: #2E1065;
+}
+
+[data-accent="emerald"] {
+  --color-primary: #059669;
+  --color-primary-hover: #047857;
+  --color-primary-light: #ECFDF5;
+}
+[data-theme="dark"][data-accent="emerald"] {
+  --color-primary: #10B981;
+  --color-primary-hover: #059669;
+  --color-primary-light: #064E3B;
+}
+
+[data-accent="rose"] {
+  --color-primary: #E11D48;
+  --color-primary-hover: #BE123C;
+  --color-primary-light: #FFF1F2;
+}
+[data-theme="dark"][data-accent="rose"] {
+  --color-primary: #F43F5E;
+  --color-primary-hover: #E11D48;
+  --color-primary-light: #4C0519;
+}
+
+[data-accent="amber"] {
+  --color-primary: #D97706;
+  --color-primary-hover: #B45309;
+  --color-primary-light: #FFFBEB;
+}
+[data-theme="dark"][data-accent="amber"] {
+  --color-primary: #F59E0B;
+  --color-primary-hover: #D97706;
+  --color-primary-light: #451A03;
+}
+
+/* Font Size Options */
+html[data-font-size="sm"] {
+  font-size: 14px;
+}
+html[data-font-size="md"] {
+  font-size: 16px;
+}
+html[data-font-size="lg"] {
+  font-size: 18px;
+}
+
+/* Layout Density */
+html[data-density="compact"] main {
+  padding-top: 0.75rem !important;
+  padding-bottom: 0.75rem !important;
+}
+
+/* Animation Preferences */
+html[data-animations="none"] *,
+html[data-animations="none"] *::before,
+html[data-animations="none"] *::after {
+  animation: none !important;
+  transition: none !important;
+}
+
+html[data-animations="reduced"] *,
+html[data-animations="reduced"] *::before,
+html[data-animations="reduced"] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+}
+
+/* ==========================================================================
    Paper Texture UI Theme: Design Tokens (Isolated behind data-bg-style="paper")
    ========================================================================== */
 

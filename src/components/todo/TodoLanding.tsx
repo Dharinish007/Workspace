@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useWorkspace } from '../../context/WorkspaceContext';
 import { Task, TaskFilter } from '../../types';
 import { PageCard } from './PageCard';
@@ -10,7 +11,8 @@ import { formatLocalDate } from '../../db/indexedDB';
 import { 
   Plus, 
   Archive, 
-  FolderPlus
+  FolderPlus,
+  Settings
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -20,6 +22,7 @@ interface TodoLandingProps {
 
 export const TodoLanding: React.FC<TodoLandingProps> = ({ onOpenPage }) => {
   const { pages, tasks, reorderPages } = useWorkspace();
+  const navigate = useNavigate();
 
   const [activeFilter, setActiveFilter] = useState<TaskFilter>('all');
   const [isPageModalOpen, setIsPageModalOpen] = useState(false);
@@ -115,6 +118,18 @@ export const TodoLanding: React.FC<TodoLandingProps> = ({ onOpenPage }) => {
           >
             <FolderPlus className="w-4 h-4" />
             <span>New Page</span>
+          </motion.button>
+
+          {/* Module Settings Shortcut */}
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => navigate('/settings?tab=todo')}
+            className="h-10 w-10 bg-bg-card border border-border hover:bg-bg-hover text-txt-secondary hover:text-txt-primary rounded-xl flex items-center justify-center shadow-2xs transition-colors cursor-pointer"
+            title="To-Do Settings"
+            aria-label="To-Do Settings"
+          >
+            <Settings className="w-4 h-4" />
           </motion.button>
         </div>
       </div>

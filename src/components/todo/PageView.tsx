@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useWorkspace } from '../../context/WorkspaceContext';
 import { Task, TaskFilter } from '../../types';
 import { IconRenderer } from '../common/IconRegistry';
@@ -11,7 +12,8 @@ import {
   ArrowLeft, 
   Archive, 
   Edit3, 
-  CheckSquare
+  CheckSquare,
+  Settings
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -26,6 +28,7 @@ export const PageView: React.FC<PageViewProps> = ({
   onBackToOverview,
   onOpenArchived,
 }) => {
+  const navigate = useNavigate();
   const { 
     pages, 
     tasks, 
@@ -303,6 +306,18 @@ export const PageView: React.FC<PageViewProps> = ({
               <kbd className="hidden sm:inline-block ml-1 px-1.5 py-0.5 text-xs font-mono font-bold bg-white/20 text-white rounded-md">
                 N
               </kbd>
+            </motion.button>
+
+            {/* Module Settings Shortcut */}
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => navigate('/settings?tab=todo')}
+              className="h-10 w-10 bg-bg-card border border-border hover:bg-bg-hover text-txt-secondary hover:text-txt-primary rounded-xl flex items-center justify-center shadow-2xs transition-colors cursor-pointer"
+              title="To-Do Settings"
+              aria-label="To-Do Settings"
+            >
+              <Settings className="w-4 h-4" />
             </motion.button>
           </div>
         </div>

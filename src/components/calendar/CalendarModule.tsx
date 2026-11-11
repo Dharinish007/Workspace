@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useWorkspace } from '../../context/WorkspaceContext';
 import { formatLocalDate } from '../../db/indexedDB';
 import { CalendarView, CalendarEvent } from '../../types';
@@ -10,14 +11,18 @@ import { DayColorPickerModal } from './DayColorPickerModal';
 import { 
   ChevronLeft, 
   ChevronRight, 
-  Plus
+  Plus,
+  Settings
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export const CalendarModule: React.FC = () => {
-  const { pages, habits } = useWorkspace();
+  const { pages, habits, settings } = useWorkspace();
+  const navigate = useNavigate();
 
-  const [currentView, setCurrentView] = useState<CalendarView>('month');
+  const [currentView, setCurrentView] = useState<CalendarView>(() => {
+    return (settings?.modules?.calendar?.defaultView as CalendarView) || 'month';
+  });
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
   const [selectedDateStr, setSelectedDateStr] = useState<string>(formatLocalDate(new Date()));
 
@@ -25,7 +30,9 @@ export const CalendarModule: React.FC = () => {
   const [showTodos, setShowTodos] = useState(true);
   const [showHabits, setShowHabits] = useState(true);
   const [showEvents, setShowEvents] = useState(true);
-  const [showCompleted, setShowCompleted] = useState(true);
+  const [showCompleted, setShowCompleted] = useState(() => {
+    return settings?.modules?.calendar?.showCompletedTasks ?? true;
+  });
 
   // Modals
   const [isEventModalOpen, setIsEventModalOpen] = useState(false);
@@ -215,6 +222,18 @@ export const CalendarModule: React.FC = () => {
           >
             <Plus className="w-4 h-4" />
             <span>Add Event</span>
+          </motion.button>
+
+          {/* Module Settings Shortcut */}
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => navigate('/settings?tab=calendar')}
+            className="h-10 w-10 bg-bg-card border border-border hover:bg-bg-hover text-txt-secondary hover:text-txt-primary rounded-xl flex items-center justify-center shadow-2xs transition-colors cursor-pointer"
+            title="Calendar Settings"
+            aria-label="Calendar Settings"
+          >
+            <Settings className="w-4 h-4" />
           </motion.button>
         </div>
       </div>

@@ -24,6 +24,7 @@ import {
 } from '../types';
 import { TimerRepository } from '../features/timer/repository/timerRepository';
 import { SchemaValidationError, getErrorMessage } from '../utils/errorUtils';
+import { mergeWithDefaultSettings } from '../utils/defaultSettings';
 
 export { SchemaValidationError };
 
@@ -1020,19 +1021,12 @@ export class Repository {
       const request = store.getAll();
       request.onsuccess = () => {
         const results = request.result as { key: string; value: any }[];
-        const settingsMap: any = {
-          theme: 'light',
-          displayName: 'Dharinish',
-          weekStart: 'monday',
-          lastBackup: null,
-          habitDefaultColor: '#1A73E8',
-          eventDefaultColor: '#F97316',
-          backgroundStyle: 'current',
-        };
+        const rawMap: Record<string, any> = {};
         results.forEach(r => {
-          settingsMap[r.key] = r.value;
+          rawMap[r.key] = r.value;
         });
-        resolve(settingsMap as UserSettings);
+        const merged = mergeWithDefaultSettings(rawMap);
+        resolve(merged);
       };
       request.onerror = () => reject(request.error);
     });

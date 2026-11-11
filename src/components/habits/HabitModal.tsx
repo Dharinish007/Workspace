@@ -38,7 +38,7 @@ export const HabitModal: React.FC<HabitModalProps> = ({
   onClose,
   habitToEdit,
 }) => {
-  const { createHabit, updateHabit } = useWorkspace();
+  const { createHabit, updateHabit, settings } = useWorkspace();
 
   const [name, setName] = useState('');
   const [icon, setIcon] = useState('Flame');
@@ -63,11 +63,12 @@ export const HabitModal: React.FC<HabitModalProps> = ({
       setName('');
       setIcon('Flame');
       setColor('#1A73E8');
-      setScheduleType('daily');
+      const defaultFreq = settings?.modules?.habits?.defaultFrequency ?? 'daily';
+      setScheduleType(defaultFreq === 'weekdays' ? 'weekdays' : 'daily');
       setSelectedDays([1, 2, 3, 4, 5]);
     }
     setError(null);
-  }, [habitToEdit, isOpen]);
+  }, [habitToEdit, isOpen, settings]);
 
   const toggleDay = (day: number) => {
     if (selectedDays.includes(day)) {
