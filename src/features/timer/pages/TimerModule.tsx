@@ -116,17 +116,14 @@ export const TimerModule: React.FC = () => {
       {/* Top Header & View Controls (Consistent with Dashboard & Habit modules) */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b border-border">
         <div className="flex items-center gap-3">
-          <motion.div
-            whileHover={{ rotate: 10 }}
-            className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shadow-2xs shrink-0"
-          >
+          <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
             <TimerIcon className="w-5 h-5 text-primary" />
-          </motion.div>
+          </div>
           <div>
-            <h1 className="text-[26px] sm:text-[28px] font-bold text-txt-primary tracking-tight font-serif">
+            <h1 className="text-2xl sm:text-3xl font-bold text-txt-primary tracking-tight font-sans">
               Focus Timer
             </h1>
-            <p className="text-[13px] sm:text-[14px] font-sans text-txt-secondary font-normal mt-0.5">
+            <p className="text-sm font-sans text-txt-secondary font-normal mt-0.5">
               Track focus sessions, use Pomodoro intervals or an open stopwatch, and review session records.
             </p>
           </div>
@@ -135,69 +132,65 @@ export const TimerModule: React.FC = () => {
         {/* View Controls: Activity Log & Tab Switcher */}
         <div className="flex flex-wrap items-center gap-3">
           {/* View Activity Log */}
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.96 }}
+          <button
             type="button"
             onClick={() => setIsActivityLogOpen(true)}
-            className="h-10 px-3.5 rounded-xl bg-bg-card border border-border hover:border-primary text-txt-secondary hover:text-primary flex items-center gap-2 text-xs font-bold shadow-2xs transition-colors cursor-pointer"
+            className="h-9 px-3.5 rounded-lg bg-bg-card border border-border hover:border-border-interactive text-txt-secondary hover:text-txt-primary flex items-center gap-2 text-xs font-medium shadow-xs transition-colors cursor-pointer active:scale-[0.98]"
             title="Open Activity Audit Log"
           >
             <Activity className="w-4 h-4 text-primary" />
             <span>Activity Log</span>
-          </motion.button>
+          </button>
 
           {/* Segmented Tab Switcher */}
-          <div className="flex items-center h-10 bg-bg-card border border-border rounded-xl p-1 shadow-2xs relative">
+          <div className="inline-flex items-center p-1 bg-bg-subtle border border-border rounded-xl relative">
             <button
               type="button"
               onClick={() => setActiveTab('focus')}
-              className={`relative flex items-center gap-1.5 h-8 px-3.5 text-xs font-sans font-bold rounded-lg transition-colors cursor-pointer z-10 ${
-                activeTab === 'focus' ? 'text-white' : 'text-txt-secondary hover:text-txt-primary'
+              className={`relative flex items-center gap-1.5 h-7 px-3 text-xs font-sans font-medium rounded-lg transition-colors cursor-pointer z-10 ${
+                activeTab === 'focus' ? 'text-txt-primary shadow-xs font-semibold' : 'text-txt-secondary hover:text-txt-primary'
               }`}
             >
               {activeTab === 'focus' && (
                 <motion.div
                   layoutId="timerMainTabPill"
-                  className="absolute inset-0 bg-primary rounded-lg -z-10 shadow-xs"
-                  transition={{ type: "spring", stiffness: 450, damping: 35 }}
+                  className="absolute inset-0 bg-bg-card rounded-lg -z-10 shadow-xs border border-border/40"
+                  transition={{ duration: 0.15 }}
                 />
               )}
-              <TimerIcon className="w-4 h-4" />
+              <TimerIcon className="w-3.5 h-3.5 text-primary" />
               <span>Focus Timer</span>
             </button>
 
             <button
               type="button"
               onClick={() => setActiveTab('records')}
-              className={`relative flex items-center gap-1.5 h-8 px-3.5 text-xs font-sans font-bold rounded-lg transition-colors cursor-pointer z-10 ${
-                activeTab === 'records' ? 'text-white' : 'text-txt-secondary hover:text-txt-primary'
+              className={`relative flex items-center gap-1.5 h-7 px-3 text-xs font-sans font-medium rounded-lg transition-colors cursor-pointer z-10 ${
+                activeTab === 'records' ? 'text-txt-primary shadow-xs font-semibold' : 'text-txt-secondary hover:text-txt-primary'
               }`}
             >
               {activeTab === 'records' && (
                 <motion.div
                   layoutId="timerMainTabPill"
-                  className="absolute inset-0 bg-primary rounded-lg -z-10 shadow-xs"
-                  transition={{ type: "spring", stiffness: 450, damping: 35 }}
+                  className="absolute inset-0 bg-bg-card rounded-lg -z-10 shadow-xs border border-border/40"
+                  transition={{ duration: 0.15 }}
                 />
               )}
-              <ListFilter className="w-4 h-4" />
+              <ListFilter className="w-3.5 h-3.5 text-txt-secondary" />
               <span>Records ({sessions.filter(s => s.status === 'saved').length})</span>
             </button>
           </div>
 
           {/* Module Settings Shortcut */}
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+          <button
             type="button"
             onClick={() => navigate('/settings?tab=timer')}
-            className="h-10 w-10 bg-bg-card border border-border hover:bg-bg-hover text-txt-secondary hover:text-txt-primary rounded-xl flex items-center justify-center shadow-2xs transition-colors cursor-pointer"
+            className="h-9 w-9 bg-bg-card border border-border hover:bg-bg-hover text-txt-secondary hover:text-txt-primary rounded-lg flex items-center justify-center shadow-xs transition-colors cursor-pointer active:scale-[0.98]"
             title="Focus Timer Settings"
             aria-label="Focus Timer Settings"
           >
             <Settings className="w-4 h-4" />
-          </motion.button>
+          </button>
         </div>
       </div>
 

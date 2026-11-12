@@ -25,7 +25,7 @@ export const PomodoroCycleCard: React.FC<PomodoroCycleCardProps> = ({
   return (
     <div className="flex flex-col justify-between h-full space-y-4">
       <div>
-        <div className="text-xs font-bold uppercase tracking-wider text-txt-muted mb-2.5 font-sans">
+        <div className="text-xs font-medium text-txt-secondary mb-2.5 font-sans">
           Pomodoro Cycle
         </div>
 
@@ -51,7 +51,7 @@ export const PomodoroCycleCard: React.FC<PomodoroCycleCardProps> = ({
               return (
                 <div
                   key={idx}
-                  className="w-7 h-7 rounded-full border-2 border-primary bg-primary/15 flex items-center justify-center animate-pulse"
+                  className="w-7 h-7 rounded-full border-2 border-primary bg-primary/15 flex items-center justify-center"
                   title={`Block ${idx + 1}: In Progress`}
                 >
                   <div className="w-2 h-2 rounded-full bg-primary" />

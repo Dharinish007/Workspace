@@ -1,5 +1,6 @@
 import React from 'react';
 import { TimerMode, PomodoroPhase, TimerStatus } from '../types';
+import { Timer, Target, Coffee, Moon } from 'lucide-react';
 
 interface TimerDialProps {
   mode: TimerMode;
@@ -29,7 +30,7 @@ export const TimerDial: React.FC<TimerDialProps> = ({
     if (mode === 'stopwatch') return 'Stopwatch';
     switch (phase) {
       case 'work':
-        return 'Focus (Work)';
+        return 'Focus';
       case 'shortBreak':
         return 'Short Break';
       case 'longBreak':
@@ -37,15 +38,15 @@ export const TimerDial: React.FC<TimerDialProps> = ({
     }
   };
 
-  const getPhaseIcon = () => {
-    if (mode === 'stopwatch') return '⏱️';
+  const renderPhaseIcon = () => {
+    if (mode === 'stopwatch') return <Timer className="w-3.5 h-3.5" />;
     switch (phase) {
       case 'work':
-        return '🍅';
+        return <Target className="w-3.5 h-3.5" />;
       case 'shortBreak':
-        return '☕';
+        return <Coffee className="w-3.5 h-3.5" />;
       case 'longBreak':
-        return '🧘';
+        return <Moon className="w-3.5 h-3.5" />;
     }
   };
 
@@ -94,8 +95,7 @@ export const TimerDial: React.FC<TimerDialProps> = ({
               strokeDasharray={circumference}
               strokeDashoffset={status === 'running' ? circumference * 0.25 : circumference}
               strokeLinecap="round"
-              className={status === 'running' ? 'animate-spin origin-center' : ''}
-              style={{ animationDuration: '6s' }}
+              className="transition-[stroke-dashoffset] duration-300 ease-out"
             />
           )}
         </svg>
@@ -103,10 +103,8 @@ export const TimerDial: React.FC<TimerDialProps> = ({
         {/* Center Text Display */}
         <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-4">
           {/* Phase Badge */}
-          <div className="flex items-center gap-1.5 text-xs font-semibold text-primary bg-primary/10 border border-primary/20 px-3 py-1 rounded-full mb-1">
-            <span role="img" aria-label={getPhaseLabel()}>
-              {getPhaseIcon()}
-            </span>
+          <div className="flex items-center gap-1.5 text-xs font-medium text-txt-secondary bg-bg-subtle border border-border px-2.5 py-1 rounded-md mb-1">
+            <span className="text-primary">{renderPhaseIcon()}</span>
             <span>{getPhaseLabel()}</span>
           </div>
 
@@ -123,12 +121,12 @@ export const TimerDial: React.FC<TimerDialProps> = ({
             {mode === 'pomodoro' && formattedPlannedTime ? (
               <span>of {formattedPlannedTime}</span>
             ) : status === 'running' ? (
-              <span className="flex items-center gap-1.5 text-primary font-semibold">
-                <span className="w-2 h-2 rounded-full bg-primary animate-ping inline-block" />
+              <span className="flex items-center gap-1.5 text-primary font-medium">
+                <span className="w-1.5 h-1.5 rounded-full bg-primary inline-block" />
                 Active Focus
               </span>
             ) : status === 'paused' ? (
-              <span className="text-amber-600 dark:text-amber-400 font-semibold">Paused</span>
+              <span className="text-amber-600 dark:text-amber-400 font-medium">Paused</span>
             ) : (
               <span>Ready</span>
             )}

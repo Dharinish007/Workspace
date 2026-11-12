@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { TimerSession } from '../types';
 import { formatTimerDisplay, formatTimeRange, calculateActiveDuration } from '../engine/calculations';
-import { History, Plus, MoreHorizontal, Edit2, Trash2 } from 'lucide-react';
+import { History, Plus, MoreHorizontal, Edit2, Trash2, PenLine, Target, Clock } from 'lucide-react';
 import { useWorkspace } from '../../../context/WorkspaceContext';
 import { motion } from 'framer-motion';
 
@@ -38,29 +38,29 @@ export const SessionRecordsTable: React.FC<SessionRecordsTableProps> = ({
   });
 
   const getSessionIcon = (session: TimerSession) => {
-    if (session.source === 'manual') return '✍️';
-    if (session.mode === 'pomodoro') return '🍅';
-    return '⏱️';
+    if (session.source === 'manual') return <PenLine className="w-4 h-4 text-primary shrink-0" />;
+    if (session.mode === 'pomodoro') return <Target className="w-4 h-4 text-primary shrink-0" />;
+    return <Clock className="w-4 h-4 text-txt-secondary shrink-0" />;
   };
 
   const getOutcomeBadge = (session: TimerSession) => {
     if (!session.outcome) return null;
     if (session.outcome === 'completed') {
       return (
-        <span className="text-[11px] text-primary font-semibold">
+        <span className="text-xs text-primary font-medium">
           Completed
         </span>
       );
     }
     if (session.outcome === 'interrupted') {
       return (
-        <span className="text-[11px] text-amber-600 dark:text-amber-400 font-semibold">
+        <span className="text-xs text-amber-600 dark:text-amber-400 font-medium">
           Interrupted
         </span>
       );
     }
     return (
-      <span className="text-[11px] text-red-500 font-semibold">
+      <span className="text-xs text-red-500 font-medium">
         Abandoned
       </span>
     );
@@ -126,8 +126,10 @@ export const SessionRecordsTable: React.FC<SessionRecordsTableProps> = ({
       {/* Session Rows */}
       {filteredSessions.length === 0 ? (
         <div className="text-center py-10 space-y-2">
-          <div className="text-3xl">⏳</div>
-          <div className="text-sm font-bold text-txt-primary font-serif">No focus sessions recorded yet</div>
+          <div className="w-10 h-10 rounded-xl bg-bg-subtle border border-border flex items-center justify-center text-txt-muted mx-auto">
+            <History className="w-5 h-5" />
+          </div>
+          <div className="text-sm font-semibold text-txt-primary font-sans">No focus sessions recorded yet</div>
           <p className="text-xs text-txt-muted max-w-sm mx-auto">
             Completed focus sessions will appear here with detailed active time, intervals, and notes.
           </p>
@@ -156,23 +158,23 @@ export const SessionRecordsTable: React.FC<SessionRecordsTableProps> = ({
               >
                 {/* Left: Icon & Label & Task */}
                 <div className="flex items-start gap-3 min-w-0">
-                  <div className="text-xl shrink-0 mt-0.5" role="img" aria-hidden="true">
+                  <div className="mt-0.5 shrink-0" aria-hidden="true">
                     {getSessionIcon(session)}
                   </div>
 
                   <div className="min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-xs font-bold text-txt-primary truncate">
+                      <span className="text-xs font-semibold text-txt-primary truncate">
                         {session.label || 'Untitled Session'}
                       </span>
                       {session.wasAdjusted && (
-                        <span className="text-[10px] px-1.5 py-0.2 rounded bg-amber-500/15 text-amber-700 dark:text-amber-400 font-bold uppercase tracking-wider">
+                        <span className="text-xs px-1.5 py-0.5 rounded bg-bg-card border border-border text-txt-secondary font-medium">
                           Edited
                         </span>
                       )}
                     </div>
 
-                    <div className="flex items-center gap-2 text-[11px] text-txt-muted mt-0.5 flex-wrap">
+                    <div className="flex items-center gap-2 text-xs text-txt-muted mt-0.5 flex-wrap">
                       <span className="capitalize font-medium">{session.mode}</span>
                       <span>•</span>
                       {getOutcomeBadge(session)}

@@ -3,7 +3,7 @@ import { useWorkspace } from '../../../context/WorkspaceContext';
 import { TimerSession, TimerMode, SessionOutcome } from '../types';
 import { validateTimerSession } from '../services/validation';
 import { getLocalDateString } from '../engine/calculations';
-import { X, Tag, Link2, Clock, AlertCircle, Save } from 'lucide-react';
+import { X, Tag, Link2, Clock, AlertCircle, Save, Target, Timer } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 interface ManualSessionModalProps {
@@ -177,28 +177,30 @@ export const ManualSessionModal: React.FC<ManualSessionModalProps> = ({
           )}
 
           {/* Mode Selector */}
-          <div className="flex items-center gap-2 p-1 bg-bg-card border border-border rounded-xl shadow-2xs w-fit">
+          <div className="flex items-center gap-1.5 p-1 bg-bg-subtle border border-border rounded-xl shadow-2xs w-fit">
             <button
               type="button"
               onClick={() => setMode('pomodoro')}
-              className={`px-3.5 py-1.5 rounded-lg font-bold transition-all cursor-pointer ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
                 mode === 'pomodoro'
-                  ? 'bg-primary text-white shadow-xs'
+                  ? 'bg-bg-card text-txt-primary shadow-xs font-semibold'
                   : 'text-txt-secondary hover:text-txt-primary'
               }`}
             >
-              🍅 Pomodoro
+              <Target className="w-3.5 h-3.5 text-primary" />
+              <span>Pomodoro</span>
             </button>
             <button
               type="button"
               onClick={() => setMode('stopwatch')}
-              className={`px-3.5 py-1.5 rounded-lg font-bold transition-all cursor-pointer ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
                 mode === 'stopwatch'
-                  ? 'bg-primary text-white shadow-xs'
+                  ? 'bg-bg-card text-txt-primary shadow-xs font-semibold'
                   : 'text-txt-secondary hover:text-txt-primary'
               }`}
             >
-              ⏱️ Stopwatch
+              <Timer className="w-3.5 h-3.5 text-txt-secondary" />
+              <span>Stopwatch</span>
             </button>
           </div>
 
