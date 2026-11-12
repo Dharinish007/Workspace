@@ -15,7 +15,6 @@ import {
   ArrowRight, 
   Check,
   Clock,
-  Sparkles,
   Flame,
   CalendarDays
 } from 'lucide-react';
@@ -253,17 +252,16 @@ export const DashboardModule: React.FC = () => {
       {/* Welcome Banner */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b border-border">
         <div>
-          <h1 className="text-[26px] sm:text-[28px] lg:text-[30px] font-bold text-txt-primary tracking-tight">
-            {greeting}, {settings.displayName || 'Friend'} 👋
+          <h1 className="text-2xl sm:text-3xl font-bold text-txt-primary tracking-tight">
+            {greeting}, {settings.displayName || 'Friend'}
           </h1>
-          <p className="text-[14px] sm:text-[15px] font-sans text-txt-secondary mt-1 font-normal">
+          <p className="text-sm font-sans text-txt-secondary mt-1 font-normal">
             Here's your day at a glance. Everything is focused and organized.
           </p>
         </div>
 
         <div className="hidden sm:flex items-center gap-2.5 px-4 py-2 rounded-xl bg-bg-card border border-border shadow-2xs">
-          <Sparkles className="w-4 h-4 text-primary" />
-          <span className="text-[13px] font-sans font-semibold text-txt-secondary">
+          <span className="text-xs font-sans font-semibold text-txt-secondary">
             {tasksDueToday.length - tasksDueTodayCompleted} tasks remaining today
           </span>
         </div>
@@ -272,28 +270,26 @@ export const DashboardModule: React.FC = () => {
       {/* 4 Overview Stat Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
         {/* Tasks Card */}
-        <motion.div 
-          whileHover={{ y: -3, transition: { type: "spring", stiffness: 450, damping: 25 } }}
-          whileTap={{ scale: 0.98 }}
+        <div 
           onClick={() => navigate('/tasks')}
-          className="bg-bg-card border border-border hover:border-primary shadow-card hover:shadow-card-hover rounded-2xl p-5 sm:p-6 transition-all duration-150 cursor-pointer group select-none flex flex-col justify-between"
+          className="bg-bg-card border border-border hover:border-border-interactive shadow-2xs hover:shadow-card rounded-2xl p-5 sm:p-6 transition-colors duration-150 cursor-pointer group select-none flex flex-col justify-between"
           role="button"
           tabIndex={0}
           aria-label="View Tasks Due Today"
         >
           <div>
             <div className="flex items-center justify-between mb-3">
-              <span className="text-[14px] sm:text-[15px] font-sans font-bold text-txt-secondary group-hover:text-primary transition-colors">
+              <span className="text-sm font-sans font-bold text-txt-secondary group-hover:text-primary transition-colors">
                 Tasks
               </span>
               <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 text-primary flex items-center justify-center">
                 <CheckCircle2 className="w-5 h-5" />
               </div>
             </div>
-            <div className="text-[28px] sm:text-[30px] font-mono font-bold text-txt-primary tracking-tight">
+            <div className="text-3xl font-mono font-bold text-txt-primary tracking-tight">
               {tasksDueTodayCompleted} <span className="text-xl font-normal text-txt-muted">/ {tasksDueToday.length}</span>
             </div>
-            <div className="text-[13px] font-sans font-medium text-txt-secondary mt-1.5 flex flex-wrap items-center justify-between gap-1">
+            <div className="text-xs font-sans font-medium text-txt-secondary mt-1.5 flex flex-wrap items-center justify-between gap-1">
               <span>{tasksDueToday.length === 0 ? 'No tasks due today' : 'Due today'}</span>
               {overdueTasks.length > 0 && (
                 <span className="text-xs font-bold px-2 py-0.5 rounded-md bg-red-100 dark:bg-red-950/60 text-red-700 dark:text-red-300 border border-red-300 dark:border-red-800">
@@ -315,31 +311,29 @@ export const DashboardModule: React.FC = () => {
               <span>{tasksDueToday.length > 0 ? `${tasksDueTodayPercent}%` : '100%'}</span>
             </div>
           </div>
-        </motion.div>
+        </div>
 
         {/* Habits Card */}
-        <motion.div 
-          whileHover={{ y: -3, transition: { type: "spring", stiffness: 450, damping: 25 } }}
-          whileTap={{ scale: 0.98 }}
+        <div 
           onClick={() => navigate('/habits')}
-          className="bg-bg-card border border-border hover:border-primary shadow-card hover:shadow-card-hover rounded-2xl p-5 sm:p-6 transition-all duration-150 cursor-pointer group select-none flex flex-col justify-between"
+          className="bg-bg-card border border-border hover:border-border-interactive shadow-2xs hover:shadow-card rounded-2xl p-5 sm:p-6 transition-colors duration-150 cursor-pointer group select-none flex flex-col justify-between"
           role="button"
           tabIndex={0}
           aria-label="View Habits Scheduled Today"
         >
           <div>
             <div className="flex items-center justify-between mb-3">
-              <span className="text-[14px] sm:text-[15px] font-sans font-bold text-txt-secondary group-hover:text-primary transition-colors">
+              <span className="text-sm font-sans font-bold text-txt-secondary group-hover:text-primary transition-colors">
                 Habits
               </span>
               <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 text-primary flex items-center justify-center">
                 <Activity className="w-5 h-5" />
               </div>
             </div>
-            <div className="text-[28px] sm:text-[30px] font-mono font-bold text-txt-primary tracking-tight">
+            <div className="text-3xl font-mono font-bold text-txt-primary tracking-tight">
               {habitsCompletedToday} <span className="text-xl font-normal text-txt-muted">/ {habitsScheduledToday.length}</span>
             </div>
-            <div className="text-[13px] font-sans font-medium text-txt-secondary mt-1.5">
+            <div className="text-xs font-sans font-medium text-txt-secondary mt-1.5">
               {habitsScheduledToday.length === 0 ? 'None scheduled' : 'Scheduled today'}
             </div>
           </div>
@@ -356,31 +350,29 @@ export const DashboardModule: React.FC = () => {
               <span>{habitsScheduledToday.length > 0 ? `${habitsTodayPercent}%` : '100%'}</span>
             </div>
           </div>
-        </motion.div>
+        </div>
 
         {/* Events Card */}
-        <motion.div 
-          whileHover={{ y: -3, transition: { type: "spring", stiffness: 450, damping: 25 } }}
-          whileTap={{ scale: 0.98 }}
+        <div 
           onClick={() => navigate('/calendar')}
-          className="bg-bg-card border border-border hover:border-primary shadow-card hover:shadow-card-hover rounded-2xl p-5 sm:p-6 transition-all duration-150 cursor-pointer group select-none flex flex-col justify-between"
+          className="bg-bg-card border border-border hover:border-border-interactive shadow-2xs hover:shadow-card rounded-2xl p-5 sm:p-6 transition-colors duration-150 cursor-pointer group select-none flex flex-col justify-between"
           role="button"
           tabIndex={0}
           aria-label="View Events Today"
         >
           <div>
             <div className="flex items-center justify-between mb-3">
-              <span className="text-[14px] sm:text-[15px] font-sans font-bold text-txt-secondary group-hover:text-primary transition-colors">
+              <span className="text-sm font-sans font-bold text-txt-secondary group-hover:text-primary transition-colors">
                 Events
               </span>
               <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 text-primary flex items-center justify-center">
                 <Calendar className="w-5 h-5" />
               </div>
             </div>
-            <div className="text-[28px] sm:text-[30px] font-mono font-bold text-txt-primary tracking-tight">
+            <div className="text-3xl font-mono font-bold text-txt-primary tracking-tight">
               {eventsToday.length}
             </div>
-            <div className="text-[13px] font-sans font-medium text-txt-secondary mt-1.5">
+            <div className="text-xs font-sans font-medium text-txt-secondary mt-1.5">
               {eventsToday.length === 1 ? '1 event scheduled today' : `${eventsToday.length} events today`}
             </div>
           </div>
@@ -389,40 +381,38 @@ export const DashboardModule: React.FC = () => {
             <span>Calendar schedule</span>
             <ArrowRight className="w-4 h-4 text-txt-secondary group-hover:text-primary transition-colors" />
           </div>
-        </motion.div>
+        </div>
 
         {/* Pages Card */}
-        <motion.div 
-          whileHover={{ y: -3, transition: { type: "spring", stiffness: 450, damping: 25 } }}
-          whileTap={{ scale: 0.98 }}
+        <div 
           onClick={() => navigate('/tasks')}
-          className="bg-bg-card border border-border hover:border-purple-500 shadow-card hover:shadow-card-hover rounded-2xl p-5 sm:p-6 transition-all duration-150 cursor-pointer group select-none flex flex-col justify-between"
+          className="bg-bg-card border border-border hover:border-border-interactive shadow-2xs hover:shadow-card rounded-2xl p-5 sm:p-6 transition-colors duration-150 cursor-pointer group select-none flex flex-col justify-between"
           role="button"
           tabIndex={0}
           aria-label="View Active Pages"
         >
           <div>
             <div className="flex items-center justify-between mb-3">
-              <span className="text-[14px] sm:text-[15px] font-sans font-bold text-txt-secondary group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
+              <span className="text-sm font-sans font-bold text-txt-secondary group-hover:text-primary transition-colors">
                 Pages
               </span>
-              <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-600 dark:text-purple-400 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 text-primary flex items-center justify-center">
                 <Layers className="w-5 h-5" />
               </div>
             </div>
-            <div className="text-[28px] sm:text-[30px] font-mono font-bold text-txt-primary tracking-tight">
+            <div className="text-3xl font-mono font-bold text-txt-primary tracking-tight">
               {activePagesCount}
             </div>
-            <div className="text-[13px] font-sans font-medium text-txt-secondary mt-1.5">
+            <div className="text-xs font-sans font-medium text-txt-secondary mt-1.5">
               Active project pages
             </div>
           </div>
 
           <div className="mt-4 pt-3 border-t border-border-subtle flex items-center justify-between text-xs font-sans text-txt-secondary font-medium">
             <span>Folders & lists</span>
-            <ArrowRight className="w-4 h-4 text-txt-secondary group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors" />
+            <ArrowRight className="w-4 h-4 text-txt-secondary group-hover:text-primary transition-colors" />
           </div>
-        </motion.div>
+        </div>
       </div>
 
       {/* Middle row: Today's Tasks & Habit Summary */}
@@ -432,7 +422,7 @@ export const DashboardModule: React.FC = () => {
           <div>
             <div className="flex items-center justify-between mb-5">
               <div className="flex items-center gap-2.5 sm:gap-3 flex-wrap">
-                <span className="text-[17px] sm:text-[18px] font-serif font-bold text-txt-primary tracking-tight">Today's Tasks</span>
+                <span className="text-lg font-serif font-bold text-txt-primary tracking-tight">Today's Tasks</span>
                 <span className="text-xs font-mono font-bold px-2.5 py-1 rounded-full bg-bg-subtle text-txt-secondary border border-border-interactive/80">
                   {todaysTasksCandidates.length} pending
                 </span>
@@ -442,11 +432,9 @@ export const DashboardModule: React.FC = () => {
                   </span>
                 )}
               </div>
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.96 }}
+              <button
                 onClick={() => setShowInlineAdd(!showInlineAdd)}
-                className={`h-10 px-4 text-xs font-sans font-bold rounded-xl flex items-center gap-1.5 transition-all shadow-xs cursor-pointer ${
+                className={`h-10 px-4 text-xs font-sans font-bold rounded-xl flex items-center gap-1.5 transition-colors shadow-xs cursor-pointer ${
                   showInlineAdd
                     ? 'bg-bg-subtle text-txt-primary border border-border-interactive'
                     : 'bg-primary hover:bg-primary-hover text-white'
@@ -456,7 +444,7 @@ export const DashboardModule: React.FC = () => {
               >
                 <Plus className={`w-4 h-4 transition-transform ${showInlineAdd ? 'rotate-45' : ''}`} />
                 <span>{showInlineAdd ? 'Close' : 'Add Task'}</span>
-              </motion.button>
+              </button>
             </div>
 
             {/* Inline Add Task Form */}
@@ -510,18 +498,17 @@ export const DashboardModule: React.FC = () => {
                   <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 flex items-center justify-center mb-3">
                     <CheckCircle2 className="w-6 h-6" />
                   </div>
-                  <h4 className="text-base font-serif font-bold text-txt-primary">All caught up for today!</h4>
+                  <h4 className="text-base font-serif font-bold text-txt-primary">No pending tasks today</h4>
                   <p className="text-xs font-sans text-txt-secondary max-w-sm mt-1 mb-4">
-                    No pending tasks due today or overdue. Enjoy your free time or plan ahead.
+                    No pending tasks due today or overdue.
                   </p>
-                  <motion.button
-                    whileTap={{ scale: 0.98 }}
+                  <button
                     onClick={() => setShowInlineAdd(true)}
                     className="h-10 px-4 text-xs font-sans font-semibold text-primary bg-bg-card hover:bg-bg-hover border border-border-interactive rounded-xl flex items-center gap-1.5 transition-colors shadow-2xs"
                   >
                     <Plus className="w-4 h-4" />
                     <span>Create a Task</span>
-                  </motion.button>
+                  </button>
                 </div>
               ) : (
                 top3TodaysTasks.map(task => {
@@ -529,25 +516,22 @@ export const DashboardModule: React.FC = () => {
                   const page = pages.find(p => p.id === task.pageId);
 
                   return (
-                    <motion.div
+                    <div
                       key={task.id}
-                      whileHover={{ x: 2 }}
-                      transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                      className="flex items-center justify-between p-3.5 rounded-xl bg-bg-card hover:bg-bg-subtle/70 border border-border-interactive/70 hover:border-primary/70 transition-all duration-150 shadow-2xs group"
+                      className="flex items-center justify-between p-3.5 rounded-xl bg-bg-card hover:bg-bg-subtle/70 border border-border-interactive/70 hover:border-primary/70 transition-colors duration-150 shadow-2xs group"
                     >
                       <div className="flex items-center gap-3 overflow-hidden flex-1">
-                        <motion.button
-                          whileTap={{ scale: 0.85 }}
+                        <button
                           onClick={() => toggleTaskCompleted(task.id)}
-                          className="w-8 h-8 rounded-lg flex items-center justify-center border-2 border-border-interactive hover:border-primary bg-bg-subtle/40 text-txt-muted hover:text-primary transition-colors flex-shrink-0 cursor-pointer focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary"
+                          className="w-5 h-5 rounded-[6px] flex items-center justify-center border-2 border-border-interactive hover:border-primary bg-bg-subtle/40 text-txt-muted hover:text-primary transition-colors flex-shrink-0 cursor-pointer focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary"
                           aria-label={`Mark task ${task.title} as completed`}
                           title="Mark task completed"
                         >
-                          <Square className="w-4 h-4 sm:w-5 sm:h-5" />
-                        </motion.button>
+                          <Square className="w-3.5 h-3.5" />
+                        </button>
                         <button
                           onClick={() => navigateToTask(task.pageId, task.id)}
-                          className="text-[14px] sm:text-[15px] font-sans font-semibold text-txt-primary group-hover:text-primary break-words line-clamp-2 text-left transition-colors cursor-pointer leading-snug"
+                          className="text-sm font-sans font-semibold text-txt-primary group-hover:text-primary break-words line-clamp-2 text-left transition-colors cursor-pointer leading-snug"
                           title={task.title}
                         >
                           {task.title}
@@ -578,7 +562,7 @@ export const DashboardModule: React.FC = () => {
                           />
                         )}
                       </div>
-                    </motion.div>
+                    </div>
                   );
                 })
               )}
@@ -586,7 +570,7 @@ export const DashboardModule: React.FC = () => {
           </div>
 
           <div className="mt-5 pt-3.5 border-t border-border flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs font-sans">
-            <span className="text-[13px] text-txt-secondary font-medium">
+            <span className="text-xs text-txt-secondary font-medium">
               {tasksDueToday.length} due today, {overdueTasks.length} overdue from past days ({todaysTasksCandidates.length} total pending)
             </span>
             <button
@@ -604,14 +588,12 @@ export const DashboardModule: React.FC = () => {
           <div>
             <div className="flex items-center justify-between mb-5">
               <div className="flex items-center gap-3">
-                <span className="text-[17px] sm:text-[18px] font-serif font-bold text-txt-primary tracking-tight">Habit Summary</span>
+                <span className="text-lg font-serif font-bold text-txt-primary tracking-tight">Habit Summary</span>
                 <span className="text-xs font-mono font-bold px-2.5 py-1 rounded-full bg-bg-subtle text-txt-secondary border border-border-interactive/80">
                   {habitsScheduledToday.length} today
                 </span>
               </div>
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+              <button
                 onClick={() => setIsHabitModalOpen(true)}
                 className="h-10 px-4 text-xs font-sans font-bold text-primary bg-primary/10 hover:bg-primary/20 border border-primary/30 rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
                 title="Add Habit"
@@ -619,7 +601,7 @@ export const DashboardModule: React.FC = () => {
               >
                 <Plus className="w-4 h-4" />
                 <span>New Habit</span>
-              </motion.button>
+              </button>
             </div>
 
             <div className="space-y-2.5">
@@ -633,14 +615,13 @@ export const DashboardModule: React.FC = () => {
                   <p className="text-xs font-sans text-txt-secondary max-w-sm mt-1 mb-4">
                     Take a rest day or establish a new daily routine to keep up your momentum.
                   </p>
-                  <motion.button
-                    whileTap={{ scale: 0.98 }}
+                  <button
                     onClick={() => setIsHabitModalOpen(true)}
                     className="h-10 px-4 text-xs font-sans font-semibold text-primary bg-bg-card hover:bg-bg-hover border border-border-interactive rounded-xl flex items-center gap-1.5 transition-colors shadow-2xs"
                   >
                     <Plus className="w-4 h-4" />
                     <span>Create Habit</span>
-                  </motion.button>
+                  </button>
                 </div>
               ) : (
                 habitsScheduledToday.map(habit => {
@@ -649,11 +630,9 @@ export const DashboardModule: React.FC = () => {
                   );
 
                   return (
-                    <motion.div
+                    <div
                       key={habit.id}
-                      whileHover={{ x: 2 }}
-                      transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                      className="flex items-center justify-between p-3.5 rounded-xl bg-bg-card hover:bg-bg-subtle/70 border border-border-interactive/70 hover:border-primary/70 transition-all duration-150 shadow-2xs"
+                      className="flex items-center justify-between p-3.5 rounded-xl bg-bg-card hover:bg-bg-subtle/70 border border-border-interactive/70 hover:border-primary/70 transition-colors duration-150 shadow-2xs"
                     >
                       <div className="flex items-center gap-3">
                         <div
@@ -663,10 +642,10 @@ export const DashboardModule: React.FC = () => {
                           <IconRenderer name={habit.icon} className="w-4 h-4 sm:w-5 sm:h-5" />
                         </div>
                         <div>
-                          <span className={`text-[14px] sm:text-[15px] font-sans font-semibold ${isChecked ? 'text-txt-muted line-through' : 'text-txt-primary'}`}>
+                          <span className={`text-sm font-sans font-semibold ${isChecked ? 'text-txt-muted line-through' : 'text-txt-primary'}`}>
                             {habit.name}
                           </span>
-                          <div className="text-[13px] font-sans text-txt-secondary">
+                          <div className="text-xs font-sans text-txt-secondary">
                             {habit.schedule.type === 'daily' ? 'Every day' : 'Scheduled day'}
                           </div>
                         </div>
@@ -680,11 +659,9 @@ export const DashboardModule: React.FC = () => {
                         }`}>
                           {isChecked ? 'Done' : 'Check In'}
                         </span>
-                        <motion.button
-                          whileTap={{ scale: 0.88 }}
-                          transition={{ type: "spring", stiffness: 500, damping: 25 }}
+                        <button
                           onClick={() => toggleHabitLog(habit.id, todayStr)}
-                          className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all cursor-pointer border-2 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary ${
+                          className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors cursor-pointer border-2 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-primary ${
                             isChecked
                               ? 'bg-primary border-primary text-white shadow-xs'
                               : 'border-border-interactive bg-bg-card hover:border-primary text-transparent'
@@ -693,9 +670,9 @@ export const DashboardModule: React.FC = () => {
                           aria-label={isChecked ? `Mark ${habit.name} incomplete` : `Mark ${habit.name} complete`}
                         >
                           <Check className="w-5 h-5 stroke-[3]" />
-                        </motion.button>
+                        </button>
                       </div>
-                    </motion.div>
+                    </div>
                   );
                 })
               )}
@@ -703,7 +680,7 @@ export const DashboardModule: React.FC = () => {
           </div>
 
           <div className="mt-5 pt-3.5 border-t border-border flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs font-sans">
-            <span className="text-[13px] text-txt-secondary font-semibold">
+            <span className="text-xs text-txt-secondary font-semibold">
               {habitsScheduledToday.length > 0
                 ? `${habitsCompletedToday} / ${habitsScheduledToday.length} completed (${Math.round(
                     (habitsCompletedToday / habitsScheduledToday.length) * 100
@@ -729,7 +706,7 @@ export const DashboardModule: React.FC = () => {
             <div className="flex items-center justify-between mb-5">
               <div className="flex items-center gap-2.5">
                 <CalendarDays className="w-5 h-5 text-primary" />
-                <span className="text-[17px] sm:text-[18px] font-serif font-bold text-txt-primary tracking-tight">Upcoming (Next 7 Days)</span>
+                <span className="text-lg font-serif font-bold text-txt-primary tracking-tight">Upcoming (Next 7 Days)</span>
               </div>
               <span className="text-xs font-mono font-bold px-2.5 py-1 rounded-full bg-bg-subtle text-txt-secondary border border-border-interactive/80">
                 {next7DaysItems.length} items
@@ -756,10 +733,8 @@ export const DashboardModule: React.FC = () => {
                 </div>
               ) : (
                 next7DaysItems.slice(0, 5).map(item => (
-                  <motion.div
+                  <div
                     key={`${item.type}-${item.id}`}
-                    whileHover={{ x: 2 }}
-                    transition={{ type: "spring", stiffness: 500, damping: 30 }}
                     onClick={() => {
                       if (item.type === 'task' && item.pageId) {
                         navigateToTask(item.pageId, item.id);
@@ -767,7 +742,7 @@ export const DashboardModule: React.FC = () => {
                         navigate('/calendar');
                       }
                     }}
-                    className="flex items-center justify-between p-3.5 rounded-xl bg-bg-card hover:bg-bg-subtle/70 border border-border-interactive/70 hover:border-primary/70 transition-all duration-150 shadow-2xs cursor-pointer group"
+                    className="flex items-center justify-between p-3.5 rounded-xl bg-bg-card hover:bg-bg-subtle/70 border border-border-interactive/70 hover:border-primary/70 transition-colors duration-150 shadow-2xs cursor-pointer group"
                   >
                     <div className="flex items-center gap-3 overflow-hidden">
                       <span className="text-xs font-mono font-semibold px-2.5 py-1 rounded-lg bg-bg-subtle border border-border-interactive text-txt-secondary flex-shrink-0">
@@ -777,7 +752,7 @@ export const DashboardModule: React.FC = () => {
                         className="w-2.5 h-2.5 rounded-full flex-shrink-0 ring-1 ring-border"
                         style={{ backgroundColor: item.color }}
                       />
-                      <span className="text-[14px] sm:text-[15px] font-sans font-medium text-txt-primary group-hover:text-primary truncate">
+                      <span className="text-sm font-sans font-medium text-txt-primary group-hover:text-primary truncate">
                         {item.title}
                       </span>
                     </div>
@@ -793,14 +768,14 @@ export const DashboardModule: React.FC = () => {
                         {item.type}
                       </span>
                     </div>
-                  </motion.div>
+                  </div>
                 ))
               )}
             </div>
           </div>
 
           <div className="mt-5 pt-3.5 border-t border-border flex items-center justify-between text-xs font-sans">
-            <span className="text-[13px] text-txt-secondary font-medium">
+            <span className="text-xs text-txt-secondary font-medium">
               {next7DaysItems.length > 5 ? `+${next7DaysItems.length - 5} more scheduled` : '7-day overview'}
             </span>
             <button
@@ -817,7 +792,7 @@ export const DashboardModule: React.FC = () => {
         <div className="bg-bg-card border border-border shadow-card rounded-2xl p-5 sm:p-6 flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-5">
-              <span className="text-[17px] sm:text-[18px] font-serif font-bold text-txt-primary tracking-tight">Weekly Progress</span>
+              <span className="text-lg font-serif font-bold text-txt-primary tracking-tight">Weekly Progress</span>
               <span className="text-xs font-mono font-semibold text-txt-secondary bg-bg-subtle border border-border-interactive/80 px-2.5 py-1 rounded-lg">
                 Mon - Sun
               </span>
@@ -844,13 +819,13 @@ export const DashboardModule: React.FC = () => {
                     strokeDasharray={251.2}
                     initial={{ strokeDashoffset: 251.2 }}
                     animate={{ strokeDashoffset: 251.2 - (251.2 * weekProgressData.overallPercent) / 100 }}
-                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                    transition={{ duration: 0.3, ease: "easeOut" }}
                     strokeLinecap="round"
                     fill="transparent"
                   />
                 </svg>
                 <div className="absolute flex flex-col items-center">
-                  <span className="text-[28px] sm:text-[30px] font-mono font-bold text-txt-primary">
+                  <span className="text-3xl font-mono font-bold text-txt-primary">
                     {weekProgressData.overallPercent}%
                   </span>
                   <span className="text-xs font-sans text-txt-secondary font-bold uppercase tracking-wider">
@@ -864,8 +839,8 @@ export const DashboardModule: React.FC = () => {
                 {/* Tasks breakdown */}
                 <div className="space-y-1">
                   <div className="flex items-center justify-between text-xs font-medium">
-                    <span className="text-[13px] text-txt-secondary font-semibold">Tasks this week</span>
-                    <span className="text-[13px] font-mono font-bold text-txt-primary">
+                    <span className="text-xs text-txt-secondary font-semibold">Tasks this week</span>
+                    <span className="text-xs font-mono font-bold text-txt-primary">
                       {weekProgressData.tasksCompletedThisWeek} / {weekProgressData.tasksDueThisWeek}
                     </span>
                   </div>
@@ -884,8 +859,8 @@ export const DashboardModule: React.FC = () => {
                 {/* Habits breakdown */}
                 <div className="space-y-1">
                   <div className="flex items-center justify-between text-xs font-medium">
-                    <span className="text-[13px] text-txt-secondary font-semibold">Habits this week</span>
-                    <span className="text-[13px] font-mono font-bold text-txt-primary">
+                    <span className="text-xs text-txt-secondary font-semibold">Habits this week</span>
+                    <span className="text-xs font-mono font-bold text-txt-primary">
                       {weekProgressData.habitCompletionsThisWeek} / {weekProgressData.habitOccurrencesThisWeek}
                     </span>
                   </div>
@@ -905,9 +880,9 @@ export const DashboardModule: React.FC = () => {
                 <div className="flex items-center justify-between p-3 rounded-xl bg-bg-subtle border border-border-interactive/80 text-xs">
                   <div className="flex items-center gap-2">
                     <Calendar className="w-4 h-4 text-txt-secondary" />
-                    <span className="text-[13px] font-semibold text-txt-secondary">Events scheduled</span>
+                    <span className="text-xs font-semibold text-txt-secondary">Events scheduled</span>
                   </div>
-                  <span className="text-[13px] font-mono font-bold text-txt-primary">
+                  <span className="text-xs font-mono font-bold text-txt-primary">
                     {weekProgressData.eventsThisWeek}
                   </span>
                 </div>
@@ -915,7 +890,7 @@ export const DashboardModule: React.FC = () => {
             </div>
           </div>
 
-          <div className="mt-5 pt-3.5 border-t border-border text-[13px] font-sans text-txt-secondary text-center sm:text-left leading-relaxed">
+          <div className="mt-5 pt-3.5 border-t border-border text-xs font-sans text-txt-secondary text-center sm:text-left leading-relaxed">
             Overall score combines task completions and habit streak check-ins across the current 7-day week.
           </div>
         </div>
