@@ -14,6 +14,7 @@ export const MobileNav: React.FC = () => {
     { id: 'todo' as NavigationSection, label: 'Tasks', icon: CheckSquare, path: '/tasks' },
     { id: 'calendar' as NavigationSection, label: 'Calendar', icon: Calendar, path: '/calendar' },
     { id: 'habits' as NavigationSection, label: 'Habits', icon: Flame, path: '/habits' },
+    { id: 'journal' as NavigationSection, label: 'Journal', icon: BookOpen, path: '/journal' },
     { id: 'notes' as NavigationSection, label: 'Notes', icon: FileText, path: '/notes' },
     { id: 'timer' as NavigationSection, label: 'Timer', icon: Timer, path: '/timer' },
   ].filter((item) => {
@@ -44,12 +45,12 @@ export const MobileNav: React.FC = () => {
             {isActive && (
               <motion.div
                 layoutId="mobileActiveIndicator"
-                className="absolute top-0 w-10 h-1 bg-primary rounded-full"
-                transition={{ type: "spring", stiffness: 500, damping: 35 }}
+                className="absolute top-0 w-8 h-1 bg-primary rounded-full"
+                transition={{ duration: 0.15, ease: 'easeOut' }}
               />
             )}
-            <Icon className={`w-5 h-5 mb-1 transition-colors ${isActive ? 'text-primary' : 'text-txt-muted'}`} />
-            <span className="font-sans text-[12px] font-medium tracking-tight">{item.label}</span>
+            <Icon className={`w-5 h-5 mb-0.5 transition-colors ${isActive ? 'text-primary' : 'text-txt-muted'}`} />
+            <span className="font-sans text-xs font-medium tracking-tight truncate max-w-full px-0.5">{item.label}</span>
           </motion.button>
         );
       })}

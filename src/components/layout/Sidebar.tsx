@@ -124,10 +124,10 @@ export const Sidebar: React.FC = () => {
               className="flex items-center gap-3 cursor-pointer min-w-0 group"
               title="My Workspace - Dashboard"
             >
-              <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center text-white font-bold text-lg shadow-xs shrink-0 group-hover:scale-105 transition-transform">
+              <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center text-white font-bold text-lg shadow-xs shrink-0">
                 W
               </div>
-              <span className="font-bold text-[15px] text-txt-primary tracking-tight truncate group-hover:text-primary transition-colors">
+              <span className="font-bold text-sm text-txt-primary tracking-tight truncate group-hover:text-primary transition-colors">
                 My Workspace
               </span>
             </div>
@@ -143,38 +143,26 @@ export const Sidebar: React.FC = () => {
         )}
 
         {/* Scrollable Workspace Navigation List */}
-        <div className="flex-1 overflow-y-auto overflow-x-hidden p-2 space-y-1.5 scrollbar-thin">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden p-2 space-y-1 scrollbar-thin">
           {visibleNavItems.map((item) => {
             const Icon = item.icon;
             const active = isItemActive(item.path);
 
             return (
-              <motion.button
+              <button
                 key={item.id}
-                whileTap={{ scale: 0.98 }}
                 onClick={() => handleNavClick(item.path)}
                 title={isSidebarCollapsed ? item.label : undefined}
                 aria-label={item.label}
-                className={`relative w-full flex items-center rounded-xl min-h-[42px] text-sm transition-all duration-150 text-left cursor-pointer overflow-hidden group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
+                className={`relative w-full flex items-center rounded-xl h-9 text-sm transition-colors text-left cursor-pointer overflow-hidden group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
                   active
-                    ? 'text-primary font-bold'
+                    ? 'bg-primary/10 dark:bg-primary/20 text-primary font-semibold'
                     : 'text-txt-secondary hover:text-txt-primary hover:bg-bg-hover font-medium'
-                } ${isSidebarCollapsed ? 'justify-center p-2' : 'gap-3 px-3 py-2.5'}`}
+                } ${isSidebarCollapsed ? 'justify-center p-2' : 'gap-3 px-3'}`}
               >
-                {/* Active Pill Indicator */}
-                {active && (
-                  <motion.div
-                    layoutId="sidebarActivePill"
-                    className={`absolute inset-0 bg-primary/15 dark:bg-primary/25 rounded-xl ${
-                      isSidebarCollapsed ? 'border border-primary/30' : ''
-                    }`}
-                    transition={{ type: 'spring', stiffness: 500, damping: 35 }}
-                  />
-                )}
-
                 <Icon 
-                  className={`relative z-10 shrink-0 transition-colors ${
-                    isSidebarCollapsed ? 'w-5 h-5' : 'w-5 h-5'
+                  className={`shrink-0 transition-colors ${
+                    isSidebarCollapsed ? 'w-4 h-4' : 'w-4 h-4'
                   } ${
                     active 
                       ? 'text-primary' 
@@ -183,11 +171,11 @@ export const Sidebar: React.FC = () => {
                 />
 
                 {!isSidebarCollapsed && (
-                  <span className="relative z-10 truncate tracking-tight">
+                  <span className="truncate tracking-tight">
                     {item.label}
                   </span>
                 )}
-              </motion.button>
+              </button>
             );
           })}
         </div>
@@ -234,10 +222,10 @@ export const Sidebar: React.FC = () => {
                   onClick={() => handleNavClick('/dashboard')}
                   className="flex items-center gap-3 cursor-pointer"
                 >
-                  <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center text-white font-bold text-lg shadow-xs">
+                  <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center text-white font-bold text-lg shadow-xs shrink-0">
                     W
                   </div>
-                  <span className="font-bold text-[15px] text-txt-primary tracking-tight">
+                  <span className="font-bold text-sm text-txt-primary tracking-tight">
                     My Workspace
                   </span>
                 </div>
@@ -251,7 +239,7 @@ export const Sidebar: React.FC = () => {
               </div>
 
               {/* Drawer Navigation List */}
-              <div className="flex-1 overflow-y-auto p-3 space-y-1.5 scrollbar-thin">
+              <div className="flex-1 overflow-y-auto p-3 space-y-1 scrollbar-thin">
                 {visibleNavItems.map((item) => {
                   const Icon = item.icon;
                   const active = isItemActive(item.path);
@@ -260,13 +248,13 @@ export const Sidebar: React.FC = () => {
                     <button
                       key={item.id}
                       onClick={() => handleNavClick(item.path)}
-                      className={`relative w-full flex items-center gap-3.5 px-3.5 py-3 rounded-xl text-[14px] transition-colors text-left cursor-pointer ${
+                      className={`relative w-full flex items-center gap-3 px-3 h-9 rounded-xl text-sm transition-colors text-left cursor-pointer ${
                         active
-                          ? 'bg-primary/15 text-primary font-bold'
+                          ? 'bg-primary/10 dark:bg-primary/20 text-primary font-semibold'
                           : 'text-txt-secondary hover:text-txt-primary hover:bg-bg-hover font-medium'
                       }`}
                     >
-                      <Icon className={`w-5 h-5 shrink-0 ${active ? 'text-primary' : 'text-txt-secondary'}`} />
+                      <Icon className={`w-4 h-4 shrink-0 ${active ? 'text-primary' : 'text-txt-secondary'}`} />
                       <span className="truncate">{item.label}</span>
                     </button>
                   );

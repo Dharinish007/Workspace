@@ -2,7 +2,6 @@ import React, { useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useWorkspace } from '../../context/WorkspaceContext';
 import { Search, Calendar, Sun, Moon, Menu, Settings } from 'lucide-react';
-import { motion } from 'framer-motion';
 
 export const Header: React.FC = () => {
   const {
@@ -69,29 +68,25 @@ export const Header: React.FC = () => {
       {/* Right: Global Search, Dynamic Date/Calendar Shortcut, and Theme Toggle */}
       <div className="flex items-center gap-2 sm:gap-3 shrink-0">
         {/* Global Search Button */}
-        <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.96 }}
+        <button
           onClick={() => setIsSearchOpen(true)}
-          className="h-9 px-3 rounded-xl border border-border bg-bg-card hover:bg-bg-hover hover:border-primary/50 text-txt-secondary hover:text-txt-primary flex items-center gap-2.5 transition-all cursor-pointer shadow-2xs group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          className="h-9 px-3 rounded-xl border border-border bg-bg-card hover:bg-bg-hover hover:border-primary/50 text-txt-secondary hover:text-txt-primary flex items-center gap-2.5 transition-colors cursor-pointer shadow-2xs group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
           title="Search tasks, pages, habits, events (Ctrl+K)"
           aria-label="Search workspace"
         >
           <Search className="w-4 h-4 text-txt-muted group-hover:text-primary transition-colors shrink-0" />
           <span className="hidden sm:inline text-xs text-txt-muted group-hover:text-txt-secondary font-medium">
-            {location.pathname.startsWith('/notes') ? 'Search notes...' : 'Search...'}
+            Search...
           </span>
           <kbd className="hidden sm:inline-flex items-center text-[10px] font-mono bg-bg-subtle border border-border px-1.5 py-0.5 rounded text-txt-muted">
             Ctrl K
           </kbd>
-        </motion.button>
+        </button>
 
         {/* Dynamic Date / Calendar Shortcut */}
-        <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.96 }}
+        <button
           onClick={() => navigate('/calendar')}
-          className="h-9 px-3 rounded-xl border border-border bg-bg-card hover:bg-bg-hover hover:border-primary/50 text-txt-secondary hover:text-primary flex items-center gap-2 transition-all cursor-pointer shadow-2xs group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          className="h-9 px-3 rounded-xl border border-border bg-bg-card hover:bg-bg-hover hover:border-primary/50 text-txt-secondary hover:text-primary flex items-center gap-2 transition-colors cursor-pointer shadow-2xs group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
           title={`Today: ${formattedDate} — Click to open Calendar`}
           aria-label="Open Calendar"
         >
@@ -99,14 +94,12 @@ export const Header: React.FC = () => {
           <span className="hidden md:inline text-xs font-semibold text-txt-secondary group-hover:text-primary">
             {formattedDate}
           </span>
-        </motion.button>
+        </button>
 
         {/* Light / Dark Mode Toggle */}
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
+        <button
           onClick={toggleTheme}
-          className="w-9 h-9 rounded-xl border border-border bg-bg-card hover:bg-bg-hover hover:border-primary/50 text-txt-secondary hover:text-txt-primary flex items-center justify-center transition-all cursor-pointer shadow-2xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          className="w-9 h-9 rounded-xl border border-border bg-bg-card hover:bg-bg-hover hover:border-primary/50 text-txt-secondary hover:text-txt-primary flex items-center justify-center transition-colors cursor-pointer shadow-2xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
           title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
           aria-label={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
         >
@@ -115,19 +108,17 @@ export const Header: React.FC = () => {
           ) : (
             <Moon className="w-4 h-4 text-txt-secondary hover:text-primary transition-colors" />
           )}
-        </motion.button>
+        </button>
 
         {/* Settings Button */}
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
+        <button
           onClick={() => navigate('/settings')}
-          className="w-9 h-9 rounded-xl border border-border bg-bg-card hover:bg-bg-hover hover:border-primary/50 text-txt-secondary hover:text-txt-primary flex items-center justify-center transition-all cursor-pointer shadow-2xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          className="w-9 h-9 rounded-xl border border-border bg-bg-card hover:bg-bg-hover hover:border-primary/50 text-txt-secondary hover:text-txt-primary flex items-center justify-center transition-colors cursor-pointer shadow-2xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
           title="Settings"
           aria-label="Settings"
         >
           <Settings className="w-4 h-4 text-txt-secondary hover:text-primary transition-colors" />
-        </motion.button>
+        </button>
       </div>
     </header>
   );
