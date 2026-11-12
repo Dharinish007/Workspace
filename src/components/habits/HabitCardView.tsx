@@ -51,9 +51,8 @@ export const HabitCardView: React.FC<HabitCardViewProps> = ({
           const isHighlighted = highlightedHabitId === habit.id;
 
           return (
-            <motion.div
+            <div
               key={habit.id}
-              whileHover={{ y: -3, transition: { type: "spring", stiffness: 450, damping: 25 } }}
               className={`bg-bg-card border shadow-card hover:shadow-card-hover rounded-2xl p-6 flex flex-col justify-between transition-all duration-150 group select-none min-h-[300px] ${
                 isHighlighted
                   ? 'ring-2 ring-primary border-primary bg-primary/5 shadow-md'
@@ -64,18 +63,17 @@ export const HabitCardView: React.FC<HabitCardViewProps> = ({
                 {/* Header: Icon, Name & Menu */}
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-3.5">
-                    <motion.div
-                      whileHover={{ scale: 1.08 }}
+                    <div
                       className="w-11 h-11 rounded-xl flex items-center justify-center text-white shadow-xs flex-shrink-0"
                       style={{ backgroundColor: habit.color }}
                     >
                       <IconRenderer name={habit.icon} className="w-5 h-5" />
-                    </motion.div>
+                    </div>
                     <div className="overflow-hidden">
-                      <h3 className="font-bold text-[16px] sm:text-[17px] text-txt-primary group-hover:text-primary transition-colors tracking-tight truncate">
+                      <h3 className="font-bold text-base text-txt-primary group-hover:text-primary transition-colors tracking-tight truncate">
                         {habit.name}
                       </h3>
-                      <p className="text-[13px] font-sans text-txt-secondary font-medium">
+                      <p className="text-sm font-sans text-txt-secondary font-medium">
                         {habit.schedule.type === 'daily'
                           ? 'Every Day'
                           : `${habit.schedule.days.length} days/week`}
@@ -85,7 +83,7 @@ export const HabitCardView: React.FC<HabitCardViewProps> = ({
 
                   <div className="relative">
                     <motion.button
-                      whileTap={{ scale: 0.9 }}
+                      whileTap={{ scale: 0.98 }}
                       onClick={() => setActiveMenuId(activeMenuId === habit.id ? null : habit.id)}
                       className="w-8 h-8 rounded-lg flex items-center justify-center text-txt-muted hover:text-txt-primary hover:bg-bg-subtle transition-colors cursor-pointer"
                       title="Habit options"
@@ -181,10 +179,10 @@ export const HabitCardView: React.FC<HabitCardViewProps> = ({
 
               {/* Mini Frequency Activity Bars (Last 14 days) */}
               <div>
-                <div className="text-xs uppercase font-sans font-bold text-txt-muted tracking-wider mb-2 flex items-center justify-between">
+                <div className="text-xs font-sans font-semibold text-txt-secondary mb-2 flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <span>Last 14 Days</span>
-                    <span className="text-[10px] text-txt-muted font-normal lowercase">(14d ago → today)</span>
+                    <span className="text-xs text-txt-muted font-normal lowercase">(14d ago → today)</span>
                   </div>
                   <span className="font-mono text-txt-secondary font-bold">Missed: {stats.missedDays}</span>
                 </div>
@@ -215,12 +213,12 @@ export const HabitCardView: React.FC<HabitCardViewProps> = ({
                     );
                   })}
                 </div>
-                <div className="flex justify-between items-center text-[10px] font-mono text-txt-muted mt-1 px-1">
+                <div className="flex justify-between items-center text-xs font-mono text-txt-muted mt-1 px-1">
                   <span>14d ago</span>
                   <span className="font-bold text-primary">Today</span>
                 </div>
               </div>
-            </motion.div>
+            </div>
           );
         })
       )}

@@ -86,7 +86,7 @@ export const HabitHeatmapView: React.FC<HabitHeatmapViewProps> = ({ habits }) =>
           {/* Year selector */}
           <div className="flex items-center gap-1 bg-bg-subtle border border-border rounded-xl p-1 text-xs font-sans font-semibold">
             <motion.button
-              whileTap={{ scale: 0.9 }}
+              whileTap={{ scale: 0.98 }}
               onClick={() => setSelectedYear(selectedYear - 1)}
               className="p-1 rounded hover:bg-bg-hover text-txt-muted hover:text-txt-primary transition-colors cursor-pointer"
             >
@@ -94,7 +94,7 @@ export const HabitHeatmapView: React.FC<HabitHeatmapViewProps> = ({ habits }) =>
             </motion.button>
             <span className="px-2 font-mono">{selectedYear}</span>
             <motion.button
-              whileTap={{ scale: 0.9 }}
+              whileTap={{ scale: 0.98 }}
               onClick={() => setSelectedYear(selectedYear + 1)}
               className="p-1 rounded hover:bg-bg-hover text-txt-muted hover:text-txt-primary transition-colors cursor-pointer"
             >
@@ -114,7 +114,7 @@ export const HabitHeatmapView: React.FC<HabitHeatmapViewProps> = ({ habits }) =>
       <div className="overflow-x-auto pb-2">
         <div className="min-w-[700px]">
           {/* Month labels */}
-          <div className="flex text-[11px] font-sans font-semibold text-txt-muted mb-2 pl-6 justify-between pr-4 select-none">
+          <div className="flex text-xs font-sans font-medium text-txt-muted mb-2 pl-6 justify-between pr-4 select-none">
             {monthsLabels.map(m => (
               <span key={m}>{m}</span>
             ))}
@@ -123,7 +123,7 @@ export const HabitHeatmapView: React.FC<HabitHeatmapViewProps> = ({ habits }) =>
           {/* Grid rows by day of week */}
           <div className="flex gap-1">
             {/* Day of week labels */}
-            <div className="flex flex-col justify-between text-[10px] font-sans text-txt-muted font-medium pr-2 py-0.5 select-none">
+            <div className="flex flex-col justify-between text-xs font-sans text-txt-muted font-medium pr-2 py-0.5 select-none">
               <span>Mon</span>
               <span>Wed</span>
               <span>Fri</span>
@@ -149,8 +149,8 @@ export const HabitHeatmapView: React.FC<HabitHeatmapViewProps> = ({ habits }) =>
                     return (
                       <motion.div
                         key={day.dateStr}
-                        whileHover={{ scale: 1.45, zIndex: 10 }}
-                        transition={{ type: "spring", stiffness: 600, damping: 25 }}
+                        whileHover={{ scale: 1.2, zIndex: 10 }}
+                        transition={{ duration: 0.15 }}
                         className={`w-3.5 h-3.5 rounded-xs cursor-pointer ${bgClass} ${
                           isToday ? 'ring-1.5 ring-primary' : ''
                         }`}

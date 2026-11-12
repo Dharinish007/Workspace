@@ -62,17 +62,14 @@ export const HabitModule: React.FC = () => {
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-2 border-b border-border-subtle">
         <div>
           <div className="flex items-center gap-3">
-            <motion.div
-              whileHover={{ rotate: 15 }}
-              className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shadow-2xs"
-            >
+            <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shadow-2xs">
               <Flame className="w-6 h-6" />
-            </motion.div>
-            <h1 className="text-[26px] sm:text-[28px] font-bold text-txt-primary tracking-tight">
+            </div>
+            <h1 className="text-2xl font-bold text-txt-primary tracking-tight">
               Habit Tracker
             </h1>
           </div>
-          <p className="text-[13px] sm:text-[14px] font-sans text-txt-secondary font-medium mt-1">
+          <p className="text-sm font-sans text-txt-secondary font-medium mt-1">
             Build long-term consistency through daily execution and streaks.
           </p>
         </div>
@@ -99,7 +96,7 @@ export const HabitModule: React.FC = () => {
                     <motion.div
                       layoutId="habitTemplatePill"
                       className="absolute inset-0 bg-primary rounded-lg -z-10 shadow-xs"
-                      transition={{ type: "spring", stiffness: 450, damping: 35 }}
+                      transition={{ duration: 0.18, ease: "easeOut" }}
                     />
                   )}
                   <Icon className="w-4 h-4" />
@@ -137,7 +134,7 @@ export const HabitModule: React.FC = () => {
 
               <div className="flex items-center h-10 gap-1 bg-bg-card border border-border rounded-xl p-1 text-xs font-sans shadow-2xs">
                 <motion.button
-                  whileTap={{ scale: 0.9 }}
+                  whileTap={{ scale: 0.98 }}
                   onClick={handlePrev}
                   className="w-8 h-8 rounded-lg hover:bg-bg-hover text-txt-secondary flex items-center justify-center cursor-pointer transition-colors"
                   title="Previous period"
@@ -152,7 +149,7 @@ export const HabitModule: React.FC = () => {
                   Today
                 </button>
                 <motion.button
-                  whileTap={{ scale: 0.9 }}
+                  whileTap={{ scale: 0.98 }}
                   onClick={handleNext}
                   className="w-8 h-8 rounded-lg hover:bg-bg-hover text-txt-secondary flex items-center justify-center cursor-pointer transition-colors"
                   title="Next period"
@@ -166,9 +163,7 @@ export const HabitModule: React.FC = () => {
 
           {/* Add Habit Button */}
           <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.96 }}
-            transition={{ type: "spring", stiffness: 500, damping: 25 }}
+            whileTap={{ scale: 0.98 }}
             onClick={() => {
               setHabitToEdit(null);
               setIsModalOpen(true);
@@ -181,8 +176,7 @@ export const HabitModule: React.FC = () => {
 
           {/* Module Settings Shortcut */}
           <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+            whileTap={{ scale: 0.98 }}
             onClick={() => navigate('/settings?tab=habits')}
             className="h-10 w-10 bg-bg-card border border-border hover:bg-bg-hover text-txt-secondary hover:text-txt-primary rounded-xl flex items-center justify-center shadow-2xs transition-colors cursor-pointer"
             title="Habit Settings"

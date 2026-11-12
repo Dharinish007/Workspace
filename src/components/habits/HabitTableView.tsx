@@ -88,7 +88,7 @@ export const HabitTableView: React.FC<HabitTableViewProps> = ({
                     col.isToday ? 'bg-primary/10 text-primary font-bold' : ''
                   }`}
                 >
-                  <div className="text-[11px] uppercase font-sans font-semibold tracking-wider">{col.dayName}</div>
+                  <div className="text-xs font-sans font-medium text-txt-secondary">{col.dayName}</div>
                   <div className={`text-xs font-mono font-bold ${col.isToday ? 'text-primary' : 'text-txt-primary'}`}>{col.dayNum}</div>
                 </th>
               ))}
@@ -128,10 +128,10 @@ export const HabitTableView: React.FC<HabitTableViewProps> = ({
                           <IconRenderer name={habit.icon} className="w-4 h-4" />
                         </div>
                         <div className="overflow-hidden">
-                          <span className="font-semibold text-txt-primary truncate block text-[14px] sm:text-[15px]">
+                          <span className="font-semibold text-txt-primary truncate block text-sm">
                             {habit.name}
                           </span>
-                          <span className="text-[13px] font-medium text-txt-muted block">
+                          <span className="text-xs font-medium text-txt-muted block">
                             {habit.schedule.type === 'daily'
                               ? 'Daily'
                               : `${habit.schedule.days.length} days/week`}
@@ -158,8 +158,8 @@ export const HabitTableView: React.FC<HabitTableViewProps> = ({
                         >
                           {isScheduled ? (
                             <motion.button
-                              whileTap={{ scale: 0.82 }}
-                              transition={{ type: "spring", stiffness: 600, damping: 25 }}
+                              whileTap={{ scale: 0.95 }}
+                              transition={{ duration: 0.15 }}
                               onClick={() => toggleHabitLog(habit.id, col.dateStr)}
                               className={`w-7 h-7 mx-auto rounded-lg flex items-center justify-center transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
                                 isCompleted
@@ -192,7 +192,7 @@ export const HabitTableView: React.FC<HabitTableViewProps> = ({
                               {isCompleted ? (
                                 <Check className="w-4 h-4 stroke-[3]" />
                               ) : isPast ? (
-                                <span className="text-[10px] text-txt-muted/60 font-mono">·</span>
+                                <span className="text-xs text-txt-muted/60 font-mono">·</span>
                               ) : null}
                             </motion.button>
                           ) : (
@@ -237,7 +237,7 @@ export const HabitTableView: React.FC<HabitTableViewProps> = ({
                     {/* Row Menu */}
                     <td className="py-3 px-2 text-center relative">
                       <motion.button
-                        whileTap={{ scale: 0.9 }}
+                        whileTap={{ scale: 0.98 }}
                         onClick={() =>
                           setActiveMenuHabitId(activeMenuHabitId === habit.id ? null : habit.id)
                         }
@@ -299,9 +299,11 @@ export const HabitTableView: React.FC<HabitTableViewProps> = ({
       {/* Table Status Legend and Progress Calculation explanation */}
       <div className="border-t border-border bg-bg-subtle/50 px-4 py-3 flex flex-wrap items-center justify-between gap-3 text-xs font-sans">
         <div className="flex flex-wrap items-center gap-3">
-          <span className="font-bold text-txt-secondary uppercase tracking-wider text-[11px]">Legend:</span>
+          <span className="font-semibold text-txt-secondary text-xs">Legend:</span>
           <div className="flex items-center gap-1.5">
-            <span className="w-5 h-5 rounded-md bg-primary text-white flex items-center justify-center text-[10px] shadow-2xs font-bold">✓</span>
+            <span className="w-5 h-5 rounded-md bg-primary text-white flex items-center justify-center text-xs shadow-2xs font-bold">
+              <Check className="w-3.5 h-3.5 stroke-[2.5]" />
+            </span>
             <span className="text-txt-primary font-medium">Completed</span>
           </div>
           <div className="flex items-center gap-1.5">
@@ -309,7 +311,7 @@ export const HabitTableView: React.FC<HabitTableViewProps> = ({
             <span className="text-txt-primary font-medium">Pending (Today)</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="w-5 h-5 rounded-md border border-border/80 bg-bg-card flex items-center justify-center text-txt-muted text-[10px] font-mono">·</span>
+            <span className="w-5 h-5 rounded-md border border-border/80 bg-bg-card flex items-center justify-center text-txt-muted text-xs font-mono">·</span>
             <span className="text-txt-secondary font-medium">Missed (Past)</span>
           </div>
           <div className="flex items-center gap-1.5">
@@ -318,7 +320,7 @@ export const HabitTableView: React.FC<HabitTableViewProps> = ({
           </div>
         </div>
 
-        <div className="text-txt-muted text-[11px] font-medium">
+        <div className="text-txt-muted text-xs font-medium">
           Progress = Completed days ÷ Scheduled days in active {timeframe}
         </div>
       </div>
