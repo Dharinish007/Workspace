@@ -1,14 +1,14 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SettingsContent } from './SettingsContent';
-import { Database, ArrowLeft } from 'lucide-react';
+import { Sliders, ArrowLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export const SettingsView: React.FC = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="p-4 md:p-6 lg:p-8 max-w-4xl mx-auto space-y-6">
+    <div className="p-4 md:p-6 lg:p-8 max-w-6xl mx-auto space-y-6">
       {/* Top Header */}
       <div className="flex items-center justify-between pb-4 border-b border-border">
         <div className="flex items-center gap-3">
@@ -24,22 +24,22 @@ export const SettingsView: React.FC = () => {
           </motion.button>
 
           <div className="p-2.5 rounded-xl bg-primary-light text-primary">
-            <Database className="w-6 h-6" />
+            <Sliders className="w-6 h-6" />
           </div>
 
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-txt-primary tracking-tight">
-              Settings & Data Management
+            <h1 className="text-2xl sm:text-3xl font-bold text-txt-primary tracking-tight font-serif">
+              Settings
             </h1>
-            <p className="text-xs sm:text-sm text-txt-muted mt-0.5">
-              Local preferences, IndexedDB safety, and JSON backups
+            <p className="text-xs sm:text-sm text-txt-muted mt-0.5 font-sans">
+              Preferences, appearance, module configurations, and local storage
             </p>
           </div>
         </div>
       </div>
 
       {/* Main Settings Card */}
-      <div className="bg-bg-card border border-border shadow-card rounded-2xl p-6 sm:p-8">
+      <div className="bg-bg-card border border-border shadow-card rounded-2xl p-4 sm:p-6 lg:p-8">
         <SettingsContent />
       </div>
     </div>

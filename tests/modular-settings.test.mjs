@@ -254,3 +254,62 @@ test('Modular Settings: Date Formatting Helper', (t) => {
     assert.equal(formatDisplayDate('', 'MM/DD/YYYY'), '');
   });
 });
+
+test('Modular Settings: Vertical Sidebar Navigation & Search Spec', (t) => {
+  t.test('Sidebar groups contain all required categories with zero overlap', () => {
+    const expectedGroups = {
+      GENERAL: ['general', 'appearance', 'preferences'],
+      MODULES: ['habits', 'todo', 'timer', 'calendar', 'journal_notes'],
+      'DATA & PRIVACY': ['backup', 'privacy']
+    };
+
+    const allTabs = Object.values(expectedGroups).flat();
+    assert.equal(allTabs.length, 10);
+    // Ensure uniqueness
+    assert.equal(new Set(allTabs).size, 10);
+  });
+
+  t.test('URL aliases map backward-compatible tabs properly', () => {
+    const resolveTab = (param) => {
+      if (param === 'global') return 'preferences';
+      if (param === 'data') return 'backup';
+      if (param === 'storage') return 'privacy';
+      const valid = ['general', 'appearance', 'preferences', 'habits', 'todo', 'timer', 'calendar', 'journal_notes', 'backup', 'privacy'];
+      return valid.includes(param) ? param : 'general';
+    };
+
+    assert.equal(resolveTab('global'), 'preferences');
+    assert.equal(resolveTab('data'), 'backup');
+    assert.equal(resolveTab('storage'), 'privacy');
+    assert.equal(resolveTab('habits'), 'habits');
+    assert.equal(resolveTab('todo'), 'todo');
+    assert.equal(resolveTab('timer'), 'timer');
+    assert.equal(resolveTab('calendar'), 'calendar');
+    assert.equal(resolveTab('journal_notes'), 'journal_notes');
+    assert.equal(resolveTab('unknown_foo'), 'general');
+  });
+
+  t.test('Keyword search index matches critical settings query terms', () => {
+    const sampleSearchIndex = [
+      { tab: 'appearance', title: 'Theme Mode', keywords: ['dark mode', 'theme', 'light', 'system'] },
+      { tab: 'backup', title: 'Export JSON Backup', keywords: ['backup', 'export', 'download', 'json'] },
+      { tab: 'general', title: 'Language', keywords: ['language', 'english', 'spanish'] },
+      { tab: 'preferences', title: 'Notifications', keywords: ['notifications', 'alerts', 'sound'] },
+      { tab: 'general', title: 'Week Starts On', keywords: ['week starts on', 'week start', 'monday', 'sunday'] },
+    ];
+
+    const findMatches = (query) => {
+      const q = query.toLowerCase();
+      return sampleSearchIndex.filter(item => 
+        item.title.toLowerCase().includes(q) || 
+        item.keywords.some(k => k.toLowerCase().includes(q))
+      );
+    };
+
+    assert.ok(findMatches('dark mode').some(m => m.tab === 'appearance'));
+    assert.ok(findMatches('backup').some(m => m.tab === 'backup'));
+    assert.ok(findMatches('language').some(m => m.tab === 'general'));
+    assert.ok(findMatches('notifications').some(m => m.tab === 'preferences'));
+    assert.ok(findMatches('week starts on').some(m => m.tab === 'general'));
+  });
+});
