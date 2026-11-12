@@ -3,7 +3,6 @@ import { useWorkspace } from '../../context/WorkspaceContext';
 import { formatLocalDate } from '../../db/indexedDB';
 import { CalendarEvent } from '../../types';
 import { Palette, Plus } from 'lucide-react';
-import { motion } from 'framer-motion';
 import { getDayCellBackgroundStyle } from '../../utils/calendarColors';
 
 interface MonthViewProps {
@@ -273,9 +272,8 @@ export const MonthView: React.FC<MonthViewProps> = ({
                 {/* Activity Names inside Box */}
                 <div className="space-y-1">
                   {visibleActivities.map(act => (
-                    <motion.div
+                    <div
                       key={`${act.type}-${act.id}`}
-                      whileHover={{ scale: 1.02 }}
                       onClick={e => {
                         e.stopPropagation();
                         if (act.type === 'task') {
@@ -286,13 +284,13 @@ export const MonthView: React.FC<MonthViewProps> = ({
                           onOpenEditEvent(act.raw);
                         }
                       }}
-                      className="px-1.5 py-0.5 rounded text-[11px] font-sans font-medium truncate flex items-center gap-1.5 transition-opacity hover:opacity-85 shadow-2xs cursor-pointer"
+                      className="px-1.5 py-0.5 rounded text-xs font-sans font-medium truncate flex items-center gap-1.5 transition-opacity hover:opacity-85 shadow-2xs cursor-pointer"
                       style={{
                         backgroundColor: `${act.color}20`,
                         borderLeft: `3px solid ${act.color}`,
                         color: act.color,
                       }}
-                      title={`${act.type.toUpperCase()}: ${act.title}`}
+                      title={`${act.type.charAt(0).toUpperCase() + act.type.slice(1)}: ${act.title}`}
                     >
                       <span
                         className={`truncate ${
@@ -301,7 +299,7 @@ export const MonthView: React.FC<MonthViewProps> = ({
                       >
                         {act.title}
                       </span>
-                    </motion.div>
+                    </div>
                   ))}
                 </div>
               </div>
@@ -314,7 +312,7 @@ export const MonthView: React.FC<MonthViewProps> = ({
                       e.stopPropagation();
                       onOpenDayView(day.dateStr);
                     }}
-                    className="text-[10px] font-sans font-bold text-txt-primary hover:bg-primary-hover/30 px-2 py-0.5 rounded-md bg-primary/20 border border-primary/40 cursor-pointer transition-colors shadow-2xs block w-full text-center"
+                    className="text-xs font-sans font-bold text-txt-primary hover:bg-primary-hover/30 px-2 py-0.5 rounded-md bg-primary/20 border border-primary/40 cursor-pointer transition-colors shadow-2xs block w-full text-center"
                   >
                     +{overflowCount} more
                   </button>

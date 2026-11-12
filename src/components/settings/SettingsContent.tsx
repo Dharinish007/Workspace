@@ -619,7 +619,7 @@ export const SettingsContent: React.FC = () => {
                 >
                   {SETTINGS_GROUPS.map(group => (
                     <div key={group.id} className="space-y-1">
-                      <div className="text-[10px] font-bold text-txt-muted uppercase tracking-wider px-2 pt-1 font-sans">
+                      <div className="text-xs font-semibold text-txt-secondary px-2 pt-1 font-sans">
                         {group.title}
                       </div>
                       <div className="grid grid-cols-2 gap-1">
@@ -677,7 +677,7 @@ export const SettingsContent: React.FC = () => {
           <nav className="hidden md:block space-y-4 font-sans" aria-label="Settings navigation">
             {SETTINGS_GROUPS.map(group => (
               <div key={group.id} className="space-y-1">
-                <div className="px-3 pt-2 pb-1 text-[11px] font-bold uppercase tracking-wider text-txt-muted/80 font-sans select-none">
+                <div className="px-3 pt-2 pb-1 text-xs font-semibold text-txt-secondary font-sans select-none">
                   {group.title}
                 </div>
                 <div className="space-y-0.5">
@@ -752,7 +752,7 @@ export const SettingsContent: React.FC = () => {
             <div className="space-y-4">
               <div className="flex items-center justify-between pb-3 border-b border-border">
                 <div>
-                  <h2 className="text-lg font-serif font-bold text-txt-primary">
+                  <h2 className="text-lg font-sans font-semibold text-txt-primary">
                     Search Results for &ldquo;{searchQuery}&rdquo;
                   </h2>
                   <p className="text-xs text-txt-muted mt-0.5">
@@ -814,7 +814,7 @@ export const SettingsContent: React.FC = () => {
                     <ActiveIcon className="w-5 h-5" />
                   </div>
                   <div>
-                    <h2 className="text-xl sm:text-2xl font-serif font-bold text-txt-primary tracking-tight">
+                    <h2 className="text-xl sm:text-2xl font-sans font-semibold text-txt-primary tracking-tight">
                       {activeCategoryInfo.label}
                     </h2>
                     <p className="text-xs sm:text-sm text-txt-secondary mt-0.5 font-sans">
@@ -1977,27 +1977,27 @@ export const SettingsContent: React.FC = () => {
 
                       {importPreview && (
                         <div className="bg-bg-card border border-border rounded-xl p-4 space-y-3">
-                          <div className="text-xs font-bold uppercase text-txt-muted">Backup Preview</div>
+                          <div className="text-xs font-semibold text-txt-secondary">Backup Preview</div>
                           <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 text-center">
                             <div className="bg-bg-subtle p-2 rounded-lg border border-border">
                               <div className="text-base font-mono font-bold text-primary">{importPreview.pagesCount}</div>
-                              <div className="text-[11px] text-txt-muted">Pages</div>
+                              <div className="text-xs text-txt-muted">Pages</div>
                             </div>
                             <div className="bg-bg-subtle p-2 rounded-lg border border-border">
                               <div className="text-base font-mono font-bold text-primary">{importPreview.tasksCount}</div>
-                              <div className="text-[11px] text-txt-muted">Tasks</div>
+                              <div className="text-xs text-txt-muted">Tasks</div>
                             </div>
                             <div className="bg-bg-subtle p-2 rounded-lg border border-border">
                               <div className="text-base font-mono font-bold text-primary">{importPreview.habitsCount}</div>
-                              <div className="text-[11px] text-txt-muted">Habits</div>
+                              <div className="text-xs text-txt-muted">Habits</div>
                             </div>
                             <div className="bg-bg-subtle p-2 rounded-lg border border-border">
                               <div className="text-base font-mono font-bold text-primary">{importPreview.habitLogsCount}</div>
-                              <div className="text-[11px] text-txt-muted">Habit Logs</div>
+                              <div className="text-xs text-txt-muted">Habit Logs</div>
                             </div>
                             <div className="bg-bg-subtle p-2 rounded-lg border border-border">
                               <div className="text-base font-mono font-bold text-primary">{importPreview.eventsCount}</div>
-                              <div className="text-[11px] text-txt-muted">Events</div>
+                              <div className="text-xs text-txt-muted">Events</div>
                             </div>
                           </div>
 

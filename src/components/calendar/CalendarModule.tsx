@@ -111,7 +111,7 @@ export const CalendarModule: React.FC = () => {
         <div className="flex items-center gap-3.5">
           <div className="flex items-center gap-1 bg-bg-card border border-border rounded-xl p-1 shadow-2xs">
             <motion.button
-              whileTap={{ scale: 0.9 }}
+              whileTap={{ scale: 0.98 }}
               onClick={handlePrev}
               className="w-9 h-9 rounded-lg hover:bg-bg-hover text-txt-secondary hover:text-txt-primary flex items-center justify-center transition-colors cursor-pointer"
               title="Previous"
@@ -120,14 +120,14 @@ export const CalendarModule: React.FC = () => {
               <ChevronLeft className="w-5 h-5" />
             </motion.button>
             <motion.button
-              whileTap={{ scale: 0.95 }}
+              whileTap={{ scale: 0.98 }}
               onClick={handleToday}
               className="h-9 px-3.5 text-xs font-sans font-bold text-txt-primary hover:bg-bg-hover rounded-lg transition-colors cursor-pointer"
             >
               Today
             </motion.button>
             <motion.button
-              whileTap={{ scale: 0.9 }}
+              whileTap={{ scale: 0.98 }}
               onClick={handleNext}
               className="w-9 h-9 rounded-lg hover:bg-bg-hover text-txt-secondary hover:text-txt-primary flex items-center justify-center transition-colors cursor-pointer"
               title="Next"
@@ -137,7 +137,7 @@ export const CalendarModule: React.FC = () => {
             </motion.button>
           </div>
 
-          <h1 className="text-[26px] sm:text-[28px] font-bold text-txt-primary tracking-tight">
+          <h1 className="text-2xl font-bold text-txt-primary tracking-tight">
             {monthYearTitle}
           </h1>
         </div>
@@ -160,7 +160,7 @@ export const CalendarModule: React.FC = () => {
                     <motion.div
                       layoutId="calendarViewPill"
                       className="absolute inset-0 bg-primary rounded-lg -z-10 shadow-xs"
-                      transition={{ type: "spring", stiffness: 450, damping: 35 }}
+                      transition={{ duration: 0.18, ease: "easeOut" }}
                     />
                   )}
                   <span>{v}</span>
@@ -214,9 +214,7 @@ export const CalendarModule: React.FC = () => {
 
           {/* Add Event Button */}
           <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.96 }}
-            transition={{ type: "spring", stiffness: 500, damping: 25 }}
+            whileTap={{ scale: 0.98 }}
             onClick={() => openCreateEventForDate(selectedDateStr)}
             className="h-10 px-4 text-xs font-sans font-bold text-white bg-primary hover:bg-primary-hover rounded-xl flex items-center gap-2 shadow-xs transition-colors cursor-pointer"
           >
@@ -226,8 +224,7 @@ export const CalendarModule: React.FC = () => {
 
           {/* Module Settings Shortcut */}
           <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+            whileTap={{ scale: 0.98 }}
             onClick={() => navigate('/settings?tab=calendar')}
             className="h-10 w-10 bg-bg-card border border-border hover:bg-bg-hover text-txt-secondary hover:text-txt-primary rounded-xl flex items-center justify-center shadow-2xs transition-colors cursor-pointer"
             title="Calendar Settings"
@@ -288,7 +285,7 @@ export const CalendarModule: React.FC = () => {
       <div className="bg-bg-card border border-border rounded-2xl p-4 shadow-card flex flex-wrap items-center justify-between gap-4 text-xs font-sans">
         <div className="flex flex-wrap items-center gap-4">
           <div className="flex items-center gap-2">
-            <span className="font-bold text-txt-secondary uppercase tracking-wider text-[11px]">Pages:</span>
+            <span className="font-semibold text-txt-secondary text-xs">Pages:</span>
             <div className="flex flex-wrap items-center gap-2">
               {pages.map(p => (
                 <span key={p.id} className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-bg-subtle text-txt-primary border border-border">
@@ -300,7 +297,7 @@ export const CalendarModule: React.FC = () => {
           </div>
 
           <div className="hidden md:flex items-center gap-2 border-l border-border pl-4">
-            <span className="font-bold text-txt-secondary uppercase tracking-wider text-[11px]">Types:</span>
+            <span className="font-semibold text-txt-secondary text-xs">Types:</span>
             <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-bg-subtle text-txt-primary border border-border">
               <span className="w-2.5 h-2.5 rounded-full bg-blue-500" />
               <span>Tasks</span>
@@ -316,7 +313,7 @@ export const CalendarModule: React.FC = () => {
           </div>
         </div>
 
-        <div className="text-txt-muted text-[11px] font-medium">
+        <div className="text-txt-muted text-xs font-medium">
           Tip: Click date to view day details, or hover to set custom day background color.
         </div>
       </div>
