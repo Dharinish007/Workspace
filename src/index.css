@@ -3,51 +3,51 @@
 @tailwind utilities;
 
 :root, [data-theme="light"] {
-  /* Powder Blue + Creamy White Light Theme with Google Blue Accent */
-  --color-bg-main: #F8F4E9;
+  /* Unslop Quiet Neutral Light Theme (Slate/Graphite subtle tint) */
+  --color-bg-main: #F8F9FA;
   --color-bg-card: #FFFFFF;
-  --color-bg-subtle: #E8F0FE;
-  --color-bg-hover: #D2E3FC;
+  --color-bg-subtle: #F1F3F5;
+  --color-bg-hover: #E9ECEF;
   
-  /* Primary Google-Style Blue Accent */
+  /* Primary Brand Accent (Quiet Blue default) */
   --color-primary: #1A73E8;
   --color-primary-hover: #1557B0;
-  --color-primary-light: #E8F0FE;
+  --color-primary-light: #EFF6FF;
   
-  /* Text Contrast - High Legibility */
-  --color-text-primary: #1E3A5F;
-  --color-text-secondary: #42566B;
-  --color-text-muted: #64788A;
+  /* Text Contrast - WCAG AAA (>= 7:1 for body) & AA (>= 4.5:1 for muted) */
+  --color-text-primary: #1E293B;
+  --color-text-secondary: #475569;
+  --color-text-muted: #5E6C84;
   
-  /* Borders - Distinct & Defined (P0 Border Visibility Upgrade) */
-  --color-border: #B8C9DC;
-  --color-border-interactive: #A8BCD3;
-  --color-border-subtle: #D2DCE8;
-  --color-border-focus: #6B91BE;
+  /* Borders - Quiet Hairlines (8-10% ink equivalent) */
+  --color-border: #E2E8F0;
+  --color-border-interactive: #CBD5E1;
+  --color-border-subtle: #F1F5F9;
+  --color-border-focus: #3B82F6;
 }
 
 [data-theme="dark"] {
-  /* Slate Dark Theme with Google Blue Accent */
-  --color-bg-main: #0E1726;
-  --color-bg-card: #152238;
-  --color-bg-subtle: #1C2D47;
-  --color-bg-hover: #243B5C;
+  /* Unslop Quiet Neutral Graphite Dark Theme */
+  --color-bg-main: #111215;
+  --color-bg-card: #18191D;
+  --color-bg-subtle: #202227;
+  --color-bg-hover: #292B33;
   
-  /* Primary Google-Style Blue Accent in Dark Mode */
-  --color-primary: #1A73E8;
-  --color-primary-hover: #1557B0;
-  --color-primary-light: #1C2D47;
+  /* Primary Accent in Dark Mode (Calibrated for high contrast >= 4.5:1) */
+  --color-primary: #3B82F6;
+  --color-primary-hover: #60A5FA;
+  --color-primary-light: #1E293B;
   
-  /* Text Contrast in Dark Mode */
-  --color-text-primary: #F0F6FA;
-  --color-text-secondary: #B1C3D6;
-  --color-text-muted: #7E97B0;
+  /* Text Contrast in Dark Mode (WCAG AAA >= 7:1 for primary, AA >= 4.5:1 for secondary & muted) */
+  --color-text-primary: #F3F4F6;
+  --color-text-secondary: #9CA3AF;
+  --color-text-muted: #858D9D;
   
-  /* Borders in Dark Mode */
-  --color-border: #3A5578;
-  --color-border-interactive: #4A6E9B;
-  --color-border-subtle: #2C425E;
-  --color-border-focus: #6B91BE;
+  /* Borders in Dark Mode - Quiet Hairlines */
+  --color-border: #2B2D35;
+  --color-border-interactive: #3B3E49;
+  --color-border-subtle: #22242B;
+  --color-border-focus: #3B82F6;
 }
 
 /* ==========================================================================
@@ -56,12 +56,12 @@
 [data-accent="blue"] {
   --color-primary: #1A73E8;
   --color-primary-hover: #1557B0;
-  --color-primary-light: #E8F0FE;
+  --color-primary-light: #EFF6FF;
 }
 [data-theme="dark"][data-accent="blue"] {
-  --color-primary: #1A73E8;
-  --color-primary-hover: #1557B0;
-  --color-primary-light: #1C2D47;
+  --color-primary: #3B82F6;
+  --color-primary-hover: #60A5FA;
+  --color-primary-light: #1E293B;
 }
 
 [data-accent="indigo"] {
@@ -71,7 +71,7 @@
 }
 [data-theme="dark"][data-accent="indigo"] {
   --color-primary: #6366F1;
-  --color-primary-hover: #4F46E5;
+  --color-primary-hover: #818CF8;
   --color-primary-light: #1E1B4B;
 }
 
@@ -82,7 +82,7 @@
 }
 [data-theme="dark"][data-accent="violet"] {
   --color-primary: #8B5CF6;
-  --color-primary-hover: #7C3AED;
+  --color-primary-hover: #A78BFA;
   --color-primary-light: #2E1065;
 }
 
@@ -93,7 +93,7 @@
 }
 [data-theme="dark"][data-accent="emerald"] {
   --color-primary: #10B981;
-  --color-primary-hover: #059669;
+  --color-primary-hover: #34D399;
   --color-primary-light: #064E3B;
 }
 
@@ -104,7 +104,7 @@
 }
 [data-theme="dark"][data-accent="rose"] {
   --color-primary: #F43F5E;
-  --color-primary-hover: #E11D48;
+  --color-primary-hover: #FB7185;
   --color-primary-light: #4C0519;
 }
 
@@ -115,7 +115,7 @@
 }
 [data-theme="dark"][data-accent="amber"] {
   --color-primary: #F59E0B;
-  --color-primary-hover: #D97706;
+  --color-primary-hover: #FBBF24;
   --color-primary-light: #451A03;
 }
 
@@ -264,11 +264,14 @@ html[data-bg-style="notion"][data-theme="dark"] {
   box-sizing: border-box;
 }
 
+/* ==========================================================================
+   Base Typography & System Hierarchy
+   ========================================================================== */
+
 body {
-  font-family: 'Newsreader', 'Source Serif 4', 'Tiempos Headline', Georgia, serif;
-  font-optical-sizing: auto;
-  letter-spacing: 0.005em;
-  transition: background-color 200ms ease, color 200ms ease;
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  letter-spacing: -0.01em;
+  transition: background-color 150ms cubic-bezier(0.22, 1, 0.36, 1), color 150ms cubic-bezier(0.22, 1, 0.36, 1);
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -276,16 +279,30 @@ body {
   background-color: var(--color-bg-main);
 }
 
+/* Headings default to clean modern sans-serif */
 h1, h2, h3, h4, h5, h6 {
-  font-family: 'Newsreader', 'Source Serif 4', 'Tiempos Headline', Georgia, serif;
-  letter-spacing: -0.01em;
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  letter-spacing: -0.02em;
   line-height: 1.25;
+}
+
+/* Display serif: strictly reserved for top-level page titles or journal reader views */
+.font-serif,
+.display-title {
+  font-family: 'Newsreader', 'Source Serif 4', 'Tiempos Headline', Georgia, serif;
+  letter-spacing: -0.015em;
+}
+
+/* Monospace for numbers, timers, keyboard shortcuts, tabular figures */
+.font-mono {
+  font-family: 'JetBrains Mono', 'Fira Code', Menlo, monospace;
+  font-feature-settings: 'tnum' 1;
 }
 
 /* Modern sans-serif typography for navigation, labels, controls, and form elements */
 button, input, select, textarea, label, [role="button"], [role="tab"], [role="radio"], nav, aside, .font-sans {
   font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  letter-spacing: 0.005em;
+  letter-spacing: -0.005em;
 }
 
 /* ==========================================================================
@@ -420,8 +437,8 @@ html[data-bg-style="notion"] button.bg-primary {
 
 /* Custom scrollbar */
 ::-webkit-scrollbar {
-  width: 7px;
-  height: 7px;
+  width: 6px;
+  height: 6px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
@@ -447,5 +464,53 @@ html[data-bg-style="notion"] button.bg-primary {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+}
+
+/* ==========================================================================
+   Unslop Component Layer Primitives
+   ========================================================================== */
+@layer components {
+  /* Unslop Button Primitives */
+  .btn-primary {
+    @apply inline-flex items-center justify-center font-sans font-medium text-sm h-9 px-3.5 rounded-lg bg-primary text-white shadow-xs hover:bg-primary-hover active:scale-[0.98] transition-[background-color,transform] duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1 disabled:opacity-50 disabled:pointer-events-none cursor-pointer;
+  }
+  .btn-secondary {
+    @apply inline-flex items-center justify-center font-sans font-medium text-sm h-9 px-3.5 rounded-lg bg-bg-card hover:bg-bg-hover text-txt-primary border border-border hover:border-border-interactive shadow-xs active:scale-[0.98] transition-[background-color,border-color,transform] duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1 disabled:opacity-50 disabled:pointer-events-none cursor-pointer;
+  }
+  .btn-ghost {
+    @apply inline-flex items-center justify-center font-sans font-medium text-sm h-9 px-3 rounded-lg text-txt-secondary hover:text-txt-primary hover:bg-bg-hover active:scale-[0.98] transition-[background-color,color,transform] duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1 disabled:opacity-50 disabled:pointer-events-none cursor-pointer;
+  }
+  .btn-danger {
+    @apply inline-flex items-center justify-center font-sans font-medium text-sm h-9 px-3.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 border border-red-500/20 active:scale-[0.98] transition-[background-color,border-color,transform] duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-1 disabled:opacity-50 disabled:pointer-events-none cursor-pointer;
+  }
+
+  /* Unslop Form Inputs & Selects */
+  .input-base {
+    @apply h-9 px-3 rounded-lg bg-bg-subtle/50 border border-border text-txt-primary placeholder:text-txt-muted text-sm font-sans focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  /* Unslop Standard Card */
+  .card-base {
+    @apply bg-bg-card border border-border rounded-card p-5 shadow-card transition-colors duration-150;
+  }
+
+  /* Unslop Tabs & Segmented Controls */
+  .tab-group {
+    @apply inline-flex items-center gap-1 p-1 rounded-xl bg-bg-subtle border border-border/50;
+  }
+  .tab-item {
+    @apply px-3 py-1.5 text-xs font-sans font-medium rounded-lg transition-colors duration-150 text-txt-secondary hover:text-txt-primary cursor-pointer select-none;
+  }
+  .tab-item-active {
+    @apply bg-bg-card text-txt-primary shadow-xs font-medium;
+  }
+
+  /* Unslop Quiet Status Dot & Badge */
+  .status-dot {
+    @apply w-2 h-2 rounded-full shrink-0;
+  }
+  .badge-quiet {
+    @apply inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-sans font-medium bg-bg-subtle text-txt-secondary border border-border/60;
   }
 }

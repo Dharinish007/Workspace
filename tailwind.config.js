@@ -15,10 +15,10 @@ export default {
       letterSpacing: {
         tighter: '-0.02em',
         tight: '-0.01em',
-        normal: '0.005em',
-        wide: '0.03em',
-        wider: '0.06em',
-        widest: '0.1em',
+        normal: '0em',
+        wide: '0.01em',
+        wider: '0.02em',
+        widest: '0.05em',
       },
       colors: {
         bg: {
@@ -45,12 +45,26 @@ export default {
         },
       },
       borderRadius: {
+        'control': '8px',
         'card': '16px',
+        'modal': '20px',
       },
       boxShadow: {
-        'card': '0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.04)',
-        'card-hover': '0 6px 16px -2px rgba(0, 0, 0, 0.08), 0 2px 6px -1px rgba(0, 0, 0, 0.04)',
-        'modal': '0 20px 25px -5px rgba(0, 0, 0, 0.18), 0 10px 10px -5px rgba(0, 0, 0, 0.06)',
+        'card': '0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.02)',
+        'card-hover': '0 4px 12px -2px rgba(0, 0, 0, 0.06), 0 2px 4px -1px rgba(0, 0, 0, 0.02)',
+        'modal': '0 12px 32px -4px rgba(0, 0, 0, 0.12), 0 4px 12px -2px rgba(0, 0, 0, 0.06)',
+        'popover': '0 8px 24px -2px rgba(0, 0, 0, 0.08), 0 2px 6px -1px rgba(0, 0, 0, 0.04)',
+      },
+      transitionTimingFunction: {
+        'unslop': 'cubic-bezier(0.22, 1, 0.36, 1)',
+      },
+      transitionDuration: {
+        'fast': '150ms',
+        'normal': '200ms',
+        'slow': '300ms',
+      },
+      scale: {
+        'press': '0.98',
       }
     },
   },
