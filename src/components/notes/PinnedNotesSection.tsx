@@ -97,11 +97,11 @@ export const PinnedNotesSection: React.FC<PinnedNotesSectionProps> = ({
       {/* Section Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="text-base">📌</span>
+          <Pin className="w-4 h-4 text-primary fill-primary" />
           <h2 className="text-sm font-bold text-txt-primary tracking-tight">Pinned Notes</h2>
           <span className="text-xs text-txt-muted font-normal">({pinnedNotes.length})</span>
         </div>
-        <span className="text-[11px] text-txt-muted hidden sm:inline">Drag to reorder</span>
+        <span className="text-xs text-txt-muted hidden sm:inline">Drag to reorder</span>
       </div>
 
       {/* Horizontal Carousel */}
@@ -130,7 +130,7 @@ export const PinnedNotesSection: React.FC<PinnedNotesSectionProps> = ({
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: isDragging ? 0.4 : 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.9 }}
-                  transition={{ type: 'spring', stiffness: 450, damping: 30 }}
+                  transition={{ duration: 0.2 }}
                   onClick={() => onSelectNote(note.id)}
                   className={`w-52 sm:w-56 h-full bg-bg-card border rounded-2xl p-4 shadow-card hover:shadow-card-hover transition-all duration-200 cursor-grab active:cursor-grabbing flex flex-col justify-between select-none group relative ${
                     isOver ? 'border-primary ring-2 ring-primary/30 scale-[1.02]' : 'border-border hover:border-border-interactive'
@@ -164,7 +164,7 @@ export const PinnedNotesSection: React.FC<PinnedNotesSectionProps> = ({
 
                   {/* Title */}
                   <div className="mt-3 mb-2.5">
-                    <h3 className="font-bold text-[14px] sm:text-[15px] text-txt-primary group-hover:text-primary transition-colors line-clamp-1 leading-snug">
+                    <h3 className="font-semibold text-sm text-txt-primary group-hover:text-primary transition-colors line-clamp-1 leading-snug">
                       {note.title || 'Untitled Note'}
                     </h3>
                   </div>
@@ -175,13 +175,13 @@ export const PinnedNotesSection: React.FC<PinnedNotesSectionProps> = ({
                       note.tags.slice(0, 3).map((tag, tIdx) => (
                         <span
                           key={tIdx}
-                          className="text-[11px] font-medium px-2 py-0.5 rounded-md bg-bg-subtle text-txt-secondary border border-border/50 group-hover:border-primary/20 transition-colors"
+                          className="text-xs font-medium px-2 py-0.5 rounded-md bg-bg-subtle text-txt-secondary border border-border/50 group-hover:border-primary/20 transition-colors"
                         >
                           #{tag}
                         </span>
                       ))
                     ) : (
-                      <span className="text-[11px] text-txt-muted italic">No tags</span>
+                      <span className="text-xs text-txt-muted italic">No tags</span>
                     )}
                   </div>
                 </motion.div>

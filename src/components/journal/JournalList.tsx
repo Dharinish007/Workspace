@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useWorkspace } from '../../context/WorkspaceContext';
-import { JournalEntry, JournalMood } from '../../types';
+import { JournalMood } from '../../types';
 import { formatLocalDate } from '../../db/indexedDB';
 import { 
   Plus, 
@@ -9,27 +9,42 @@ import {
   ChevronRight, 
   Search, 
   ChevronDown, 
-  Calendar as CalendarIcon, 
+  Calendar,
+  PenLine,
+  Award,
+  BookOpen,
+  Frown,
+  Meh,
+  Smile,
+  Laugh,
   Trash2,
   Edit2,
   Settings
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-const MOOD_EMOJIS: Record<JournalMood, string> = {
-  terrible: '😢',
-  bad: '🙁',
-  neutral: '😐',
-  good: '🙂',
-  great: '😄',
+const MOOD_ICONS: Record<JournalMood, React.ComponentType<{ className?: string }>> = {
+  terrible: Frown,
+  bad: Frown,
+  neutral: Meh,
+  good: Smile,
+  great: Laugh,
+};
+
+const MOOD_LABELS: Record<JournalMood, string> = {
+  terrible: 'Terrible',
+  bad: 'Low',
+  neutral: 'Neutral',
+  good: 'Good',
+  great: 'Great',
 };
 
 const MOOD_BG: Record<JournalMood, string> = {
-  terrible: 'bg-red-500/10 text-red-600 dark:text-red-400',
-  bad: 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
-  neutral: 'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400',
-  good: 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
-  great: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
+  terrible: 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20',
+  bad: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20',
+  neutral: 'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 border-yellow-500/20',
+  good: 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20',
+  great: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20',
 };
 
 interface JournalListProps {
@@ -175,9 +190,8 @@ export const JournalList: React.FC<JournalListProps> = ({ onOpenDate }) => {
       {/* Top Banner Row: Title, Subtitle & Action buttons */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-serif font-bold text-txt-primary flex items-center gap-2">
-            <span>Your Journal</span>
-            <span>✍️</span>
+          <h1 className="text-2xl sm:text-3xl font-serif font-bold text-txt-primary">
+            Your Journal
           </h1>
           <p className="text-xs sm:text-sm text-txt-secondary mt-1">
             A space to write, reflect and keep track of your journey.
@@ -187,7 +201,6 @@ export const JournalList: React.FC<JournalListProps> = ({ onOpenDate }) => {
         <div className="flex items-center gap-2.5 self-start sm:self-center">
           {/* "+ New Entry" Button (opens or creates today's entry) */}
           <motion.button
-            whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={() => onOpenDate(todayDateStr)}
             className="px-4 py-2.5 rounded-xl bg-primary hover:bg-primary-hover text-white text-xs sm:text-sm font-semibold flex items-center gap-2 shadow-xs transition-colors cursor-pointer"
@@ -198,8 +211,7 @@ export const JournalList: React.FC<JournalListProps> = ({ onOpenDate }) => {
 
           {/* Module Settings Shortcut */}
           <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+            whileTap={{ scale: 0.98 }}
             onClick={() => navigate('/settings?tab=journal_notes')}
             className="h-10 w-10 bg-bg-card border border-border hover:bg-bg-hover text-txt-secondary hover:text-txt-primary rounded-xl flex items-center justify-center shadow-2xs transition-colors cursor-pointer"
             title="Journal & Notes Settings"
@@ -238,7 +250,7 @@ export const JournalList: React.FC<JournalListProps> = ({ onOpenDate }) => {
           </div>
 
           {/* Days of Week Header */}
-          <div className="grid grid-cols-7 text-center text-[11px] font-semibold text-txt-muted mb-2">
+          <div className="grid grid-cols-7 text-center text-xs font-medium text-txt-secondary mb-2">
             <span>Sun</span>
             <span>Mon</span>
             <span>Tue</span>
@@ -297,40 +309,40 @@ export const JournalList: React.FC<JournalListProps> = ({ onOpenDate }) => {
             <div className="space-y-4">
               {/* Entries count */}
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-xl bg-blue-500/10 text-primary flex items-center justify-center text-sm">
-                  ✏️
+                <div className="w-8 h-8 rounded-xl bg-blue-500/10 text-primary flex items-center justify-center">
+                  <PenLine className="w-4 h-4" />
                 </div>
                 <div>
                   <div className="text-sm font-bold text-txt-primary">
                     {monthStats.entriesCount} {monthStats.entriesCount === 1 ? 'entry' : 'entries'}
                   </div>
-                  <div className="text-[11px] text-txt-muted">Written this month</div>
+                  <div className="text-xs text-txt-muted">Written this month</div>
                 </div>
               </div>
 
               {/* Active days */}
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-sm">
-                  📅
+                <div className="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+                  <Calendar className="w-4 h-4" />
                 </div>
                 <div>
                   <div className="text-sm font-bold text-txt-primary">
                     {monthStats.activeDaysCount} {monthStats.activeDaysCount === 1 ? 'day active' : 'days active'}
                   </div>
-                  <div className="text-[11px] text-txt-muted">Reflection consistency</div>
+                  <div className="text-xs text-txt-muted">Reflection consistency</div>
                 </div>
               </div>
 
               {/* Total entries */}
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center text-sm">
-                  🏆
+                <div className="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center">
+                  <Award className="w-4 h-4" />
                 </div>
                 <div>
                   <div className="text-sm font-bold text-txt-primary">
                     {monthStats.totalEntriesCount} total {monthStats.totalEntriesCount === 1 ? 'entry' : 'entries'}
                   </div>
-                  <div className="text-[11px] text-txt-muted">All-time collection</div>
+                  <div className="text-xs text-txt-muted">All-time collection</div>
                 </div>
               </div>
             </div>
@@ -346,7 +358,7 @@ export const JournalList: React.FC<JournalListProps> = ({ onOpenDate }) => {
           className="p-4 rounded-2xl border border-dashed border-border bg-bg-card flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs sm:text-sm"
         >
           <div className="flex items-center gap-2.5 text-txt-secondary">
-            <CalendarIcon className="w-4 h-4 text-primary" />
+            <Calendar className="w-4 h-4 text-primary" />
             <span>
               No entry for <strong className="text-txt-primary">{formatHeaderDate(selectedDate)}</strong>. Write one?
             </span>
@@ -400,7 +412,7 @@ export const JournalList: React.FC<JournalListProps> = ({ onOpenDate }) => {
         {/* Entries List */}
         {filteredEntries.length === 0 ? (
           <div className="p-12 text-center bg-bg-card border border-border rounded-2xl text-txt-muted space-y-3">
-            <div className="text-3xl">📖</div>
+            <BookOpen className="w-10 h-10 text-txt-muted/60 mx-auto" />
             <p className="text-sm font-medium text-txt-secondary">
               {searchQuery ? 'No journal entries match your search.' : 'No journal entries yet.'}
             </p>
@@ -416,8 +428,8 @@ export const JournalList: React.FC<JournalListProps> = ({ onOpenDate }) => {
         ) : (
           <div className="space-y-3">
             {filteredEntries.map(entry => {
-              const moodFace = entry.mood ? MOOD_EMOJIS[entry.mood] : '📝';
-              const moodStyle = entry.mood ? MOOD_BG[entry.mood] : 'bg-primary/10 text-primary';
+              const MoodIcon = entry.mood ? MOOD_ICONS[entry.mood] : BookOpen;
+              const moodStyle = entry.mood ? MOOD_BG[entry.mood] : 'bg-primary/10 text-primary border-primary/20';
               const displayTitle = entry.title || formatRowDate(entry.date);
               const previewText = entry.body.trim().replace(/^[#\->\*\`\s]+/gm, '').substring(0, 110) || 'Empty entry...';
 
@@ -427,16 +439,23 @@ export const JournalList: React.FC<JournalListProps> = ({ onOpenDate }) => {
                   onClick={() => onOpenDate(entry.date)}
                   className="bg-bg-card border border-border hover:border-primary/50 shadow-card hover:shadow-card-hover rounded-2xl p-4 sm:p-5 flex items-start gap-4 transition-all duration-150 cursor-pointer group"
                 >
-                  {/* Mood Face in tinted container */}
-                  <div className={`w-11 h-11 rounded-xl flex items-center justify-center text-xl shrink-0 ${moodStyle} group-hover:scale-105 transition-transform`}>
-                    {moodFace}
+                  {/* Mood Icon in tinted container */}
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border ${moodStyle}`}>
+                    <MoodIcon className="w-5 h-5" />
                   </div>
 
                   {/* Middle Content */}
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-serif font-bold text-sm sm:text-base text-txt-primary truncate group-hover:text-primary transition-colors">
-                      {displayTitle}
-                    </h3>
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-serif font-bold text-sm sm:text-base text-txt-primary truncate group-hover:text-primary transition-colors">
+                        {displayTitle}
+                      </h3>
+                      {entry.mood && (
+                        <span className={`px-2 py-0.5 rounded-md text-xs font-medium border ${moodStyle}`}>
+                          {MOOD_LABELS[entry.mood]}
+                        </span>
+                      )}
+                    </div>
 
                     <p className="text-xs text-txt-secondary line-clamp-2 mt-0.5 leading-relaxed">
                       {previewText}
@@ -448,7 +467,7 @@ export const JournalList: React.FC<JournalListProps> = ({ onOpenDate }) => {
                         {entry.tags.map(t => (
                           <span
                             key={t}
-                            className="px-2 py-0.5 rounded-md text-[11px] font-medium bg-primary/10 text-primary border border-primary/20"
+                            className="px-2 py-0.5 rounded-md text-xs font-medium bg-primary/10 text-primary border border-primary/20"
                           >
                             #{t}
                           </span>

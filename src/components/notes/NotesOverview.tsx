@@ -169,7 +169,7 @@ export const NotesOverview: React.FC<NotesOverviewProps> = ({
             className="absolute inset-0 z-40 bg-primary/10 border-2 border-dashed border-primary rounded-3xl backdrop-blur-xs flex flex-col items-center justify-center p-6 text-center select-none"
           >
             <div className="w-16 h-16 rounded-2xl bg-primary text-white flex items-center justify-center shadow-lg mb-3">
-              <Upload className="w-8 h-8 animate-bounce" />
+              <Upload className="w-8 h-8" />
             </div>
             <h3 className="text-lg font-bold text-txt-primary font-serif">Drop Markdown or Text files to import</h3>
             <p className="text-xs text-txt-secondary mt-1">Supports .md and .txt files</p>
@@ -190,12 +190,9 @@ export const NotesOverview: React.FC<NotesOverviewProps> = ({
       {/* Header Row: Title & Action Buttons */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2">
-            <h1 className="font-serif text-2xl sm:text-3xl font-bold text-txt-primary tracking-tight">
-              My Notes
-            </h1>
-            <span className="text-2xl" role="img" aria-label="notes">📝</span>
-          </div>
+          <h1 className="font-serif text-2xl sm:text-3xl font-bold text-txt-primary tracking-tight">
+            My Notes
+          </h1>
           <p className="text-xs sm:text-sm text-txt-secondary mt-1">
             Capture ideas, learnings and important information.
           </p>
@@ -216,7 +213,7 @@ export const NotesOverview: React.FC<NotesOverviewProps> = ({
           <button
             type="button"
             onClick={onCreateNewNote}
-            className="h-10 px-4 rounded-xl bg-[#2F6FDB] hover:bg-[#225BC0] text-white text-xs font-semibold flex items-center gap-2 shadow-card hover:shadow-card-hover transition-all cursor-pointer group"
+            className="h-10 px-4 rounded-xl bg-primary hover:bg-primary-hover text-white text-xs font-semibold flex items-center gap-2 shadow-card hover:shadow-card-hover transition-all cursor-pointer group"
           >
             <Plus className="w-4 h-4 group-hover:rotate-90 transition-transform duration-200" />
             <span>New Note</span>
@@ -224,8 +221,7 @@ export const NotesOverview: React.FC<NotesOverviewProps> = ({
 
           {/* Module Settings Shortcut */}
           <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+            whileTap={{ scale: 0.98 }}
             type="button"
             onClick={() => navigate('/settings?tab=journal_notes')}
             className="h-10 w-10 bg-bg-card border border-border hover:bg-bg-hover text-txt-secondary hover:text-txt-primary rounded-xl flex items-center justify-center shadow-2xs transition-colors cursor-pointer"
@@ -343,7 +339,7 @@ export const NotesOverview: React.FC<NotesOverviewProps> = ({
                   }`}
                 >
                   <span>All Tags</span>
-                  <span className="text-[11px] text-txt-muted">{notes.length}</span>
+                  <span className="text-xs text-txt-muted">{notes.length}</span>
                 </button>
                 {allTagsWithCount.map(({ tag, count }) => (
                   <button
@@ -358,7 +354,7 @@ export const NotesOverview: React.FC<NotesOverviewProps> = ({
                     }`}
                   >
                     <span>#{tag}</span>
-                    <span className="text-[11px] text-txt-muted">{count}</span>
+                    <span className="text-xs text-txt-muted">{count}</span>
                   </button>
                 ))}
               </div>

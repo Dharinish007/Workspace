@@ -303,7 +303,7 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({
             <div className="flex items-center gap-1.5 text-xs select-none">
               {saveState === 'saving' && (
                 <>
-                  <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+                  <div className="w-2 h-2 rounded-full bg-amber-500" />
                   <span className="text-amber-600 dark:text-amber-400 font-medium">Saving...</span>
                 </>
               )}
@@ -325,7 +325,7 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({
             <button
               type="button"
               onClick={() => persistChanges()}
-              className="h-9 px-4 rounded-xl bg-[#2F6FDB] hover:bg-[#225BC0] text-white text-xs font-semibold flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
+              className="h-9 px-4 rounded-xl bg-primary hover:bg-primary-hover text-white text-xs font-semibold flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
               title="Save note (Ctrl+S)"
             >
               <Save className="w-3.5 h-3.5" />
@@ -588,7 +588,7 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({
               onChange={handleContentChange}
               onKeyDown={handleTextareaKeyDown}
               placeholder="Start typing your note in Markdown... Use toolbar or Markdown shortcuts like # for headings, - for lists, **bold**."
-              className="flex-1 w-full bg-transparent border-none outline-none resize-none font-sans text-[15px] sm:text-base leading-relaxed text-txt-primary placeholder:text-txt-muted/50 scrollbar-thin"
+              className="flex-1 w-full bg-transparent border-none outline-none resize-none font-sans text-base leading-relaxed text-txt-primary placeholder:text-txt-muted/50 scrollbar-thin"
             />
           ) : (
             <div className="flex-1 overflow-y-auto scrollbar-thin">
@@ -603,7 +603,7 @@ export const NoteEditor: React.FC<NoteEditorProps> = ({
             Created {createdDateFormatted} · Last edited {lastEditedFormatted}
           </div>
 
-          <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 font-medium text-[11px]">
+          <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 font-medium text-xs">
             <Check className="w-3 h-3 text-emerald-500" />
             <span>Auto-saving</span>
           </div>

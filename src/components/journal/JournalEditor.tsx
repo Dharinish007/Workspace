@@ -3,7 +3,6 @@ import { useWorkspace } from '../../context/WorkspaceContext';
 import { JournalEntry, JournalMood } from '../../types';
 import { 
   ArrowLeft, 
-  Sparkles, 
   RefreshCw, 
   Tag as TagIcon, 
   X, 
@@ -17,7 +16,11 @@ import {
   Edit3, 
   Download, 
   Check, 
-  AlertCircle 
+  AlertCircle,
+  Frown,
+  Meh,
+  Smile,
+  Laugh
 } from 'lucide-react';
 
 const WRITING_PROMPTS = [
@@ -33,12 +36,12 @@ const WRITING_PROMPTS = [
   "What is the single most important focus for your tomorrow?"
 ];
 
-const MOODS: { id: JournalMood; face: string; label: string }[] = [
-  { id: 'terrible', face: '😢', label: 'Terrible' },
-  { id: 'bad', face: '🙁', label: 'Down' },
-  { id: 'neutral', face: '😐', label: 'Okay' },
-  { id: 'good', face: '🙂', label: 'Good' },
-  { id: 'great', face: '😄', label: 'Great' },
+const MOODS: { id: JournalMood; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
+  { id: 'terrible', label: 'Terrible', icon: Frown },
+  { id: 'bad', label: 'Low', icon: Frown },
+  { id: 'neutral', label: 'Neutral', icon: Meh },
+  { id: 'good', label: 'Good', icon: Smile },
+  { id: 'great', label: 'Great', icon: Laugh },
 ];
 
 interface JournalEditorProps {
@@ -372,7 +375,7 @@ export const JournalEditor: React.FC<JournalEditorProps> = ({ date, onBack }) =>
           <div className="flex items-center text-xs">
             {saveStatus === 'saving' && (
               <span className="flex items-center gap-1.5 text-txt-muted">
-                <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+                <span className="w-2 h-2 rounded-full bg-amber-400" />
                 <span>Saving…</span>
               </span>
             )}
@@ -412,14 +415,14 @@ export const JournalEditor: React.FC<JournalEditorProps> = ({ date, onBack }) =>
                   className="w-full text-left px-3 py-2 hover:bg-bg-hover text-txt-primary flex items-center justify-between transition-colors cursor-pointer"
                 >
                   <span>Download .md</span>
-                  <span className="text-[10px] text-txt-muted">Markdown</span>
+                  <span className="text-xs text-txt-muted">Markdown</span>
                 </button>
                 <button
                   onClick={() => handleDownload('txt')}
                   className="w-full text-left px-3 py-2 hover:bg-bg-hover text-txt-primary flex items-center justify-between transition-colors cursor-pointer"
                 >
                   <span>Download .txt</span>
-                  <span className="text-[10px] text-txt-muted">Text</span>
+                  <span className="text-xs text-txt-muted">Text</span>
                 </button>
               </div>
             )}
@@ -429,16 +432,14 @@ export const JournalEditor: React.FC<JournalEditorProps> = ({ date, onBack }) =>
 
       {/* Date Header */}
       <div className="flex items-center gap-2 text-xs font-semibold text-txt-secondary">
-        <span>📅</span>
         <span>{formattedDateString}</span>
       </div>
 
       {/* Prompt Card: Placed ABOVE Title */}
       <div className="bg-primary/5 dark:bg-primary/10 border border-primary/20 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="space-y-1">
-          <div className="flex items-center gap-1.5 text-xs font-bold text-primary uppercase tracking-wider">
-            <Sparkles className="w-3.5 h-3.5 text-primary" />
-            <span>Need a prompt?</span>
+          <div className="text-xs font-semibold text-primary">
+            Need a prompt?
           </div>
           <p className="text-sm font-medium text-txt-primary italic">
             "{WRITING_PROMPTS[promptIndex]}"
@@ -465,13 +466,14 @@ export const JournalEditor: React.FC<JournalEditorProps> = ({ date, onBack }) =>
         />
       </div>
 
-      {/* Meta Row: Mood Faces (5 inline, one tap) & Tags */}
+      {/* Meta Row: Mood Pills & Tags */}
       <div className="flex flex-wrap items-center gap-3 sm:gap-4 pt-1 pb-2">
-        {/* Mood Selector: 5 faces inline, one tap */}
-        <div className="flex items-center gap-1.5 bg-bg-card border border-border rounded-xl px-2.5 py-1.5 shadow-2xs">
-          <span className="text-xs text-txt-muted hidden sm:inline mr-1">Mood:</span>
+        {/* Mood Selector: 5 inline pills */}
+        <div className="flex items-center gap-1 bg-bg-card border border-border rounded-xl p-1 shadow-2xs">
+          <span className="text-xs text-txt-muted hidden sm:inline px-2 font-medium">Mood:</span>
           {MOODS.map(m => {
             const isSelected = mood === m.id;
+            const Icon = m.icon;
             return (
               <button
                 key={m.id}
@@ -479,13 +481,14 @@ export const JournalEditor: React.FC<JournalEditorProps> = ({ date, onBack }) =>
                 onClick={() => handleMoodSelect(m.id)}
                 title={m.label}
                 aria-label={`Select mood: ${m.label}`}
-                className={`w-7 h-7 rounded-lg text-base flex items-center justify-center transition-all cursor-pointer ${
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
                   isSelected 
-                    ? 'bg-primary/20 scale-110 ring-2 ring-primary' 
-                    : 'hover:bg-bg-hover opacity-70 hover:opacity-100'
+                    ? 'bg-primary text-white shadow-2xs font-semibold' 
+                    : 'text-txt-secondary hover:text-txt-primary hover:bg-bg-hover'
                 }`}
               >
-                {m.face}
+                <Icon className="w-3.5 h-3.5" />
+                <span className="hidden md:inline">{m.label}</span>
               </button>
             );
           })}
@@ -536,7 +539,7 @@ export const JournalEditor: React.FC<JournalEditorProps> = ({ date, onBack }) =>
             {/* Existing Tag Suggestions Dropdown */}
             {isTagDropdownOpen && allExistingTags.filter(t => !tags.includes(t) && t.includes(tagInput.toLowerCase())).length > 0 && (
               <div className="absolute left-0 mt-1 w-36 bg-bg-card border border-border rounded-xl shadow-modal py-1 z-30 text-xs max-h-36 overflow-y-auto">
-                <div className="px-2 py-1 text-[10px] uppercase font-bold text-txt-muted tracking-wider">
+                <div className="px-2 py-1 text-xs font-semibold text-txt-muted">
                   Reuse tags
                 </div>
                 {allExistingTags
