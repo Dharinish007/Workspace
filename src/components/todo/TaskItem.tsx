@@ -136,9 +136,9 @@ export const TaskItem: React.FC<TaskItemProps> = ({
         {/* Task Title */}
         <div className="flex-1 min-w-0 pr-2">
           <span
-            className={`text-[14px] sm:text-[15px] font-sans font-medium transition-all duration-180 block break-words ${
+            className={`text-sm sm:text-base font-sans font-medium transition-colors block break-words ${
               task.completed 
-                ? 'line-through text-txt-muted opacity-80' 
+                ? 'line-through text-txt-muted' 
                 : 'text-txt-primary'
             }`}
             title={task.title}
@@ -153,7 +153,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
         {/* Due date badge */}
         {task.dueDate && (
           <div
-            className={`flex items-center gap-1.5 text-[13px] font-sans px-2.5 py-1 rounded-lg font-medium border ${
+            className={`flex items-center gap-1.5 text-xs font-sans px-2.5 py-1 rounded-md font-medium border ${
               isOverdue
                 ? 'bg-red-500/10 border-red-300 dark:border-red-900 text-red-700 dark:text-red-400 font-bold'
                 : isDueToday
@@ -171,12 +171,12 @@ export const TaskItem: React.FC<TaskItemProps> = ({
 
         {/* Priority tag */}
         {task.priority === 'high' && (
-          <span className="text-xs font-sans font-bold px-2 py-0.5 rounded-md bg-red-100 dark:bg-red-950/40 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-900/50">
+          <span className="text-xs font-sans font-medium px-2 py-0.5 rounded-md bg-red-100 dark:bg-red-950/40 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-900/50">
             High
           </span>
         )}
         {task.priority === 'medium' && (
-          <span className="text-xs font-sans font-semibold px-2 py-0.5 rounded-md bg-amber-100 dark:bg-amber-950/40 text-amber-800 dark:text-amber-400 border border-amber-200 dark:border-amber-900/50">
+          <span className="text-xs font-sans font-medium px-2 py-0.5 rounded-md bg-amber-100 dark:bg-amber-950/40 text-amber-800 dark:text-amber-400 border border-amber-200 dark:border-amber-900/50">
             Medium
           </span>
         )}
@@ -187,12 +187,10 @@ export const TaskItem: React.FC<TaskItemProps> = ({
         )}
 
         {/* Star button with 32px clickable target */}
-        <motion.button
-          whileHover={{ scale: 1.15 }}
-          whileTap={{ scale: 0.85 }}
-          transition={{ type: "spring", stiffness: 500, damping: 25 }}
+        <button
+          type="button"
           onClick={toggleStar}
-          className="w-8 h-8 rounded-lg flex items-center justify-center text-txt-muted hover:text-amber-500 hover:bg-bg-subtle transition-colors cursor-pointer"
+          className="w-8 h-8 rounded-lg flex items-center justify-center text-txt-muted hover:text-amber-500 hover:bg-bg-subtle transition-colors cursor-pointer active:scale-95"
           title={task.important ? 'Unmark important' : 'Mark important'}
           aria-label={task.important ? 'Unmark important' : 'Mark important'}
         >
@@ -201,7 +199,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
               task.important ? 'fill-amber-400 text-amber-400' : 'text-txt-muted'
             }`}
           />
-        </motion.button>
+        </button>
 
         {/* Action dropdown */}
         <div className="relative">

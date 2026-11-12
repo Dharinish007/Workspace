@@ -26,11 +26,9 @@ export const PageCard: React.FC<PageCardProps> = ({ page, onOpenPage }) => {
   const previews = [...highPriority, ...otherPriority].slice(0, 5);
 
   return (
-    <motion.div 
-      whileHover={{ y: -3, transition: { type: "spring", stiffness: 450, damping: 25 } }}
-      whileTap={{ scale: 0.98 }}
+    <div 
       onClick={() => onOpenPage(page.id)}
-      className="bg-bg-card border border-border hover:border-primary/60 shadow-card hover:shadow-card-hover rounded-2xl p-6 transition-all duration-150 cursor-pointer flex flex-col justify-between group select-none min-h-[280px] h-full"
+      className="bg-bg-card border border-border hover:border-border-interactive shadow-2xs hover:shadow-card rounded-2xl p-6 transition-colors duration-150 cursor-pointer flex flex-col justify-between group select-none min-h-[280px] h-full"
       role="button"
       tabIndex={0}
       aria-label={`Open page ${page.name}`}
@@ -39,19 +37,18 @@ export const PageCard: React.FC<PageCardProps> = ({ page, onOpenPage }) => {
         {/* Card Header: Icon, Name, and Chevron */}
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3.5">
-            <motion.div
-              whileHover={{ scale: 1.08 }}
+            <div
               className="w-12 h-12 rounded-xl flex items-center justify-center text-white shadow-xs flex-shrink-0"
               style={{ backgroundColor: page.color }}
             >
               <IconRenderer name={page.icon} className="w-6 h-6" />
-            </motion.div>
+            </div>
             <div className="overflow-hidden">
               <h3 className="font-serif font-bold text-lg text-txt-primary group-hover:text-primary transition-colors flex items-center gap-1.5 tracking-tight truncate">
                 <span>{page.name}</span>
                 <ChevronRight className="w-4 h-4 text-txt-muted group-hover:translate-x-0.5 transition-transform flex-shrink-0" />
               </h3>
-              <p className="text-[13px] font-sans text-txt-secondary font-medium mt-0.5">
+              <p className="text-xs font-sans text-txt-secondary font-medium mt-0.5">
                 {totalCount} task{totalCount === 1 ? '' : 's'} · {completedCount} done
               </p>
             </div>
@@ -70,7 +67,7 @@ export const PageCard: React.FC<PageCardProps> = ({ page, onOpenPage }) => {
             className="h-full rounded-full"
             initial={{ width: 0 }}
             animate={{ width: `${completionPercentage}%` }}
-            transition={{ type: "spring", stiffness: 400, damping: 30 }}
+            transition={{ duration: 0.3, ease: 'easeOut' }}
             style={{ backgroundColor: page.color }}
           />
         </div>
@@ -79,27 +76,26 @@ export const PageCard: React.FC<PageCardProps> = ({ page, onOpenPage }) => {
         <div className="space-y-2 mt-2">
           {previews.length === 0 ? (
             <div className="py-6 text-center text-txt-muted text-xs font-sans font-medium">
-              {totalCount === 0 ? 'No tasks yet' : 'All tasks completed! 🎉'}
+              {totalCount === 0 ? 'No tasks yet' : 'All tasks completed'}
             </div>
           ) : (
             previews.map(task => (
               <div
                 key={task.id}
                 onClick={e => e.stopPropagation()}
-                className="flex items-center justify-between gap-2.5 p-2 rounded-xl hover:bg-bg-subtle transition-colors text-[13px] font-sans group/item"
+                className="flex items-center justify-between gap-2.5 p-2 rounded-xl hover:bg-bg-subtle transition-colors text-xs font-sans group/item"
               >
                 <div className="flex items-center gap-2.5 overflow-hidden flex-1">
-                  <motion.button
-                    whileTap={{ scale: 0.82 }}
+                  <button
                     onClick={() => toggleTaskCompleted(task.id)}
-                    className="w-7 h-7 rounded-lg flex items-center justify-center border border-border bg-bg-card text-txt-muted hover:border-primary hover:text-primary transition-colors flex-shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                    className="w-5 h-5 rounded-[6px] flex items-center justify-center border border-border bg-bg-card text-txt-muted hover:border-primary hover:text-primary transition-colors flex-shrink-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                     title="Mark complete"
                     aria-label={`Mark task ${task.title} complete`}
                   >
                     <Square className="w-3.5 h-3.5" />
-                  </motion.button>
+                  </button>
                   <span
-                    className="truncate text-txt-primary font-medium text-[14px] hover:text-primary transition-colors"
+                    className="truncate text-txt-primary font-medium text-sm hover:text-primary transition-colors"
                     title={task.title}
                   >
                     {task.title}
@@ -131,6 +127,6 @@ export const PageCard: React.FC<PageCardProps> = ({ page, onOpenPage }) => {
         <span>Open Page</span>
         <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
       </div>
-    </motion.div>
+    </div>
   );
 };

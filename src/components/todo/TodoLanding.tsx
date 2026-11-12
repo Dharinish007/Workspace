@@ -91,46 +91,40 @@ export const TodoLanding: React.FC<TodoLandingProps> = ({ onOpenPage }) => {
       {/* Top action header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-border-subtle">
         <div>
-          <h1 className="text-[26px] sm:text-[28px] font-bold text-txt-primary tracking-tight">To-Do</h1>
-          <p className="text-[13px] sm:text-[14px] font-sans text-txt-secondary font-medium mt-1">
+          <h1 className="text-2xl sm:text-3xl font-bold text-txt-primary tracking-tight">To-Do</h1>
+          <p className="text-xs sm:text-sm font-sans text-txt-secondary font-medium mt-1">
             Organize tasks by page, view pending items, and manage workflows.
           </p>
         </div>
 
         <div className="flex items-center gap-3">
           {archivedPagesCount > 0 && (
-            <motion.button
-              whileTap={{ scale: 0.95 }}
+            <button
               onClick={() => setIsArchivedModalOpen(true)}
               className="h-10 px-4 text-xs font-sans font-bold text-txt-secondary hover:text-txt-primary bg-bg-card hover:bg-bg-hover border border-border rounded-xl flex items-center gap-2 transition-colors shadow-2xs cursor-pointer"
             >
               <Archive className="w-4 h-4 text-txt-muted" />
               <span>Archived ({archivedPagesCount})</span>
-            </motion.button>
+            </button>
           )}
 
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.96 }}
-            transition={{ type: "spring", stiffness: 500, damping: 25 }}
+          <button
             onClick={() => setIsPageModalOpen(true)}
             className="h-10 px-4 text-xs font-sans font-bold text-white bg-primary hover:bg-primary-hover rounded-xl flex items-center gap-2 shadow-xs transition-colors cursor-pointer"
           >
             <FolderPlus className="w-4 h-4" />
             <span>New Page</span>
-          </motion.button>
+          </button>
 
           {/* Module Settings Shortcut */}
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+          <button
             onClick={() => navigate('/settings?tab=todo')}
             className="h-10 w-10 bg-bg-card border border-border hover:bg-bg-hover text-txt-secondary hover:text-txt-primary rounded-xl flex items-center justify-center shadow-2xs transition-colors cursor-pointer"
             title="To-Do Settings"
             aria-label="To-Do Settings"
           >
             <Settings className="w-4 h-4" />
-          </motion.button>
+          </button>
         </div>
       </div>
 
@@ -139,15 +133,14 @@ export const TodoLanding: React.FC<TodoLandingProps> = ({ onOpenPage }) => {
         {[
           { id: 'all' as TaskFilter, label: 'All Tasks', count: totalTasks },
           { id: 'open' as TaskFilter, label: 'Open', count: openTasks },
-          { id: 'important' as TaskFilter, label: 'Important ⭐', count: importantTasks },
+          { id: 'important' as TaskFilter, label: 'Important', count: importantTasks },
           { id: 'completed' as TaskFilter, label: 'Completed', count: completedTasks },
           { id: 'today' as TaskFilter, label: 'Today', count: todayTasks },
         ].map(f => (
-          <motion.button
+          <button
             key={f.id}
-            whileTap={{ scale: 0.95 }}
             onClick={() => setActiveFilter(f.id)}
-            className={`h-9 px-4 rounded-full text-xs font-sans flex items-center gap-2 whitespace-nowrap transition-all cursor-pointer shadow-2xs ${
+            className={`h-9 px-4 rounded-full text-xs font-sans flex items-center gap-2 whitespace-nowrap transition-colors cursor-pointer shadow-2xs ${
               activeFilter === f.id
                 ? 'bg-primary text-white shadow-xs font-bold ring-1 ring-primary-hover/50'
                 : 'bg-bg-card hover:bg-bg-hover text-txt-secondary border border-border font-semibold'
@@ -163,7 +156,7 @@ export const TodoLanding: React.FC<TodoLandingProps> = ({ onOpenPage }) => {
             >
               {f.count}
             </span>
-          </motion.button>
+          </button>
         ))}
       </div>
 
@@ -172,7 +165,7 @@ export const TodoLanding: React.FC<TodoLandingProps> = ({ onOpenPage }) => {
         <div className="bg-bg-card border border-border rounded-2xl p-6 shadow-card space-y-4">
           <div className="flex items-center justify-between pb-2 border-b border-border">
             <h2 className="text-lg font-serif font-bold text-txt-primary flex items-center gap-2 tracking-tight">
-              <span>Filtered Tasks: {activeFilter.toUpperCase()}</span>
+              <span>Filtered tasks: {activeFilter}</span>
               <span className="text-xs font-sans font-normal text-txt-muted">
                 ({filteredTasksAcrossPages.length} tasks across all pages)
               </span>
@@ -233,15 +226,13 @@ export const TodoLanding: React.FC<TodoLandingProps> = ({ onOpenPage }) => {
             <p className="text-sm font-sans text-txt-muted max-w-sm mx-auto">
               Create your first page to start organizing tasks, projects, and personal routines.
             </p>
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.96 }}
+            <button
               onClick={() => setIsPageModalOpen(true)}
               className="mt-3 h-10 px-5 bg-primary text-white text-xs font-sans font-bold rounded-xl inline-flex items-center gap-2 shadow-xs hover:bg-primary-hover cursor-pointer transition-colors"
             >
               <Plus className="w-4 h-4" />
               <span>Create Page</span>
-            </motion.button>
+            </button>
           </div>
         ) : (
           <div className={`grid gap-5 ${

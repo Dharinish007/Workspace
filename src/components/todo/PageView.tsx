@@ -173,15 +173,13 @@ export const PageView: React.FC<PageViewProps> = ({
     <div className="flex flex-col lg:flex-row gap-6">
       {/* Secondary Navigation (inside To-Do section) */}
       <aside className="w-full lg:w-64 flex-shrink-0 space-y-4">
-        <motion.button
-          whileHover={{ x: -2 }}
-          whileTap={{ scale: 0.97 }}
+        <button
           onClick={onBackToOverview}
           className="h-10 px-3 rounded-xl flex items-center gap-2 text-xs font-sans font-bold text-txt-secondary hover:text-primary hover:bg-bg-card border border-transparent hover:border-border transition-colors cursor-pointer"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>All Pages Overview</span>
-        </motion.button>
+        </button>
 
         <div className="bg-bg-card border border-border rounded-2xl p-4 shadow-card space-y-1.5">
           <div className="text-xs font-sans font-bold uppercase tracking-wider text-txt-muted px-2 py-1.5 flex items-center justify-between">
@@ -197,9 +195,8 @@ export const PageView: React.FC<PageViewProps> = ({
               const count = tasks.filter(t => t.pageId === p.id && !t.completed).length;
 
               return (
-                <motion.button
+                <button
                   key={p.id}
-                  whileTap={{ scale: 0.98 }}
                   onClick={() => setSelectedPageId(p.id)}
                   className={`w-full min-h-[44px] flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-sans font-medium transition-colors cursor-pointer ${
                     isSelected
@@ -221,7 +218,7 @@ export const PageView: React.FC<PageViewProps> = ({
                       {count}
                     </span>
                   )}
-                </motion.button>
+                </button>
               );
             })}
           </div>
