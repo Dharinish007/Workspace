@@ -30,14 +30,17 @@ export function useTimer() {
 
   // Initialize service on mount and bind settings config
   useEffect(() => {
-    const customConfig = (settings as any)?.timerConfig;
+    const customConfig = (settings as any)?.timerConfig || (settings as any)?.modules?.timer;
     service.initialize(customConfig).then(() => {
       setState(service.getState());
       setActiveDurationMs(service.calculateCurrentDuration());
       setIsRecoveryRequired(service.isRecoveryRequired());
       setIsReadOnlyTab(service.isReadOnlyTab());
     });
+  }, [service]);
 
+  // Subscribe to service state changes
+  useEffect(() => {
     const unsubscribe = service.subscribe((newState, newDuration) => {
       setState({ ...newState });
       setActiveDurationMs(newDuration);
@@ -48,7 +51,7 @@ export function useTimer() {
     return () => {
       unsubscribe();
     };
-  }, [service, settings]);
+  }, [service]);
 
   // Load saved sessions from IndexedDB
   const refreshSessions = useCallback(async () => {
@@ -69,10 +72,11 @@ export function useTimer() {
 
   // Sync settings config changes to service
   useEffect(() => {
-    if ((settings as any)?.timerConfig) {
-      service.updateConfig((settings as any).timerConfig);
+    const customConfig = (settings as any)?.timerConfig || (settings as any)?.modules?.timer;
+    if (customConfig) {
+      service.updateConfig(customConfig);
     }
-  }, [service, settings]);
+  }, [service, (settings as any)?.timerConfig, (settings as any)?.modules?.timer]);
 
   // Daily focus summary for today
   const todayStr = useMemo(() => getLocalDateString(Date.now()), []);
@@ -85,7 +89,7 @@ export function useTimer() {
     if (state.mode === 'pomodoro' && state.plannedMs) {
       // In Pomodoro, display countdown remaining (or elapsed if passed)
       const remainingMs = Math.max(0, state.plannedMs - activeDurationMs);
-      return formatTimerDisplay(remainingMs);
+      return formatTimerDisplay(Math.ceil(remainingMs / 1000) * 1000);
     }
     // In Stopwatch, count up
     return formatTimerDisplay(activeDurationMs);

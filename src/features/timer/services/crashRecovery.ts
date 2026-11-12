@@ -11,7 +11,8 @@ export function checkRecoveryNeeded(
   now: number = Date.now()
 ): boolean {
   if (!activeState) return false;
-  if (activeState.status !== 'running' && activeState.status !== 'paused') {
+  // Only actively running sessions can crash; paused or idle sessions have no unclosed active segments
+  if (activeState.status !== 'running') {
     return false;
   }
   // If no heartbeat recorded or heartbeat is older than timeout threshold

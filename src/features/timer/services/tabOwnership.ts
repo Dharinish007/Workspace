@@ -10,9 +10,30 @@ export class TabOwnershipManager {
   private listeners: Set<(message: any) => void> = new Set();
 
   private constructor() {
-    this.tabId = typeof crypto !== 'undefined' && crypto.randomUUID 
-      ? crypto.randomUUID() 
-      : 'tab_' + Math.random().toString(36).substring(2, 11);
+    let existingTabId: string | null = null;
+    if (typeof window !== 'undefined' && typeof window.sessionStorage !== 'undefined') {
+      try {
+        existingTabId = window.sessionStorage.getItem('my_workspace_timer_tab_id');
+      } catch {
+        // Ignore sessionStorage security or access errors
+      }
+    }
+
+    if (existingTabId) {
+      this.tabId = existingTabId;
+    } else {
+      this.tabId = typeof crypto !== 'undefined' && crypto.randomUUID 
+        ? crypto.randomUUID() 
+        : 'tab_' + Math.random().toString(36).substring(2, 11);
+
+      if (typeof window !== 'undefined' && typeof window.sessionStorage !== 'undefined') {
+        try {
+          window.sessionStorage.setItem('my_workspace_timer_tab_id', this.tabId);
+        } catch {
+          // Ignore
+        }
+      }
+    }
 
     if (typeof BroadcastChannel !== 'undefined') {
       try {
