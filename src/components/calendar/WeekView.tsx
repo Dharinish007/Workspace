@@ -1,6 +1,7 @@
 import React from 'react';
 import { useWorkspace } from '../../context/WorkspaceContext';
 import { formatLocalDate } from '../../db/indexedDB';
+import { parseLocalDate } from '../../utils/dateUtils';
 import { CalendarEvent } from '../../types';
 import { Plus, Palette, Clock, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -70,7 +71,7 @@ export const WeekView: React.FC<WeekViewProps> = ({
           const isToday = dayInfo.dateStr === todayStr;
           const dayColorEntry = dayColors.find(d => d.date === dayInfo.dateStr);
 
-          const cellDate = new Date(dayInfo.dateStr);
+          const cellDate = parseLocalDate(dayInfo.dateStr);
           const dow = (cellDate.getDay() + 6) % 7 + 1;
 
           // Activities

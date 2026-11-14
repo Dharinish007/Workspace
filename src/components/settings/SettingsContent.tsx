@@ -41,7 +41,6 @@ import {
   RefreshCw
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { loadDemoData, resetToDefaultWorkspace } from '../../data';
 import { 
   ThemeMode, 
   AccentColor, 
@@ -55,6 +54,15 @@ import {
   TaskSortOption,
   StartupBehavior
 } from '../../types/settings';
+import { 
+  ThemeId, 
+  ThemeStyle,
+  THEME_DEFINITIONS, 
+  ALL_THEME_STYLES,
+  ALL_THEME_IDS, 
+  composeThemeId,
+  decomposeThemeId 
+} from '../../types/theme';
 
 export type SettingsTab = 
   | 'general' 
@@ -296,9 +304,14 @@ export const SettingsContent: React.FC = () => {
   };
 
   const isDark = settings.theme === 'dark';
-  const currentBgStyle = settings.appearance?.backgroundStyle || settings.backgroundStyle || 'current';
+  const currentBgStyle = settings.appearance?.backgroundStyle || settings.backgroundStyle || 'minimal';
   const currentAccent = settings.appearance?.accentColor || 'blue';
   const currentThemeMode = settings.appearance?.themeMode || (isDark ? 'dark' : 'light');
+  const activeThemeStyle: ThemeStyle = settings.appearance?.themeStyle ||
+    (settings.appearance?.themeId ? decomposeThemeId(settings.appearance.themeId).style :
+     (currentBgStyle === 'paper' ? 'paper' : currentBgStyle === 'notion' ? 'notion' : 'minimal'));
+  const activeThemeId: ThemeId = (settings.appearance?.themeId ||
+    composeThemeId(activeThemeStyle, currentThemeMode === 'dark' ? 'dark' : 'light')) as ThemeId;
 
   // Form local state
   const [displayNameInput, setDisplayNameInput] = useState(settings.general?.displayName || settings.displayName || '');
@@ -473,6 +486,7 @@ export const SettingsContent: React.FC = () => {
     }
     setIsLoadingDemo(true);
     try {
+      const { loadDemoData } = await import('../../data');
       await loadDemoData(mode);
       await refreshAll();
       showToast('Sample workspace data loaded successfully!', undefined, undefined, 'success');
@@ -496,6 +510,7 @@ export const SettingsContent: React.FC = () => {
 
     setIsResetting(true);
     try {
+      const { resetToDefaultWorkspace } = await import('../../data');
       await resetToDefaultWorkspace();
       await refreshAll();
       showToast('Workspace reset to clean default state', undefined, undefined, 'info');
@@ -957,6 +972,144 @@ export const SettingsContent: React.FC = () => {
                     transition={{ duration: 0.15 }}
                     className="space-y-6"
                   >
+                    {/* 3 Core Aesthetic Themes Selection */}
+                    <div className="p-5 bg-bg-subtle/40 rounded-2xl border border-border space-y-4">
+                      <div>
+                        <div className="text-xs font-semibold text-txt-primary flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <Palette className="w-4 h-4 text-primary" />
+                            <span>Aesthetic Theme</span>
+                          </div>
+                          <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium">
+                            3 Themes Available
+                          </span>
+                        </div>
+                        <p className="text-xs text-txt-secondary mt-1">
+                          Choose your workspace personality: Minimal, Paper Journal, or Notion. Each theme seamlessly adapts across Light and Dark color modes.
+                        </p>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 pt-1">
+                        {ALL_THEME_STYLES.map(style => {
+                          const theme = THEME_DEFINITIONS[style];
+                          const isSelected = activeThemeStyle === style;
+
+                          return (
+                            <button
+                              key={theme.id}
+                              type="button"
+                              onClick={() => {
+                                const resolvedMode = currentThemeMode === 'system'
+                                  ? (typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+                                  : currentThemeMode;
+                                const nextThemeId: ThemeId = `${theme.id}-${resolvedMode}` as ThemeId;
+                                updateAppearanceSettings({
+                                  themeStyle: theme.id,
+                                  themeId: nextThemeId,
+                                  backgroundStyle: theme.id,
+                                });
+                              }}
+                              className={`p-4 rounded-xl border text-left transition-all cursor-pointer relative flex flex-col justify-between overflow-hidden group ${
+                                isSelected
+                                  ? 'border-primary bg-primary/10 text-txt-primary ring-2 ring-primary shadow-xs'
+                                  : 'border-border bg-bg-card hover:bg-bg-hover hover:border-border-interactive text-txt-secondary'
+                              }`}
+                            >
+                              <div>
+                                <div className="flex items-center justify-between gap-2 mb-2">
+                                  <div className="flex items-center gap-2 min-w-0">
+                                    <span className="font-bold text-sm text-txt-primary truncate">
+                                      {theme.name}
+                                    </span>
+                                    {theme.badge && (
+                                      <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-bg-subtle text-txt-muted border border-border shrink-0">
+                                        {theme.badge}
+                                      </span>
+                                    )}
+                                  </div>
+
+                                  {isSelected && (
+                                    <div className="w-5 h-5 rounded-full bg-primary text-white flex items-center justify-center shrink-0 shadow-2xs">
+                                      <Check className="w-3.5 h-3.5 stroke-[3]" />
+                                    </div>
+                                  )}
+                                </div>
+
+                                <p className="text-[11px] text-txt-muted line-clamp-2 mb-3.5 leading-relaxed">
+                                  {theme.description}
+                                </p>
+                              </div>
+
+                              {/* Multi-swatch color preview bar for Light & Dark modes */}
+                              <div className="pt-3 border-t border-border/60 space-y-2">
+                                <div className="space-y-1">
+                                  <div className="flex items-center justify-between text-[10px] text-txt-muted font-medium">
+                                    <span className="flex items-center gap-1">
+                                      <Sun className="w-2.5 h-2.5 text-amber-500" /> Light
+                                    </span>
+                                    <span className="font-mono text-[9px] text-txt-muted">{theme.swatches.light.bg}</span>
+                                  </div>
+                                  <div className="h-3.5 rounded-md overflow-hidden flex border border-border/80 shadow-2xs">
+                                    <div
+                                      className="flex-1 h-full"
+                                      style={{ backgroundColor: theme.swatches.light.bg }}
+                                      title={`Canvas: ${theme.swatches.light.bg}`}
+                                    />
+                                    <div
+                                      className="flex-1 h-full"
+                                      style={{ backgroundColor: theme.swatches.light.card }}
+                                      title={`Card: ${theme.swatches.light.card}`}
+                                    />
+                                    <div
+                                      className="w-5 h-full"
+                                      style={{ backgroundColor: theme.swatches.light.primary }}
+                                      title={`Primary: ${theme.swatches.light.primary}`}
+                                    />
+                                    <div
+                                      className="w-4 h-full"
+                                      style={{ backgroundColor: theme.swatches.light.accent }}
+                                      title={`Accent: ${theme.swatches.light.accent}`}
+                                    />
+                                  </div>
+                                </div>
+
+                                <div className="space-y-1">
+                                  <div className="flex items-center justify-between text-[10px] text-txt-muted font-medium">
+                                    <span className="flex items-center gap-1">
+                                      <Moon className="w-2.5 h-2.5 text-amber-300" /> Dark
+                                    </span>
+                                    <span className="font-mono text-[9px] text-txt-muted">{theme.swatches.dark.bg}</span>
+                                  </div>
+                                  <div className="h-3.5 rounded-md overflow-hidden flex border border-border/80 shadow-2xs">
+                                    <div
+                                      className="flex-1 h-full"
+                                      style={{ backgroundColor: theme.swatches.dark.bg }}
+                                      title={`Canvas: ${theme.swatches.dark.bg}`}
+                                    />
+                                    <div
+                                      className="flex-1 h-full"
+                                      style={{ backgroundColor: theme.swatches.dark.card }}
+                                      title={`Card: ${theme.swatches.dark.card}`}
+                                    />
+                                    <div
+                                      className="w-5 h-full"
+                                      style={{ backgroundColor: theme.swatches.dark.primary }}
+                                      title={`Primary: ${theme.swatches.dark.primary}`}
+                                    />
+                                    <div
+                                      className="w-4 h-full"
+                                      style={{ backgroundColor: theme.swatches.dark.accent }}
+                                      title={`Accent: ${theme.swatches.dark.accent}`}
+                                    />
+                                  </div>
+                                </div>
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+
                     {/* Theme Mode: Light / Dark / System */}
                     <div className="p-5 bg-bg-subtle/40 rounded-2xl border border-border space-y-3">
                       <div>
@@ -994,44 +1147,6 @@ export const SettingsContent: React.FC = () => {
                               </div>
                               <div className="font-bold text-xs text-txt-primary mt-2">{m.label}</div>
                               <div className="text-[11px] text-txt-muted mt-0.5">{m.desc}</div>
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
-
-                    {/* UI Theme Style: Current / Paper / Notion */}
-                    <div className="p-5 bg-bg-subtle/40 rounded-2xl border border-border space-y-3">
-                      <div>
-                        <div className="text-xs font-semibold text-txt-primary">UI Theme Style</div>
-                        <p className="text-xs text-txt-secondary mt-0.5">
-                          Aesthetic styling and background material applied across all modules.
-                        </p>
-                      </div>
-
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1">
-                        {[
-                          { id: 'current', label: 'Current', desc: 'Modern clean minimalist aesthetic' },
-                          { id: 'paper', label: 'Paper Texture', desc: 'Warm vintage organic paper feel' },
-                          { id: 'notion', label: 'Notion Clean', desc: 'Crisp, structured workspace style' },
-                        ].map(style => {
-                          const isSelected = currentBgStyle === style.id;
-                          return (
-                            <button
-                              key={style.id}
-                              type="button"
-                              onClick={() => updateAppearanceSettings({ backgroundStyle: style.id as any })}
-                              className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer ${
-                                isSelected
-                                  ? 'border-primary bg-primary/10 text-txt-primary ring-1 ring-primary shadow-xs'
-                                  : 'border-border bg-bg-card hover:bg-bg-hover text-txt-secondary'
-                              }`}
-                            >
-                              <div className="flex items-center justify-between">
-                                <span className="font-bold text-xs text-txt-primary">{style.label}</span>
-                                {isSelected && <Check className="w-3.5 h-3.5 text-primary" />}
-                              </div>
-                              <div className="text-[11px] text-txt-muted mt-1">{style.desc}</div>
                             </button>
                           );
                         })}

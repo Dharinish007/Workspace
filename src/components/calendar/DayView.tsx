@@ -4,6 +4,7 @@ import { CalendarEvent } from '../../types';
 import { Clock, Plus, Palette, CheckSquare, Activity, Calendar as CalendarIcon, ArrowLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { getDayCellBackgroundStyle } from '../../utils/calendarColors';
+import { parseLocalDate } from '../../utils/dateUtils';
 
 interface DayViewProps {
   dateStr: string;
@@ -42,7 +43,7 @@ export const DayView: React.FC<DayViewProps> = ({
 
   const isDark = settings.theme === 'dark';
 
-  const d = new Date(dateStr);
+  const d = parseLocalDate(dateStr);
   const formattedFullDate = d.toLocaleDateString('en-US', {
     weekday: 'long',
     month: 'long',

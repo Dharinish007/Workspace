@@ -265,10 +265,11 @@ function parseMarkdown(md: string): React.ReactNode[] {
 }
 
 /**
- * Validates URLs in markdown links to prevent XSS via javascript:, vbscript:, data:, etc.
- * Only http:, https:, mailto:, or relative paths are permitted.
+ * Validates URLs in markdown links to prevent XSS via javascript:, vbscript:, data:, blob:, file:, etc.
+ * Protects against percent-encoded variants (e.g. javascript%3A), control characters, and protocol-relative URLs.
+ * Only http:, https:, mailto:, or safe relative paths are permitted.
  */
-export function isSafeUrl(rawUrl: string): boolean {
+export function isSafeUrl(rawUrl: string | null | undefined): boolean {
   if (!rawUrl || typeof rawUrl !== 'string') return false;
   const trimmed = rawUrl.trim();
   if (!trimmed) return false;
@@ -278,19 +279,44 @@ export function isSafeUrl(rawUrl: string): boolean {
     return false;
   }
 
-  // Block dangerous schemes even if case-altered or obfuscated
-  const lower = trimmed.toLowerCase();
-  if (lower.startsWith('javascript:') || lower.startsWith('vbscript:') || lower.startsWith('data:')) {
+  // Iteratively decode percent-encoded characters to prevent scheme obfuscation (e.g. javascript%3A)
+  let decoded = trimmed;
+  for (let i = 0; i < 3; i++) {
+    try {
+      const next = decodeURIComponent(decoded);
+      if (next === decoded) break;
+      decoded = next;
+    } catch {
+      break;
+    }
+  }
+
+  // Strip whitespace, tabs, newlines, and control chars from decoded string for scheme validation
+  const cleanDecoded = decoded.replace(/[\s\u0000-\u001F\u007F-\u009F\u200B-\u200D\uFEFF]/g, '').toLowerCase();
+
+  // Block dangerous schemes even if case-altered, encoded, or obfuscated
+  if (
+    cleanDecoded.startsWith('javascript:') ||
+    cleanDecoded.startsWith('vbscript:') ||
+    cleanDecoded.startsWith('data:') ||
+    cleanDecoded.startsWith('blob:') ||
+    cleanDecoded.startsWith('file:')
+  ) {
     return false;
   }
 
-  // Allow relative internal anchors and paths
-  if (trimmed.startsWith('/') || trimmed.startsWith('./') || trimmed.startsWith('#')) {
+  // Allow relative internal anchors and paths (strictly disallowing protocol-relative // and /\)
+  if (
+    (trimmed.startsWith('/') && !trimmed.startsWith('//') && !trimmed.startsWith('/\\')) ||
+    trimmed.startsWith('./') ||
+    trimmed.startsWith('#')
+  ) {
     return true;
   }
 
+  // For external links, validate via WHATWG URL parser without a base URL to prevent treating relative-like payloads as benign
   try {
-    const parsed = new URL(trimmed, 'https://workspace.local');
+    const parsed = new URL(trimmed);
     const protocol = parsed.protocol.toLowerCase();
     
     // Explicit whitelist of benign protocols

@@ -21,6 +21,8 @@ export const DEFAULT_GENERAL_SETTINGS: GeneralSettings = {
 };
 
 export const DEFAULT_APPEARANCE_SETTINGS: AppearanceSettings = {
+  themeId: 'minimal-light',
+  themeStyle: 'minimal',
   themeMode: 'light',
   backgroundStyle: 'current',
   accentColor: 'blue',
@@ -109,6 +111,7 @@ export function createDefaultUserSettings(): UserSettings {
     habitDefaultColor: '#1A73E8',
     eventDefaultColor: '#F97316',
     backgroundStyle: 'current',
+    themeStyle: 'minimal',
     timerConfig: {
       workMinutes: 25,
       shortBreakMinutes: 5,
@@ -157,9 +160,19 @@ export function mergeWithDefaultSettings(raw: Partial<UserSettings> | Record<str
 
   // Appearance settings
   const rawAppearance = (raw.appearance && typeof raw.appearance === 'object') ? raw.appearance : {};
+  const effectiveBgStyle = ['current', 'minimal', 'paper', 'notion'].includes(rawAppearance.backgroundStyle)
+    ? rawAppearance.backgroundStyle
+    : (['current', 'minimal', 'paper', 'notion'].includes(backgroundStyle) ? backgroundStyle : 'current');
+  const rawStyle = rawAppearance.themeStyle || (effectiveBgStyle === 'paper' ? 'paper' : effectiveBgStyle === 'notion' ? 'notion' : 'minimal');
+  const themeStyle = ['minimal', 'paper', 'notion'].includes(rawStyle) ? rawStyle : 'minimal';
+  const themeMode = ['light', 'dark', 'system'].includes(rawAppearance.themeMode) ? rawAppearance.themeMode : (theme as any);
+  const themeId = rawAppearance.themeId || `${themeStyle}-${themeMode === 'dark' ? 'dark' : 'light'}`;
+
   const appearance: AppearanceSettings = {
-    themeMode: ['light', 'dark', 'system'].includes(rawAppearance.themeMode) ? rawAppearance.themeMode : (theme as any),
-    backgroundStyle: ['current', 'paper', 'notion'].includes(rawAppearance.backgroundStyle) ? rawAppearance.backgroundStyle : backgroundStyle,
+    themeId,
+    themeStyle,
+    themeMode,
+    backgroundStyle: effectiveBgStyle,
     accentColor: ['blue', 'indigo', 'violet', 'emerald', 'rose', 'amber'].includes(rawAppearance.accentColor) ? rawAppearance.accentColor : defaults.appearance.accentColor,
     fontSize: ['sm', 'md', 'lg'].includes(rawAppearance.fontSize) ? rawAppearance.fontSize : defaults.appearance.fontSize,
     density: ['comfortable', 'compact'].includes(rawAppearance.density) ? rawAppearance.density : defaults.appearance.density,
@@ -221,6 +234,7 @@ export function mergeWithDefaultSettings(raw: Partial<UserSettings> | Record<str
     habitDefaultColor: raw.habitDefaultColor || defaults.habitDefaultColor,
     eventDefaultColor: raw.eventDefaultColor || defaults.eventDefaultColor,
     backgroundStyle: appearance.backgroundStyle,
+    themeStyle: appearance.themeStyle,
     timerConfig: {
       workMinutes: modules.timer.workMinutes,
       shortBreakMinutes: modules.timer.shortBreakMinutes,

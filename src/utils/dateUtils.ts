@@ -38,3 +38,19 @@ export function formatDisplayDateTime(isoStr: string | null | undefined, format:
   }
 }
 
+/**
+ * Safely parses a YYYY-MM-DD date string into a local Date object.
+ * Avoids the UTC-midnight shift bug where new Date("YYYY-MM-DD") causes off-by-one day in western timezones.
+ */
+export function parseLocalDate(dateStr: string): Date {
+  if (!dateStr || typeof dateStr !== 'string') return new Date();
+  const parts = dateStr.trim().split('-');
+  if (parts.length === 3) {
+    const [y, m, d] = parts.map(Number);
+    if (!isNaN(y) && !isNaN(m) && !isNaN(d)) {
+      return new Date(y, m - 1, d);
+    }
+  }
+  return new Date(dateStr);
+}
+

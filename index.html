@@ -8,13 +8,26 @@
     <title>My Workspace</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,300..800;1,6..72,300..800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com">
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,300..800;1,6..72,300..800&family=JetBrains+Mono:wght@400;500;600;700&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,300..800;1,6..72,300..800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'">
+    <noscript>
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,300..800;1,6..72,300..800&family=JetBrains+Mono:wght@400;500;600;700&display=swap">
+    </noscript>
     <script>
       try {
+        var themeId = localStorage.getItem('my_workspace_theme_id');
         var theme = localStorage.getItem('my_workspace_theme') || 'light';
-        var bgStyle = localStorage.getItem('my_workspace_bg_style') || 'current';
+        var bgStyle = localStorage.getItem('my_workspace_bg_style') || 'minimal';
+        if (!themeId) {
+          if (bgStyle === 'paper') themeId = 'paper-' + theme;
+          else if (bgStyle === 'notion') themeId = 'notion-' + theme;
+          else themeId = 'minimal-' + theme;
+        }
+        document.documentElement.setAttribute('data-theme-id', themeId);
         document.documentElement.setAttribute('data-theme', theme);
-        document.documentElement.setAttribute('data-bg-style', bgStyle);
+        document.documentElement.setAttribute('data-bg-style', bgStyle === 'current' ? 'minimal' : bgStyle);
       } catch (e) {}
     </script>
   </head>

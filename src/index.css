@@ -2,56 +2,339 @@
 @tailwind components;
 @tailwind utilities;
 
-:root, [data-theme="light"] {
-  /* Unslop Quiet Neutral Light Theme (Slate/Graphite subtle tint) */
-  --color-bg-main: #F8F9FA;
+/* ==========================================================================
+   Three Aesthetic Dashboard Themes Architecture: Minimal | Paper | Notion
+   Identifiers:
+   - minimal-light / minimal-dark (Minimal - Swiss Precision)
+   - paper-light / paper-dark (Paper Journal - Editorial Parchment)
+   - notion-light / notion-dark (Notion - Structured Clean)
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Minimal Light (Swiss Precision)
+   -------------------------------------------------------------------------- */
+:root,
+[data-theme-id="minimal-light"],
+html[data-theme-id="minimal"][data-theme="light"],
+html[data-theme-style="minimal"][data-theme="light"],
+html[data-bg-style="minimal"][data-theme="light"],
+html[data-bg-style="current"][data-theme="light"],
+html:not([data-theme-id])[data-theme="light"]:not([data-bg-style="paper"]):not([data-bg-style="notion"]),
+html[data-theme-style="minimal"]:not([data-theme="dark"]),
+html:not([data-theme-id]):not([data-theme="dark"]):not([data-bg-style="paper"]):not([data-bg-style="notion"]):not([data-theme-style="paper"]):not([data-theme-style="notion"]) {
+  /* Surfaces */
+  --color-bg-main: #FFFFFF;
+  --color-bg-sidebar: #FFFFFF;
+  --color-bg-header: #FFFFFF;
   --color-bg-card: #FFFFFF;
-  --color-bg-subtle: #F1F3F5;
-  --color-bg-hover: #E9ECEF;
-  
-  /* Primary Brand Accent (Quiet Blue default) */
-  --color-primary: #1A73E8;
-  --color-primary-hover: #1557B0;
+  --color-bg-subtle: #F8FAFC;
+  --color-bg-hover: #F1F5F9;
+
+  /* Primary Brand Accent (Quiet Blue) */
+  --color-primary: #2563EB;
+  --color-primary-hover: #1D4ED8;
   --color-primary-light: #EFF6FF;
-  
-  /* Text Contrast - WCAG AAA (>= 7:1 for body) & AA (>= 4.5:1 for muted) */
-  --color-text-primary: #1E293B;
+
+  /* Active Navigation Item (Soft Blue Pill) */
+  --color-nav-active-bg: #EFF6FF;
+  --color-nav-active-text: #2563EB;
+
+  /* Buttons */
+  --color-btn-primary-bg: #2563EB;
+  --color-btn-primary-text: #FFFFFF;
+  --color-btn-primary-hover: #1D4ED8;
+
+  /* Text Contrast - WCAG AAA */
+  --color-text-primary: #0F172A;
   --color-text-secondary: #475569;
-  --color-text-muted: #5E6C84;
-  
-  /* Borders - Quiet Hairlines (8-10% ink equivalent) */
+  --color-text-muted: #64748B;
+
+  /* Borders & Shadows - Razor-thin Hairlines */
   --color-border: #E2E8F0;
   --color-border-interactive: #CBD5E1;
   --color-border-subtle: #F1F5F9;
-  --color-border-focus: #3B82F6;
+  --color-border-focus: #2563EB;
+  --color-card-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+
+  /* Stat & Status Indicators - High Whitespace, Clean Badges */
+  --color-stat-icon-bg: #EFF6FF;
+  --color-stat-icon-text: #2563EB;
+  --color-badge-overdue-bg: #FEE2E2;
+  --color-badge-overdue-text: #DC2626;
+  --color-badge-overdue-border: #FECACA;
+  --color-badge-done-bg: #DCFCE7;
+  --color-badge-done-text: #16A34A;
 }
 
-[data-theme="dark"] {
-  /* Unslop Quiet Neutral Graphite Dark Theme */
-  --color-bg-main: #111215;
-  --color-bg-card: #18191D;
-  --color-bg-subtle: #202227;
-  --color-bg-hover: #292B33;
-  
-  /* Primary Accent in Dark Mode (Calibrated for high contrast >= 4.5:1) */
-  --color-primary: #3B82F6;
-  --color-primary-hover: #60A5FA;
-  --color-primary-light: #1E293B;
-  
-  /* Text Contrast in Dark Mode (WCAG AAA >= 7:1 for primary, AA >= 4.5:1 for secondary & muted) */
-  --color-text-primary: #F3F4F6;
-  --color-text-secondary: #9CA3AF;
-  --color-text-muted: #858D9D;
-  
-  /* Borders in Dark Mode - Quiet Hairlines */
-  --color-border: #2B2D35;
-  --color-border-interactive: #3B3E49;
-  --color-border-subtle: #22242B;
+/* --------------------------------------------------------------------------
+   2. Minimal Dark (Navy + Electric Blue)
+   -------------------------------------------------------------------------- */
+[data-theme-id="minimal-dark"],
+html[data-theme-id="minimal"][data-theme="dark"],
+html[data-theme-style="minimal"][data-theme="dark"],
+html[data-bg-style="minimal"][data-theme="dark"],
+html[data-bg-style="current"][data-theme="dark"],
+html:not([data-theme-id])[data-theme="dark"]:not([data-bg-style="paper"]):not([data-bg-style="notion"]):not([data-theme-style="paper"]):not([data-theme-style="notion"]) {
+  /* Surfaces */
+  --color-bg-main: #0B132B;
+  --color-bg-sidebar: #0B132B;
+  --color-bg-header: #0B132B;
+  --color-bg-card: #131E3A;
+  --color-bg-subtle: #18264A;
+  --color-bg-hover: #1E2F5B;
+
+  /* Primary Accent: Electric/Royal Blue */
+  --color-primary: #2563EB;
+  --color-primary-hover: #3B82F6;
+  --color-primary-light: #1E3A8A;
+
+  /* Active Nav: Vivid Blue Pill with White Text */
+  --color-nav-active-bg: #2563EB;
+  --color-nav-active-text: #FFFFFF;
+
+  /* Buttons */
+  --color-btn-primary-bg: #2563EB;
+  --color-btn-primary-text: #FFFFFF;
+  --color-btn-primary-hover: #3B82F6;
+
+  /* Text Contrast */
+  --color-text-primary: #F8FAFC;
+  --color-text-secondary: #94A3B8;
+  --color-text-muted: #64748B;
+
+  /* Borders & Shadows */
+  --color-border: #1E2D50;
+  --color-border-interactive: #2A3F6E;
+  --color-border-subtle: #162240;
   --color-border-focus: #3B82F6;
+  --color-card-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+
+  /* Stat & Status Indicators */
+  --color-stat-icon-bg: rgba(37, 99, 235, 0.15);
+  --color-stat-icon-text: #60A5FA;
+  --color-badge-overdue-bg: rgba(185, 28, 28, 0.25);
+  --color-badge-overdue-text: #FCA5A5;
+  --color-badge-overdue-border: rgba(239, 68, 68, 0.4);
+  --color-badge-done-bg: rgba(16, 185, 129, 0.2);
+  --color-badge-done-text: #86EFAC;
+}
+
+/* --------------------------------------------------------------------------
+   3. Paper Journal Light (Warm Parchment Ivory Canvas + Deep Sepia Ink)
+   -------------------------------------------------------------------------- */
+[data-theme-id="paper-light"],
+html[data-theme-id="paper"][data-theme="light"],
+html[data-theme-style="paper"][data-theme="light"],
+html[data-bg-style="paper"][data-theme="light"],
+html[data-theme-id="paper"]:not([data-theme="dark"]),
+html[data-theme-style="paper"]:not([data-theme="dark"]),
+html:not([data-theme-id])[data-bg-style="paper"][data-theme="light"],
+html:not([data-theme-id])[data-bg-style="paper"]:not([data-theme="dark"]) {
+  /* Surfaces: Warm parchment ivory canvas */
+  --color-bg-main: #FAF6EE;
+  --color-bg-sidebar: #F5EFE3;
+  --color-bg-header: #FAF6EE;
+  --color-bg-card: #FCFAF5;
+  --color-bg-subtle: #F2EBDC;
+  --color-bg-hover: #E9DFCE;
+
+  /* Primary Accent: Warm Terracotta / Chestnut (#8C4A2F) */
+  --color-primary: #8C4A2F;
+  --color-primary-hover: #753E26;
+  --color-primary-light: #F7EBE5;
+
+  /* Active Nav: Warm Terracotta Tint / Caramel Pill */
+  --color-nav-active-bg: #EFE3D5;
+  --color-nav-active-text: #5C2E1A;
+
+  /* Buttons */
+  --color-btn-primary-bg: #8C4A2F;
+  --color-btn-primary-text: #FFFFFF;
+  --color-btn-primary-hover: #753E26;
+
+  /* Text Contrast: Deep Sepia Ink & Warm Taupe */
+  --color-text-primary: #2D2319;
+  --color-text-secondary: #6B5542;
+  --color-text-muted: #8F7B6A;
+
+  /* Soft Warm Borders & Gentle Shadows */
+  --color-border: #E6DEC9;
+  --color-border-interactive: #D6CCA4;
+  --color-border-subtle: #F0E8D7;
+  --color-border-focus: #8C4A2F;
+  --color-card-shadow: 0 1px 3px rgba(45, 35, 25, 0.05), 0 1px 2px rgba(45, 35, 25, 0.03);
+
+  /* Stat & Status Indicators */
+  --color-stat-icon-bg: #EFE4D6;
+  --color-stat-icon-text: #8C4A2F;
+  --color-badge-overdue-bg: #FBEAE6;
+  --color-badge-overdue-text: #9E3824;
+  --color-badge-overdue-border: #F5CAC1;
+  --color-badge-done-bg: #EAF2E8;
+  --color-badge-done-text: #2D6B2E;
+}
+
+/* --------------------------------------------------------------------------
+   4. Paper Journal Dark (Espresso & Roasted Walnut + Glowing Amber)
+   -------------------------------------------------------------------------- */
+[data-theme-id="paper-dark"],
+html[data-theme-id="paper"][data-theme="dark"],
+html[data-theme-style="paper"][data-theme="dark"],
+html[data-bg-style="paper"][data-theme="dark"],
+html:not([data-theme-id])[data-bg-style="paper"][data-theme="dark"] {
+  /* Surfaces: Deep roasted espresso */
+  --color-bg-main: #1E1510;
+  --color-bg-sidebar: #241A14;
+  --color-bg-header: #241A14;
+  --color-bg-card: #2B1E17;
+  --color-bg-subtle: #35261E;
+  --color-bg-hover: #402E24;
+
+  /* Primary Accent: Warm Glowing Amber / Chestnut */
+  --color-primary: #C26522;
+  --color-primary-hover: #D97706;
+  --color-primary-light: #3D2618;
+
+  /* Active Nav: Warm Amber Pill */
+  --color-nav-active-bg: #9A5826;
+  --color-nav-active-text: #FFFDF8;
+
+  /* Buttons */
+  --color-btn-primary-bg: #C26522;
+  --color-btn-primary-text: #FFFFFF;
+  --color-btn-primary-hover: #D97706;
+
+  /* Text Contrast: Deep Sepia Inverse & Warm Cream */
+  --color-text-primary: #F7EFE6;
+  --color-text-secondary: #C4B4A3;
+  --color-text-muted: #8F7D6D;
+
+  /* Warm Dark Borders */
+  --color-border: #453328;
+  --color-border-interactive: #5A4335;
+  --color-border-subtle: #36281F;
+  --color-border-focus: #D97706;
+  --color-card-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
+
+  /* Stat & Status Indicators */
+  --color-stat-icon-bg: #3E2C22;
+  --color-stat-icon-text: #F59E0B;
+  --color-badge-overdue-bg: rgba(185, 28, 28, 0.3);
+  --color-badge-overdue-text: #FCA5A5;
+  --color-badge-overdue-border: rgba(239, 68, 68, 0.4);
+  --color-badge-done-bg: rgba(16, 185, 129, 0.2);
+  --color-badge-done-text: #86EFAC;
+}
+
+/* --------------------------------------------------------------------------
+   5. Notion Light (True Notion Flat Canvas + Zero Drop Shadows + 1px Dividers)
+   -------------------------------------------------------------------------- */
+[data-theme-id="notion-light"],
+html[data-theme-id="notion"][data-theme="light"],
+html[data-theme-style="notion"][data-theme="light"],
+html[data-bg-style="notion"][data-theme="light"],
+html[data-theme-id="notion"]:not([data-theme="dark"]),
+html[data-theme-style="notion"]:not([data-theme="dark"]),
+html:not([data-theme-id])[data-bg-style="notion"][data-theme="light"],
+html:not([data-theme-id])[data-bg-style="notion"]:not([data-theme="dark"]) {
+  /* Surfaces: Crisp flat white canvas */
+  --color-bg-main: #FFFFFF;
+  --color-bg-sidebar: #F7F6F3;
+  --color-bg-header: #FFFFFF;
+  --color-bg-card: #FFFFFF;
+  --color-bg-subtle: #F7F6F3;
+  --color-bg-hover: rgba(55, 53, 47, 0.08); /* Notion signature hover pill */
+
+  /* Primary Accent: Notion Charcoal */
+  --color-primary: #191919;
+  --color-primary-hover: #37352F;
+  --color-primary-light: #EFEFED;
+
+  /* Active Nav: Notion Hover Pill */
+  --color-nav-active-bg: rgba(55, 53, 47, 0.08);
+  --color-nav-active-text: #2F2E2B;
+
+  /* Buttons */
+  --color-btn-primary-bg: #191919;
+  --color-btn-primary-text: #FFFFFF;
+  --color-btn-primary-hover: #37352F;
+
+  /* Typography Colors: Notion System Values */
+  --color-text-primary: #2F2E2B;   /* Notion primary text in light */
+  --color-text-secondary: #787774; /* Notion secondary muted text in light */
+  --color-text-muted: #9B9A97;
+
+  /* Borders & Dividers: Subtle 1px dividers (#E9E9E7 in light) & ZERO DROP SHADOWS */
+  --color-border: #E9E9E7;
+  --color-border-interactive: #D3D1CB;
+  --color-border-subtle: #F2F1EE;
+  --color-border-focus: #191919;
+  --color-card-shadow: none;
+
+  /* Stat & Status Indicators */
+  --color-stat-icon-bg: #F2F1EE;
+  --color-stat-icon-text: #37352F;
+  --color-badge-overdue-bg: #FBE4E4;
+  --color-badge-overdue-text: #C43232;
+  --color-badge-overdue-border: #F7C8C8;
+  --color-badge-done-bg: #E3F5E1;
+  --color-badge-done-text: #2B7828;
+}
+
+/* --------------------------------------------------------------------------
+   6. Notion Dark (True Notion Dark Canvas + Zero Drop Shadows + 1px Dividers)
+   -------------------------------------------------------------------------- */
+[data-theme-id="notion-dark"],
+html[data-theme-id="notion"][data-theme="dark"],
+html[data-theme-style="notion"][data-theme="dark"],
+html[data-bg-style="notion"][data-theme="dark"],
+html:not([data-theme-id])[data-bg-style="notion"][data-theme="dark"] {
+  /* Surfaces: Dark charcoal flat canvas */
+  --color-bg-main: #191919;
+  --color-bg-sidebar: #202020;
+  --color-bg-header: #191919;
+  --color-bg-card: #202020;
+  --color-bg-subtle: #252525;
+  --color-bg-hover: rgba(255, 255, 255, 0.055); /* Notion dark hover pill */
+
+  /* Primary Accent: Off-white / Crisp Gray */
+  --color-primary: #EAEAEA;
+  --color-primary-hover: #FFFFFF;
+  --color-primary-light: #2A2A2A;
+
+  /* Active Nav: Notion Dark Hover Pill */
+  --color-nav-active-bg: rgba(255, 255, 255, 0.055);
+  --color-nav-active-text: #EAEAEA;
+
+  /* Buttons */
+  --color-btn-primary-bg: #2F2F2F;
+  --color-btn-primary-text: #FFFFFF;
+  --color-btn-primary-hover: #3D3D3D;
+
+  /* Typography Colors: Notion Dark Values */
+  --color-text-primary: #EAEAEA;   /* Notion primary text in dark */
+  --color-text-secondary: #9E9E9E; /* Notion secondary muted text in dark */
+  --color-text-muted: #707070;
+
+  /* Borders & Dividers: Subtle 1px dividers (#2F2F2F in dark) & ZERO DROP SHADOWS */
+  --color-border: #2F2F2F;
+  --color-border-interactive: #3D3D3D;
+  --color-border-subtle: #262626;
+  --color-border-focus: #888888;
+  --color-card-shadow: none;
+
+  /* Stat & Status Indicators */
+  --color-stat-icon-bg: #2E2E2E;
+  --color-stat-icon-text: #D4D4D8;
+  --color-badge-overdue-bg: rgba(185, 28, 28, 0.28);
+  --color-badge-overdue-text: #FCA5A5;
+  --color-badge-overdue-border: rgba(239, 68, 68, 0.4);
+  --color-badge-done-bg: rgba(16, 185, 129, 0.2);
+  --color-badge-done-text: #86EFAC;
 }
 
 /* ==========================================================================
-   Accent Colors: Custom Palette (Overridable via data-accent)
+   Accent Colors: Custom Palette (Optional Overrides via data-accent)
    ========================================================================== */
 [data-accent="blue"] {
   --color-primary: #1A73E8;
@@ -152,114 +435,6 @@ html[data-animations="reduced"] *::after {
   transition-duration: 0.01ms !important;
 }
 
-/* ==========================================================================
-   Paper Texture UI Theme: Design Tokens (Isolated behind data-bg-style="paper")
-   ========================================================================== */
-
-/* Light Mode Paper Texture Tokens */
-html[data-bg-style="paper"][data-theme="light"],
-html[data-bg-style="paper"]:not([data-theme="dark"]) {
-  --color-bg-main: #F7F3E9;
-  --color-bg-card: #FFFFFF;
-  --color-bg-subtle: #F4EFE6;
-  --color-bg-hover: #EAE3D4;
-
-  /* Royal Blue Accent */
-  --color-primary: #2F6FDB;
-  --color-primary-hover: #225BC0;
-  --color-primary-light: #EBF2FC;
-
-  /* Navy Text */
-  --color-text-primary: #1E3A5F;
-  --color-text-secondary: #4A5D73;
-  --color-text-muted: #6B7E94;
-
-  /* Visible Warm-Neutral Borders */
-  --color-border: #D2C9B8;
-  --color-border-interactive: #BFB4A0;
-  --color-border-subtle: #E8E1D2;
-  --color-border-focus: #2F6FDB;
-}
-
-/* Dark Mode Paper Texture Tokens (Warm Charcoal) */
-html[data-bg-style="paper"][data-theme="dark"] {
-  --color-bg-main: #1D1B18;
-  --color-bg-card: #35322C;
-  --color-bg-subtle: #2C2924;
-  --color-bg-hover: #403C35;
-
-  /* Blue Accent */
-  --color-primary: #75A5F5;
-  --color-primary-hover: #92B9F8;
-  --color-primary-light: #2A3648;
-
-  /* Light Readable Typography */
-  --color-text-primary: #F5EFE6;
-  --color-text-secondary: #D4CBC0;
-  --color-text-muted: #9E9589;
-
-  /* Warm Dark Borders */
-  --color-border: #4D483F;
-  --color-border-interactive: #5F594E;
-  --color-border-subtle: #3E3A33;
-  --color-border-focus: #75A5F5;
-}
-
-/* ==========================================================================
-   Notion UI Theme: Design Tokens (Isolated behind data-bg-style="notion")
-   ========================================================================== */
-
-/* Light Mode Notion Tokens */
-html[data-bg-style="notion"][data-theme="light"],
-html[data-bg-style="notion"]:not([data-theme="dark"]) {
-  /* Notion Pure White Canvas */
-  --color-bg-main: #FFFFFF;
-  --color-bg-card: #FFFFFF;
-  --color-bg-subtle: #F7F6F3;
-  --color-bg-hover: #EFEFED;
-
-  /* Notion Blue Accent */
-  --color-primary: #2383E2;
-  --color-primary-hover: #1D6FBE;
-  --color-primary-light: #DDEBF1;
-
-  /* Notion Dark Charcoal Text */
-  --color-text-primary: #37352F;
-  --color-text-secondary: #787774;
-  --color-text-muted: #9B9A97;
-
-  /* Notion Crisp Subtle Borders */
-  --color-border: #E3E2DE;
-  --color-border-interactive: #D3D1CB;
-  --color-border-subtle: #EEEEEC;
-  --color-border-focus: #2383E2;
-}
-
-/* Dark Mode Notion Tokens */
-html[data-bg-style="notion"][data-theme="dark"] {
-  /* Notion Dark Canvas */
-  --color-bg-main: #191919;
-  --color-bg-card: #202020;
-  --color-bg-subtle: #252525;
-  --color-bg-hover: #2D2D2D;
-
-  /* Notion Blue Accent in Dark Mode */
-  --color-primary: #2383E2;
-  --color-primary-hover: #447ACB;
-  --color-primary-light: #1F282D;
-
-  /* Notion Light Text */
-  --color-text-primary: #E6E6E6;
-  --color-text-secondary: #9B9B9B;
-  --color-text-muted: #787878;
-
-  /* Notion Dark Borders */
-  --color-border: #373737;
-  --color-border-interactive: #474747;
-  --color-border-subtle: #2D2D2D;
-  --color-border-focus: #2383E2;
-}
-
 * {
   box-sizing: border-box;
 }
@@ -268,9 +443,11 @@ html[data-bg-style="notion"][data-theme="dark"] {
    Base Typography & System Hierarchy
    ========================================================================== */
 
+/* 1. Default Minimal Font Stack: Swiss Neo-Grotesque Sans */
 body {
   font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   letter-spacing: -0.01em;
+  line-height: 1.45;
   transition: background-color 150ms cubic-bezier(0.22, 1, 0.36, 1), color 150ms cubic-bezier(0.22, 1, 0.36, 1);
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
@@ -279,41 +456,147 @@ body {
   background-color: var(--color-bg-main);
 }
 
-/* Headings default to clean modern sans-serif */
+/* Headings */
 h1, h2, h3, h4, h5, h6 {
   font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   letter-spacing: -0.02em;
   line-height: 1.25;
 }
 
-/* Display serif: strictly reserved for top-level page titles or journal reader views */
-.font-serif,
-.display-title {
-  font-family: 'Newsreader', 'Source Serif 4', 'Tiempos Headline', Georgia, serif;
-  letter-spacing: -0.015em;
-}
-
-/* Monospace for numbers, timers, keyboard shortcuts, tabular figures */
+/* Monospace */
 .font-mono {
   font-family: 'JetBrains Mono', 'Fira Code', Menlo, monospace;
   font-feature-settings: 'tnum' 1;
 }
 
-/* Modern sans-serif typography for navigation, labels, controls, and form elements */
+/* Form and controls */
 button, input, select, textarea, label, [role="button"], [role="tab"], [role="radio"], nav, aside, .font-sans {
   font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   letter-spacing: -0.005em;
 }
 
+/* 2. Paper Journal Typography Stack: Editorial Serif (ui-serif, line-height 1.65) */
+html[data-theme-id*="paper"],
+html[data-theme-style="paper"],
+html[data-bg-style="paper"] {
+  font-family: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+}
+
+html[data-theme-id*="paper"] body,
+html[data-theme-style="paper"] body,
+html[data-bg-style="paper"] body {
+  font-family: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+  line-height: 1.65;
+}
+
+html[data-theme-id*="paper"] h1,
+html[data-theme-id*="paper"] h2,
+html[data-theme-id*="paper"] h3,
+html[data-theme-id*="paper"] h4,
+html[data-theme-id*="paper"] h5,
+html[data-theme-id*="paper"] h6,
+html[data-theme-style="paper"] h1,
+html[data-theme-style="paper"] h2,
+html[data-theme-style="paper"] h3,
+html[data-theme-style="paper"] h4,
+html[data-theme-style="paper"] h5,
+html[data-theme-style="paper"] h6,
+html[data-bg-style="paper"] h1,
+html[data-bg-style="paper"] h2,
+html[data-bg-style="paper"] h3,
+html[data-bg-style="paper"] h4,
+html[data-bg-style="paper"] h5,
+html[data-bg-style="paper"] h6,
+html[data-theme-id*="paper"] .font-serif,
+html[data-theme-id*="paper"] .display-title,
+html[data-theme-style="paper"] .font-serif,
+html[data-theme-style="paper"] .display-title,
+html[data-bg-style="paper"] .font-serif,
+html[data-bg-style="paper"] .display-title {
+  font-family: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+  line-height: 1.35;
+  letter-spacing: -0.015em;
+}
+
+/* 3. Notion System Typography Stack:
+   ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif
+   letter-spacing -0.015em, line-height 1.5 */
+html[data-theme-id*="notion"],
+html[data-theme-style="notion"],
+html[data-bg-style="notion"] {
+  font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  letter-spacing: -0.015em;
+  line-height: 1.5;
+}
+
+html[data-theme-id*="notion"] body,
+html[data-theme-style="notion"] body,
+html[data-bg-style="notion"] body,
+html[data-theme-id*="notion"] button,
+html[data-theme-id*="notion"] input,
+html[data-theme-id*="notion"] select,
+html[data-theme-id*="notion"] textarea,
+html[data-theme-id*="notion"] label,
+html[data-theme-id*="notion"] nav,
+html[data-theme-id*="notion"] aside,
+html[data-theme-id*="notion"] .font-sans,
+html[data-theme-style="notion"] button,
+html[data-theme-style="notion"] input,
+html[data-theme-style="notion"] select,
+html[data-theme-style="notion"] textarea,
+html[data-theme-style="notion"] label,
+html[data-theme-style="notion"] nav,
+html[data-theme-style="notion"] aside,
+html[data-theme-style="notion"] .font-sans,
+html[data-bg-style="notion"] button,
+html[data-bg-style="notion"] input,
+html[data-bg-style="notion"] select,
+html[data-bg-style="notion"] textarea,
+html[data-bg-style="notion"] label,
+html[data-bg-style="notion"] nav,
+html[data-bg-style="notion"] aside,
+html[data-bg-style="notion"] .font-sans {
+  font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  letter-spacing: -0.015em;
+  line-height: 1.5;
+}
+
+html[data-theme-id*="notion"] h1,
+html[data-theme-id*="notion"] h2,
+html[data-theme-id*="notion"] h3,
+html[data-theme-id*="notion"] h4,
+html[data-theme-id*="notion"] h5,
+html[data-theme-id*="notion"] h6,
+html[data-theme-style="notion"] h1,
+html[data-theme-style="notion"] h2,
+html[data-theme-style="notion"] h3,
+html[data-theme-style="notion"] h4,
+html[data-theme-style="notion"] h5,
+html[data-theme-style="notion"] h6,
+html[data-bg-style="notion"] h1,
+html[data-bg-style="notion"] h2,
+html[data-bg-style="notion"] h3,
+html[data-bg-style="notion"] h4,
+html[data-bg-style="notion"] h5,
+html[data-bg-style="notion"] h6 {
+  font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  letter-spacing: -0.015em;
+  line-height: 1.25;
+}
+
 /* ==========================================================================
-   Background Styles: Current Theme vs Paper Texture
+   Background Materials & Surfaces
    ========================================================================== */
 
-/* Light Mode Paper Texture: Classic Paper with subtle 88% warm overlay */
-html[data-bg-style="paper"] body,
-html[data-theme="light"][data-bg-style="paper"] body {
+/* Light Mode Paper Journal Texture */
+html[data-theme-id="paper-light"] body,
+html[data-theme-style="paper"][data-theme="light"] body,
+html[data-bg-style="paper"][data-theme="light"] body,
+html[data-theme-id="paper"]:not([data-theme="dark"]) body,
+html[data-theme-style="paper"]:not([data-theme="dark"]) body,
+html[data-bg-style="paper"]:not([data-theme="dark"]) body {
   background-image: 
-    linear-gradient(rgba(247, 243, 233, 0.88), rgba(247, 243, 233, 0.88)),
+    linear-gradient(rgba(250, 246, 238, 0.92), rgba(250, 246, 238, 0.92)),
     url('/textures/classic-paper.jpg');
   background-size: cover;
   background-position: center center;
@@ -321,10 +604,12 @@ html[data-theme="light"][data-bg-style="paper"] body {
   background-repeat: no-repeat;
 }
 
-/* Dark Mode Paper Texture: Charcoal Paper with subtle 86% warm overlay */
-html[data-theme="dark"][data-bg-style="paper"] body {
+/* Dark Mode Paper Journal Texture */
+html[data-theme-id="paper-dark"] body,
+html[data-theme-style="paper"][data-theme="dark"] body,
+html[data-bg-style="paper"][data-theme="dark"] body {
   background-image: 
-    linear-gradient(rgba(37, 35, 31, 0.86), rgba(37, 35, 31, 0.86)),
+    linear-gradient(rgba(30, 21, 16, 0.92), rgba(30, 21, 16, 0.92)),
     url('/textures/charcoal-paper.jpg');
   background-size: cover;
   background-position: center center;
@@ -332,107 +617,105 @@ html[data-theme="dark"][data-bg-style="paper"] body {
   background-repeat: no-repeat;
 }
 
-/* When Paper Texture is active, make the main layout wrapper transparent */
-html[data-bg-style="paper"] .bg-bg-main {
-  background-color: transparent !important;
-}
-
-/* Paper Texture: Warm Ivory Header & Sidebar in Light Mode */
-html[data-bg-style="paper"][data-theme="light"] header,
-html[data-bg-style="paper"]:not([data-theme="dark"]) header,
-html[data-bg-style="paper"][data-theme="light"] aside,
-html[data-bg-style="paper"]:not([data-theme="dark"]) aside,
-html[data-bg-style="paper"][data-theme="light"] aside .bg-bg-card,
-html[data-bg-style="paper"]:not([data-theme="dark"]) aside .bg-bg-card,
-html[data-bg-style="paper"][data-theme="light"] nav,
-html[data-bg-style="paper"]:not([data-theme="dark"]) nav {
-  background-color: #FAF6ED !important;
-}
-
-/* Paper Texture: Warm Charcoal Header & Sidebar in Dark Mode */
-html[data-bg-style="paper"][data-theme="dark"] header,
-html[data-bg-style="paper"][data-theme="dark"] aside,
-html[data-bg-style="paper"][data-theme="dark"] aside .bg-bg-card,
-html[data-bg-style="paper"][data-theme="dark"] nav {
-  background-color: #25231F !important;
-}
-
-/* ==========================================================================
-   Notion Theme: Layout, Chrome, Typography & Card Rules
-   ========================================================================== */
-
-/* Notion Theme: Body Background Reset (Solid clean canvas) */
+/* Clean Canvas Reset for Minimal and Notion */
+html[data-theme-id^="minimal"] body,
+html[data-theme-id^="notion"] body,
+html[data-theme-style="minimal"] body,
+html[data-theme-style="notion"] body,
+html[data-bg-style="minimal"] body,
+html[data-bg-style="current"] body,
 html[data-bg-style="notion"] body {
   background-image: none !important;
   background-color: var(--color-bg-main) !important;
 }
 
-/* Notion Theme: Signature Sidebar & Header (Soft off-white / Dark charcoal) */
-html[data-bg-style="notion"][data-theme="light"] header,
-html[data-bg-style="notion"]:not([data-theme="dark"]) header,
-html[data-bg-style="notion"][data-theme="light"] aside,
-html[data-bg-style="notion"]:not([data-theme="dark"]) aside,
-html[data-bg-style="notion"][data-theme="light"] aside .bg-bg-card,
-html[data-bg-style="notion"]:not([data-theme="dark"]) aside .bg-bg-card,
-html[data-bg-style="notion"][data-theme="light"] nav,
-html[data-bg-style="notion"]:not([data-theme="dark"]) nav {
-  background-color: #FBFBFA !important;
+/* Dynamic Sidebar and Header Surface */
+aside[aria-label="Main Navigation"],
+.sidebar-surface {
+  background-color: var(--color-bg-sidebar) !important;
 }
 
-html[data-bg-style="notion"][data-theme="dark"] header,
-html[data-bg-style="notion"][data-theme="dark"] aside,
-html[data-bg-style="notion"][data-theme="dark"] aside .bg-bg-card,
-html[data-bg-style="notion"][data-theme="dark"] nav {
-  background-color: #202020 !important;
+header,
+.header-surface {
+  background-color: var(--color-bg-header) !important;
 }
 
-/* Notion Theme: Clean Modern UI Sans-Serif Typography */
-html[data-bg-style="notion"] body,
-html[data-bg-style="notion"] h1,
-html[data-bg-style="notion"] h2,
-html[data-bg-style="notion"] h3,
-html[data-bg-style="notion"] h4,
-html[data-bg-style="notion"] h5,
-html[data-bg-style="notion"] h6,
-html[data-bg-style="notion"] button,
-html[data-bg-style="notion"] input,
-html[data-bg-style="notion"] select,
-html[data-bg-style="notion"] textarea,
-html[data-bg-style="notion"] label,
-html[data-bg-style="notion"] p,
-html[data-bg-style="notion"] span {
-  font-family: 'Inter', ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif !important;
-  letter-spacing: -0.01em;
+/* Active Navigation Item Capsule Styling */
+.nav-item-active {
+  background-color: var(--color-nav-active-bg) !important;
+  color: var(--color-nav-active-text) !important;
+}
+.nav-item-active svg {
+  color: var(--color-nav-active-text) !important;
 }
 
-/* Notion Theme: Compact Crisp Card Radius & Micro-Shadow */
-html[data-bg-style="notion"] .rounded-card,
-html[data-bg-style="notion"] .rounded-2xl {
-  border-radius: 8px !important;
+/* Dynamic Buttons */
+.btn-primary,
+button.btn-primary {
+  background-color: var(--color-btn-primary-bg) !important;
+  color: var(--color-btn-primary-text) !important;
 }
-html[data-bg-style="notion"] .rounded-xl {
-  border-radius: 6px !important;
-}
-html[data-bg-style="notion"] .shadow-card,
-html[data-bg-style="notion"] .shadow-xs,
-html[data-bg-style="notion"] .shadow-sm {
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03), 0 0 0 1px var(--color-border) !important;
+.btn-primary:hover,
+button.btn-primary:hover {
+  background-color: var(--color-btn-primary-hover) !important;
 }
 
-/* Ensure text on primary buttons has accessible contrast */
+/* Accessible text on primary */
 .bg-primary,
 button.bg-primary {
-  color: #FFFFFF;
+  color: var(--color-btn-primary-text) !important;
 }
 
-html[data-theme="dark"][data-bg-style="paper"] .bg-primary,
-html[data-theme="dark"][data-bg-style="paper"] button.bg-primary {
-  color: #1A202C !important;
+/* ==========================================================================
+   Notion True Aesthetic Overrides:
+   - Zero drop shadows on cards (box-shadow: none)
+   - Clean square-rounded corners
+   - Notion Callout boxes
+   - 1px subtle divider borders
+   ========================================================================== */
+
+/* Zero Drop Shadows in Notion */
+html[data-theme-id*="notion"] .card-base,
+html[data-theme-id*="notion"] [class*="shadow-"],
+html[data-theme-style="notion"] .card-base,
+html[data-theme-style="notion"] [class*="shadow-"],
+html[data-bg-style="notion"] .card-base,
+html[data-bg-style="notion"] [class*="shadow-"] {
+  box-shadow: none !important;
 }
 
-html[data-bg-style="notion"] .bg-primary,
-html[data-bg-style="notion"] button.bg-primary {
-  color: #FFFFFF !important;
+/* Notion Clean Square-Rounded Corners */
+html[data-theme-id*="notion"] .rounded-card,
+html[data-theme-id*="notion"] .rounded-2xl,
+html[data-theme-style="notion"] .rounded-card,
+html[data-theme-style="notion"] .rounded-2xl,
+html[data-bg-style="notion"] .rounded-card,
+html[data-bg-style="notion"] .rounded-2xl {
+  border-radius: 6px !important;
+}
+
+html[data-theme-id*="notion"] .rounded-xl,
+html[data-theme-id*="notion"] .rounded-lg,
+html[data-theme-style="notion"] .rounded-xl,
+html[data-theme-style="notion"] .rounded-lg,
+html[data-bg-style="notion"] .rounded-xl,
+html[data-bg-style="notion"] .rounded-lg {
+  border-radius: 4px !important;
+}
+
+/* Notion Callout Box */
+.notion-callout,
+.callout-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.875rem 1rem;
+  border-radius: 4px;
+  background-color: var(--color-bg-subtle);
+  border: 1px solid var(--color-border);
+  box-shadow: none !important;
+  font-size: 0.875rem;
+  line-height: 1.5;
 }
 
 /* Custom scrollbar */
@@ -468,12 +751,12 @@ html[data-bg-style="notion"] button.bg-primary {
 }
 
 /* ==========================================================================
-   Unslop Component Layer Primitives
+   Component Layer Primitives
    ========================================================================== */
 @layer components {
-  /* Unslop Button Primitives */
+  /* Button Primitives */
   .btn-primary {
-    @apply inline-flex items-center justify-center font-sans font-medium text-sm h-9 px-3.5 rounded-lg bg-primary text-white shadow-xs hover:bg-primary-hover active:scale-[0.98] transition-[background-color,transform] duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1 disabled:opacity-50 disabled:pointer-events-none cursor-pointer;
+    @apply inline-flex items-center justify-center font-sans font-medium text-sm h-9 px-3.5 rounded-lg shadow-xs active:scale-[0.98] transition-[background-color,transform] duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1 disabled:opacity-50 disabled:pointer-events-none cursor-pointer;
   }
   .btn-secondary {
     @apply inline-flex items-center justify-center font-sans font-medium text-sm h-9 px-3.5 rounded-lg bg-bg-card hover:bg-bg-hover text-txt-primary border border-border hover:border-border-interactive shadow-xs active:scale-[0.98] transition-[background-color,border-color,transform] duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1 disabled:opacity-50 disabled:pointer-events-none cursor-pointer;
@@ -485,17 +768,18 @@ html[data-bg-style="notion"] button.bg-primary {
     @apply inline-flex items-center justify-center font-sans font-medium text-sm h-9 px-3.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 border border-red-500/20 active:scale-[0.98] transition-[background-color,border-color,transform] duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-1 disabled:opacity-50 disabled:pointer-events-none cursor-pointer;
   }
 
-  /* Unslop Form Inputs & Selects */
+  /* Form Inputs & Selects */
   .input-base {
     @apply h-9 px-3 rounded-lg bg-bg-subtle/50 border border-border text-txt-primary placeholder:text-txt-muted text-sm font-sans focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
-  /* Unslop Standard Card */
+  /* Standard Card */
   .card-base {
-    @apply bg-bg-card border border-border rounded-card p-5 shadow-card transition-colors duration-150;
+    @apply bg-bg-card border border-border rounded-card p-5 transition-colors duration-150;
+    box-shadow: var(--color-card-shadow);
   }
 
-  /* Unslop Tabs & Segmented Controls */
+  /* Tabs & Segmented Controls */
   .tab-group {
     @apply inline-flex items-center gap-1 p-1 rounded-xl bg-bg-subtle border border-border/50;
   }
@@ -506,7 +790,7 @@ html[data-bg-style="notion"] button.bg-primary {
     @apply bg-bg-card text-txt-primary shadow-xs font-medium;
   }
 
-  /* Unslop Quiet Status Dot & Badge */
+  /* Quiet Status Dot & Badge */
   .status-dot {
     @apply w-2 h-2 rounded-full shrink-0;
   }

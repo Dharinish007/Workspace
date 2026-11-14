@@ -5,6 +5,7 @@ import {
   generateUUID, 
   nowISO, 
   recordSnapshot, 
+  seedInitialDataIfNeeded,
   DatabaseError 
 } from './indexedDB';
 import { 
@@ -1015,6 +1016,91 @@ export class Repository {
   }
 
   // --- SETTINGS ---
+  /**
+   * High-performance batched loader that retrieves all initial workspace entities
+   * in a single read-only IndexedDB transaction rather than 9 separate transactions.
+   */
+  static async getInitialWorkspaceData(): Promise<{
+    pages: Page[];
+    tasks: Task[];
+    habits: Habit[];
+    habitLogs: HabitLog[];
+    events: CalendarEvent[];
+    dayColors: DayColor[];
+    settings: UserSettings;
+    journalEntries: JournalEntry[];
+    notes: Note[];
+  }> {
+    const db = await openDB();
+    await seedInitialDataIfNeeded(db);
+
+    return new Promise((resolve, reject) => {
+      const stores = ['pages', 'tasks', 'habits', 'habitLogs', 'events', 'dayColors', 'settings', 'journalEntries', 'notes'];
+      const tx = db.transaction(stores, 'readonly');
+
+      const pagesReq = tx.objectStore('pages').getAll();
+      const tasksReq = tx.objectStore('tasks').getAll();
+      const habitsReq = tx.objectStore('habits').getAll();
+      const habitLogsReq = tx.objectStore('habitLogs').getAll();
+      const eventsReq = tx.objectStore('events').getAll();
+      const dayColorsReq = tx.objectStore('dayColors').getAll();
+      const settingsReq = tx.objectStore('settings').getAll();
+      const journalReq = tx.objectStore('journalEntries').getAll();
+      const notesReq = tx.objectStore('notes').getAll();
+
+      tx.oncomplete = async () => {
+        try {
+          const pages = (pagesReq.result as Page[]) || [];
+          pages.sort((a, b) => a.order - b.order);
+
+          const tasks = (tasksReq.result as Task[]) || [];
+          const habits = (habitsReq.result as Habit[]) || [];
+          const habitLogs = (habitLogsReq.result as HabitLog[]) || [];
+          const events = (eventsReq.result as CalendarEvent[]) || [];
+          const dayColors = (dayColorsReq.result as DayColor[]) || [];
+
+          const settingsResults = (settingsReq.result as { key: string; value: any }[]) || [];
+          const rawMap: Record<string, any> = {};
+          settingsResults.forEach(r => { rawMap[r.key] = r.value; });
+          const settings = mergeWithDefaultSettings(rawMap);
+
+          const journalEntries = (journalReq.result as JournalEntry[]) || [];
+          journalEntries.sort((a, b) => b.date.localeCompare(a.date));
+
+          let notes = (notesReq.result as Note[]) || [];
+          if (notes.length === 0) {
+            notes = await Repository.seedSampleNotesIfEmpty();
+          } else {
+            notes.sort((a, b) => {
+              if (a.pinned && b.pinned) {
+                return (a.pinnedOrder ?? 0) - (b.pinnedOrder ?? 0);
+              }
+              if (a.pinned) return -1;
+              if (b.pinned) return 1;
+              return b.updatedAt.localeCompare(a.updatedAt);
+            });
+          }
+
+          resolve({
+            pages,
+            tasks,
+            habits,
+            habitLogs,
+            events,
+            dayColors,
+            settings,
+            journalEntries,
+            notes,
+          });
+        } catch (err) {
+          reject(err);
+        }
+      };
+
+      tx.onerror = () => reject(tx.error);
+    });
+  }
+
   static async getAllSettings(): Promise<UserSettings> {
     const { store } = await this.getStore('settings', 'readonly');
     return new Promise((resolve, reject) => {

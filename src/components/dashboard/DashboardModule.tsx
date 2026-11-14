@@ -5,6 +5,7 @@ import { formatLocalDate } from '../../db/indexedDB';
 import { Habit } from '../../types';
 import { IconRenderer } from '../common/IconRegistry';
 import { HabitModal } from '../habits/HabitModal';
+import { DashboardHeaderArt, DashboardCornerArt, PagesCardArt } from '../common/ThemeArt';
 import { 
   CheckCircle2, 
   Square, 
@@ -248,9 +249,12 @@ export const DashboardModule: React.FC = () => {
   };
 
   return (
-    <div className="p-4 md:p-6 lg:p-8 max-w-7xl mx-auto space-y-6 sm:space-y-8">
+    <div className="relative p-4 md:p-6 lg:p-8 max-w-7xl mx-auto space-y-6 sm:space-y-8 overflow-hidden">
+      {/* Decorative theme header art matching the six design personalities */}
+      <DashboardHeaderArt />
+
       {/* Welcome Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b border-border">
+      <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b border-border">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-txt-primary tracking-tight">
             {greeting}, {settings.displayName || 'Friend'}
@@ -268,7 +272,7 @@ export const DashboardModule: React.FC = () => {
       </div>
 
       {/* 4 Overview Stat Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+      <div className="relative z-10 grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
         {/* Tasks Card */}
         <div 
           onClick={() => navigate('/tasks')}
@@ -282,7 +286,7 @@ export const DashboardModule: React.FC = () => {
               <span className="text-sm font-sans font-bold text-txt-secondary group-hover:text-primary transition-colors">
                 Tasks
               </span>
-              <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 text-primary flex items-center justify-center">
+              <div className="w-10 h-10 rounded-xl bg-[var(--color-stat-icon-bg)] border border-border text-[var(--color-stat-icon-text)] flex items-center justify-center">
                 <CheckCircle2 className="w-5 h-5" />
               </div>
             </div>
@@ -292,7 +296,7 @@ export const DashboardModule: React.FC = () => {
             <div className="text-xs font-sans font-medium text-txt-secondary mt-1.5 flex flex-wrap items-center justify-between gap-1">
               <span>{tasksDueToday.length === 0 ? 'No tasks due today' : 'Due today'}</span>
               {overdueTasks.length > 0 && (
-                <span className="text-xs font-bold px-2 py-0.5 rounded-md bg-red-100 dark:bg-red-950/60 text-red-700 dark:text-red-300 border border-red-300 dark:border-red-800">
+                <span className="text-xs font-bold px-2 py-0.5 rounded-md bg-[var(--color-badge-overdue-bg)] text-[var(--color-badge-overdue-text)] border border-[var(--color-badge-overdue-border)]">
                   {overdueTasks.length} overdue
                 </span>
               )}
@@ -326,7 +330,7 @@ export const DashboardModule: React.FC = () => {
               <span className="text-sm font-sans font-bold text-txt-secondary group-hover:text-primary transition-colors">
                 Habits
               </span>
-              <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 text-primary flex items-center justify-center">
+              <div className="w-10 h-10 rounded-xl bg-[var(--color-stat-icon-bg)] border border-border text-[var(--color-stat-icon-text)] flex items-center justify-center">
                 <Activity className="w-5 h-5" />
               </div>
             </div>
@@ -365,7 +369,7 @@ export const DashboardModule: React.FC = () => {
               <span className="text-sm font-sans font-bold text-txt-secondary group-hover:text-primary transition-colors">
                 Events
               </span>
-              <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 text-primary flex items-center justify-center">
+              <div className="w-10 h-10 rounded-xl bg-[var(--color-stat-icon-bg)] border border-border text-[var(--color-stat-icon-text)] flex items-center justify-center">
                 <Calendar className="w-5 h-5" />
               </div>
             </div>
@@ -383,20 +387,23 @@ export const DashboardModule: React.FC = () => {
           </div>
         </div>
 
-        {/* Pages Card */}
+        {/* Pages Card with Isometric 3D Cubes Artwork */}
         <div 
           onClick={() => navigate('/tasks')}
-          className="bg-bg-card border border-border hover:border-border-interactive shadow-2xs hover:shadow-card rounded-2xl p-5 sm:p-6 transition-colors duration-150 cursor-pointer group select-none flex flex-col justify-between"
+          className="relative overflow-hidden bg-bg-card border border-border hover:border-border-interactive shadow-2xs hover:shadow-card rounded-2xl p-5 sm:p-6 transition-colors duration-150 cursor-pointer group select-none flex flex-col justify-between"
           role="button"
           tabIndex={0}
           aria-label="View Active Pages"
         >
-          <div>
+          {/* Theme-adaptive 3D Isometric Cubes decoration */}
+          <PagesCardArt className="absolute top-3 right-3" />
+
+          <div className="relative z-10">
             <div className="flex items-center justify-between mb-3">
               <span className="text-sm font-sans font-bold text-txt-secondary group-hover:text-primary transition-colors">
                 Pages
               </span>
-              <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 text-primary flex items-center justify-center">
+              <div className="w-10 h-10 rounded-xl bg-[var(--color-stat-icon-bg)] border border-border text-[var(--color-stat-icon-text)] flex items-center justify-center">
                 <Layers className="w-5 h-5" />
               </div>
             </div>
@@ -408,7 +415,7 @@ export const DashboardModule: React.FC = () => {
             </div>
           </div>
 
-          <div className="mt-4 pt-3 border-t border-border-subtle flex items-center justify-between text-xs font-sans text-txt-secondary font-medium">
+          <div className="relative z-10 mt-4 pt-3 border-t border-border-subtle flex items-center justify-between text-xs font-sans text-txt-secondary font-medium">
             <span>Folders & lists</span>
             <ArrowRight className="w-4 h-4 text-txt-secondary group-hover:text-primary transition-colors" />
           </div>
@@ -895,6 +902,9 @@ export const DashboardModule: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Bottom Corner decoration for Paper Journal themes */}
+      <DashboardCornerArt className="absolute bottom-2 left-4 hidden sm:block" />
 
       {/* Modals */}
       <HabitModal

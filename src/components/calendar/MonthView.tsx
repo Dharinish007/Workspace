@@ -1,6 +1,7 @@
 import React from 'react';
 import { useWorkspace } from '../../context/WorkspaceContext';
 import { formatLocalDate } from '../../db/indexedDB';
+import { parseLocalDate } from '../../utils/dateUtils';
 import { CalendarEvent } from '../../types';
 import { Palette, Plus } from 'lucide-react';
 import { getDayCellBackgroundStyle } from '../../utils/calendarColors';
@@ -147,7 +148,7 @@ export const MonthView: React.FC<MonthViewProps> = ({
           const isSelected = day.dateStr === selectedDate;
           const dayColorEntry = dayColorsMap.get(day.dateStr);
 
-          const cellDate = new Date(day.dateStr);
+          const cellDate = parseLocalDate(day.dateStr);
           const dow = (cellDate.getDay() + 6) % 7 + 1;
 
           const cellActivities: {

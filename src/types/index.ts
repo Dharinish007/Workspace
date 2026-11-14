@@ -155,3 +155,6 @@ export type TaskFilter = 'all' | 'open' | 'important' | 'completed' | 'today';
 export type CalendarView = 'month' | 'week' | 'day';
 export type HabitViewTemplate = 'table' | 'card' | 'heatmap';
 
+export * from './theme';
+
+

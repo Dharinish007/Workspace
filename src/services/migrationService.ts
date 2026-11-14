@@ -407,7 +407,7 @@ export async function executeIndexedDBMigration(options: MigrationOptions = {}):
     display_name: rawSettings.displayName || 'User',
     theme: rawSettings.theme || 'light',
     week_start: rawSettings.weekStart || 'monday',
-    background_style: rawSettings.backgroundStyle || 'current',
+    background_style: rawSettings.backgroundStyle === 'paper' ? 'paper' : rawSettings.backgroundStyle === 'notion' ? 'notion' : 'current',
     habit_default_color: rawSettings.habitDefaultColor || '#1A73E8',
     event_default_color: rawSettings.eventDefaultColor || '#F97316',
     last_backup: rawSettings.lastBackup || nowISO(),

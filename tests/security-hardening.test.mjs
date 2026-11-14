@@ -33,6 +33,9 @@ test('Phase 1 Security Hardening: Outbound Link URL Sanitizer', async (t) => {
     assert.equal(isSafeUrl('JaVaScRiPt:alert(document.cookie)'), false);
     assert.equal(isSafeUrl('  javascript:alert(1)'), false);
     assert.equal(isSafeUrl('javascript:/*--></title></style>alert(1)'), false);
+    assert.equal(isSafeUrl('javascript%3Aalert(1)'), false);
+    assert.equal(isSafeUrl('javascript%253Aalert(1)'), false);
+    assert.equal(isSafeUrl('//evil.com/payload'), false);
   });
 
   await t.test('Rejects VBScript and Data URI execution vectors', () => {

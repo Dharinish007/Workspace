@@ -23,7 +23,11 @@ import {
   GeneralSettings,
   AppearanceSettings,
   GlobalPreferences,
-  ModuleSettingsMap
+  ModuleSettingsMap,
+  ThemeId,
+  ThemeStyle,
+  composeThemeId,
+  decomposeThemeId
 } from '../types';
 import { getErrorMessage } from '../utils/errorUtils';
 import { createDefaultUserSettings } from '../utils/defaultSettings';
@@ -50,6 +54,7 @@ interface WorkspaceContextType {
   settings: UserSettings;
   activeSection: NavigationSection;
   selectedPageId: string | null;
+  selectedDate: string;
   highlightedTaskId: string | null;
   highlightedHabitId: string | null;
   isSearchOpen: boolean;
@@ -61,6 +66,7 @@ interface WorkspaceContextType {
   // Navigation
   setActiveSection: (section: NavigationSection) => void;
   setSelectedPageId: (pageId: string | null) => void;
+  setSelectedDate: (date: string) => void;
   setHighlightedTaskId: (taskId: string | null) => void;
   setHighlightedHabitId: (habitId: string | null) => void;
   setIsSearchOpen: (open: boolean) => void;
@@ -142,16 +148,35 @@ export function applyAppearanceToDom(appearance?: AppearanceSettings) {
     }
   }
 
-  document.documentElement.setAttribute('data-theme', activeTheme);
-  document.documentElement.setAttribute('data-bg-style', appearance.backgroundStyle || 'current');
+  // Derive theme style ('minimal', 'paper', 'notion')
+  let style: ThemeStyle = 'minimal';
+  if (appearance.themeStyle) {
+    style = appearance.themeStyle;
+  } else if (appearance.themeId) {
+    style = decomposeThemeId(appearance.themeId).style;
+  } else if (appearance.backgroundStyle === 'paper') {
+    style = 'paper';
+  } else if (appearance.backgroundStyle === 'notion') {
+    style = 'notion';
+  }
+
+  const mode: 'light' | 'dark' = activeTheme === 'dark' ? 'dark' : 'light';
+  const effectiveThemeId: ThemeId = `${style}-${mode}` as ThemeId;
+
+  document.documentElement.setAttribute('data-theme-id', effectiveThemeId);
+  document.documentElement.setAttribute('data-theme', mode);
+  document.documentElement.setAttribute('data-theme-style', style);
+  document.documentElement.setAttribute('data-bg-style', style);
   document.documentElement.setAttribute('data-accent', appearance.accentColor || 'blue');
   document.documentElement.setAttribute('data-font-size', appearance.fontSize || 'md');
   document.documentElement.setAttribute('data-density', appearance.density || 'comfortable');
   document.documentElement.setAttribute('data-animations', appearance.animations || 'full');
 
   try {
-    localStorage.setItem('my_workspace_theme', activeTheme);
-    localStorage.setItem('my_workspace_bg_style', appearance.backgroundStyle || 'current');
+    localStorage.setItem('my_workspace_theme_id', effectiveThemeId);
+    localStorage.setItem('my_workspace_theme', mode);
+    localStorage.setItem('my_workspace_theme_style', style);
+    localStorage.setItem('my_workspace_bg_style', style);
     localStorage.setItem('my_workspace_accent', appearance.accentColor || 'blue');
     localStorage.setItem('my_workspace_font_size', appearance.fontSize || 'md');
     localStorage.setItem('my_workspace_density', appearance.density || 'comfortable');
@@ -234,6 +259,23 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       navigate('/pages');
     }
   }, [navigate]);
+
+  const [selectedDate, setSelectedDateState] = useState<string>(() => {
+    try {
+      return localStorage.getItem('workspace_selected_date') || formatLocalDate(new Date());
+    } catch {
+      return formatLocalDate(new Date());
+    }
+  });
+
+  const setSelectedDate = useCallback((date: string) => {
+    setSelectedDateState(date);
+    try {
+      localStorage.setItem('workspace_selected_date', date);
+    } catch (e) {
+      console.warn('Failed to save selected date to localStorage', e);
+    }
+  }, []);
 
   const [highlightedTaskId, setHighlightedTaskId] = useState<string | null>(null);
   const [highlightedHabitId, setHighlightedHabitId] = useState<string | null>(null);
@@ -323,38 +365,21 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   const refreshAll = useCallback(async () => {
     try {
-      const db = await openDB();
-      await seedInitialDataIfNeeded(db);
+      const data = await Repository.getInitialWorkspaceData();
 
-      const [p, t, h, hl, e, dc, s, j] = await Promise.all([
-        Repository.getAllPages(),
-        Repository.getAllTasks(),
-        Repository.getAllHabits(),
-        Repository.getAllHabitLogs(),
-        Repository.getAllEvents(),
-        Repository.getAllDayColors(),
-        Repository.getAllSettings(),
-        Repository.getAllJournalEntries(),
-      ]);
-
-      let n = await Repository.getAllNotes();
-      if (n.length === 0) {
-        n = await Repository.seedSampleNotesIfEmpty();
-      }
-
-      setPages(p);
-      setTasks(t);
-      setHabits(h);
-      setHabitLogs(hl);
-      setEvents(e);
-      setDayColors(dc);
-      setJournalEntries(j);
-      setNotes(n);
-      setSettings(s);
+      setPages(data.pages);
+      setTasks(data.tasks);
+      setHabits(data.habits);
+      setHabitLogs(data.habitLogs);
+      setEvents(data.events);
+      setDayColors(data.dayColors);
+      setJournalEntries(data.journalEntries);
+      setNotes(data.notes);
+      setSettings(data.settings);
       setIsInitialized(true);
 
       // Apply appearance settings to document element
-      applyAppearanceToDom(s.appearance);
+      applyAppearanceToDom(data.settings.appearance);
     } catch (err: unknown) {
       console.error('Failed to initialize database:', err);
       setErrorMessage(getErrorMessage(err) || 'Database initialization error');
@@ -471,20 +496,46 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   const updateAppearanceSettings = useCallback(async (updates: Partial<AppearanceSettings>) => {
     const prevAppearance = settings.appearance;
+    let nextThemeMode = updates.themeMode ?? prevAppearance?.themeMode ?? 'light';
+    let nextStyle: ThemeStyle = updates.themeStyle ?? (
+      updates.backgroundStyle === 'paper' ? 'paper' :
+      updates.backgroundStyle === 'notion' ? 'notion' :
+      updates.backgroundStyle === 'minimal' || updates.backgroundStyle === 'current' ? 'minimal' :
+      (prevAppearance?.themeStyle || (prevAppearance?.themeId ? decomposeThemeId(prevAppearance.themeId).style : 'minimal'))
+    );
+
+    if (updates.themeId) {
+      const { style, mode } = decomposeThemeId(updates.themeId);
+      nextStyle = style;
+      if (!updates.themeMode) {
+        nextThemeMode = mode;
+      }
+    }
+
+    const nextModeForId = nextThemeMode === 'system'
+      ? (typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+      : nextThemeMode;
+
+    const nextThemeId: ThemeId = `${nextStyle}-${nextModeForId}` as ThemeId;
+    const nextBgStyle = nextStyle;
+
     const newAppearance: AppearanceSettings = {
       ...prevAppearance,
       ...updates,
+      themeId: nextThemeId,
+      themeStyle: nextStyle,
+      themeMode: nextThemeMode,
+      backgroundStyle: nextBgStyle,
     };
     applyAppearanceToDom(newAppearance);
 
-    const resolvedTheme: 'light' | 'dark' = newAppearance.themeMode === 'system'
-      ? (typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
-      : (newAppearance.themeMode === 'dark' ? 'dark' : 'light');
+    const resolvedTheme: 'light' | 'dark' = nextModeForId;
 
     setSettings(prev => ({
       ...prev,
       theme: resolvedTheme,
       backgroundStyle: newAppearance.backgroundStyle,
+      themeStyle: newAppearance.themeStyle,
       appearance: newAppearance,
     }));
 
@@ -499,19 +550,26 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         ...prev,
         theme: prevAppearance.themeMode === 'dark' ? 'dark' : 'light',
         backgroundStyle: prevAppearance.backgroundStyle,
+        themeStyle: prevAppearance.themeStyle,
         appearance: prevAppearance,
       }));
       showToast(`Failed to update appearance: ${getErrorMessage(err)}`, undefined, undefined, 'error');
     }
   }, [settings.appearance, showToast]);
 
-  // Theme toggle
+  // Theme toggle: switches cleanly between light and dark while maintaining active theme style ('minimal' | 'paper' | 'notion')
   const toggleTheme = useCallback(async () => {
-    const currentTheme = settings.appearance?.themeMode === 'system'
-      ? (typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
-      : (settings.theme || 'light');
-    const nextTheme: 'light' | 'dark' = currentTheme === 'light' ? 'dark' : 'light';
-    await updateAppearanceSettings({ themeMode: nextTheme });
+    const isDark = settings.appearance?.themeMode === 'dark' || settings.theme === 'dark';
+    const nextTheme: 'light' | 'dark' = isDark ? 'light' : 'dark';
+    const currentStyle: ThemeStyle = settings.appearance?.themeStyle ||
+      (settings.appearance?.themeId ? decomposeThemeId(settings.appearance.themeId).style :
+       (settings.appearance?.backgroundStyle === 'paper' ? 'paper' : settings.appearance?.backgroundStyle === 'notion' ? 'notion' : 'minimal'));
+    const nextThemeId: ThemeId = `${currentStyle}-${nextTheme}` as ThemeId;
+    await updateAppearanceSettings({
+      themeMode: nextTheme,
+      themeStyle: currentStyle,
+      themeId: nextThemeId,
+    });
   }, [settings.appearance, settings.theme, updateAppearanceSettings]);
 
   const updateGeneralSettings = useCallback(async (updates: Partial<GeneralSettings>) => {
@@ -1060,6 +1118,7 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     settings,
     activeSection,
     selectedPageId,
+    selectedDate,
     highlightedTaskId,
     highlightedHabitId,
     isSearchOpen,
@@ -1069,6 +1128,7 @@ export const WorkspaceProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     errorMessage,
     setActiveSection,
     setSelectedPageId,
+    setSelectedDate,
     setHighlightedTaskId,
     setHighlightedHabitId,
     setIsSearchOpen,

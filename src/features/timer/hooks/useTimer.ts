@@ -30,13 +30,19 @@ export function useTimer() {
 
   // Initialize service on mount and bind settings config
   useEffect(() => {
+    let isMounted = true;
     const customConfig = (settings as any)?.timerConfig || (settings as any)?.modules?.timer;
     service.initialize(customConfig).then(() => {
+      if (!isMounted) return;
       setState(service.getState());
       setActiveDurationMs(service.calculateCurrentDuration());
       setIsRecoveryRequired(service.isRecoveryRequired());
       setIsReadOnlyTab(service.isReadOnlyTab());
     });
+
+    return () => {
+      isMounted = false;
+    };
   }, [service]);
 
   // Subscribe to service state changes
@@ -79,7 +85,7 @@ export function useTimer() {
   }, [service, (settings as any)?.timerConfig, (settings as any)?.modules?.timer]);
 
   // Daily focus summary for today
-  const todayStr = useMemo(() => getLocalDateString(Date.now()), []);
+  const todayStr = getLocalDateString(Date.now());
   const dailySummary = useMemo<DailyFocusSummary>(() => {
     return calculateDailySummary(sessions, todayStr);
   }, [sessions, todayStr]);

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useWorkspace } from '../../context/WorkspaceContext';
 import { formatLocalDate } from '../../db/indexedDB';
+import { parseLocalDate } from '../../utils/dateUtils';
 import { CalendarView, CalendarEvent } from '../../types';
 import { MonthView } from './MonthView';
 import { WeekView } from './WeekView';
@@ -93,7 +94,7 @@ export const CalendarModule: React.FC = () => {
 
   const openDayView = (dateStr: string) => {
     setSelectedDateStr(dateStr);
-    setCurrentDate(new Date(dateStr));
+    setCurrentDate(parseLocalDate(dateStr));
     setCurrentView('day');
   };
 

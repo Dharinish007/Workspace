@@ -1,30 +1,17 @@
 import React, { useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useWorkspace } from '../../context/WorkspaceContext';
-import { Search, Calendar, Sun, Moon, Menu, Settings } from 'lucide-react';
+import { Menu, ChevronRight } from 'lucide-react';
 
 export const Header: React.FC = () => {
   const {
-    settings,
-    toggleTheme,
-    setIsSearchOpen,
     toggleMobileSidebar,
     pages,
     selectedPageId,
+    notes,
   } = useWorkspace();
   const location = useLocation();
   const navigate = useNavigate();
-
-  const isDark = settings.theme === 'dark';
-
-  // Dynamic real-world date, e.g. "Sat, Nov 7, 2026"
-  const formattedDate = useMemo(() => {
-    return new Intl.DateTimeFormat('en-US', {
-      weekday: 'short',
-      month: 'short',
-      day: 'numeric',
-    }).format(new Date());
-  }, []);
 
   // Compute Page Title dynamically based on current route
   const pageTitle = useMemo(() => {
@@ -47,9 +34,65 @@ export const Header: React.FC = () => {
     return 'My Workspace';
   }, [location.pathname, location.pathname.startsWith('/pages/') ? pages : null, selectedPageId]);
 
+  // Compute Breadcrumb Trail if on a detail or nested sub-route
+  const breadcrumb = useMemo(() => {
+    const p = location.pathname;
+    if (p.startsWith('/pages/')) {
+      const pageIdFromUrl = p.replace('/pages/', '');
+      const activeId = pageIdFromUrl || selectedPageId;
+      const foundPage = pages.find(item => item.id === activeId);
+      return {
+        parent: 'To-Do',
+        parentPath: '/tasks',
+        current: foundPage ? foundPage.name : 'Page Details',
+      };
+    }
+    if (p.startsWith('/journal/')) {
+      const dateParam = p.replace('/journal/', '');
+      return {
+        parent: 'Journal',
+        parentPath: '/journal',
+        current: dateParam,
+      };
+    }
+    if (p.startsWith('/notes/')) {
+      const noteId = p.replace('/notes/', '');
+      const foundNote = notes.find(n => n.id === noteId);
+      return {
+        parent: 'Notes',
+        parentPath: '/notes',
+        current: foundNote?.title || 'Note',
+      };
+    }
+    if (p.startsWith('/settings')) {
+      const searchParams = new URLSearchParams(location.search);
+      const tab = searchParams.get('tab');
+      if (tab) {
+        const tabNames: Record<string, string> = {
+          general: 'General',
+          appearance: 'Appearance',
+          todo: 'To-Do',
+          calendar: 'Calendar',
+          habits: 'Habits',
+          journal_notes: 'Journal & Notes',
+          timer: 'Timer',
+          cloud: 'Cloud Sync',
+          backup: 'Backup & Restore',
+          security: 'Security',
+        };
+        return {
+          parent: 'Settings',
+          parentPath: '/settings',
+          current: tabNames[tab] || tab,
+        };
+      }
+    }
+    return null;
+  }, [location.pathname, location.search, pages, selectedPageId, notes]);
+
   return (
     <header className="h-16 px-4 md:px-6 lg:px-8 border-b border-border bg-bg-card/95 backdrop-blur-md sticky top-0 z-20 flex items-center justify-between shrink-0 transition-colors duration-200">
-      {/* Left: Mobile hamburger menu toggle + Dynamic Page Title */}
+      {/* Left: Mobile hamburger menu toggle + Dynamic Page Title & Breadcrumbs */}
       <div className="flex items-center gap-3 min-w-0">
         <button
           onClick={toggleMobileSidebar}
@@ -60,66 +103,30 @@ export const Header: React.FC = () => {
           <Menu className="w-5 h-5 text-txt-primary" />
         </button>
 
-        <h1 className="text-lg sm:text-xl font-bold font-serif text-txt-primary tracking-tight truncate select-none">
-          {pageTitle}
-        </h1>
-      </div>
-
-      {/* Right: Global Search, Dynamic Date/Calendar Shortcut, and Theme Toggle */}
-      <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-        {/* Global Search Button */}
-        <button
-          onClick={() => setIsSearchOpen(true)}
-          className="h-9 px-3 rounded-xl border border-border bg-bg-card hover:bg-bg-hover hover:border-primary/50 text-txt-secondary hover:text-txt-primary flex items-center gap-2.5 transition-colors cursor-pointer shadow-2xs group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-          title="Search tasks, pages, habits, events (Ctrl+K)"
-          aria-label="Search workspace"
-        >
-          <Search className="w-4 h-4 text-txt-muted group-hover:text-primary transition-colors shrink-0" />
-          <span className="hidden sm:inline text-xs text-txt-muted group-hover:text-txt-secondary font-medium">
-            Search...
-          </span>
-          <kbd className="hidden sm:inline-flex items-center text-[10px] font-mono bg-bg-subtle border border-border px-1.5 py-0.5 rounded text-txt-muted">
-            Ctrl K
-          </kbd>
-        </button>
-
-        {/* Dynamic Date / Calendar Shortcut */}
-        <button
-          onClick={() => navigate('/calendar')}
-          className="h-9 px-3 rounded-xl border border-border bg-bg-card hover:bg-bg-hover hover:border-primary/50 text-txt-secondary hover:text-primary flex items-center gap-2 transition-colors cursor-pointer shadow-2xs group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-          title={`Today: ${formattedDate} — Click to open Calendar`}
-          aria-label="Open Calendar"
-        >
-          <Calendar className="w-4 h-4 text-txt-muted group-hover:text-primary transition-colors shrink-0" />
-          <span className="hidden md:inline text-xs font-semibold text-txt-secondary group-hover:text-primary">
-            {formattedDate}
-          </span>
-        </button>
-
-        {/* Light / Dark Mode Toggle */}
-        <button
-          onClick={toggleTheme}
-          className="w-9 h-9 rounded-xl border border-border bg-bg-card hover:bg-bg-hover hover:border-primary/50 text-txt-secondary hover:text-txt-primary flex items-center justify-center transition-colors cursor-pointer shadow-2xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-          title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
-          aria-label={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
-        >
-          {isDark ? (
-            <Sun className="w-4 h-4 text-amber-400 hover:text-amber-300 transition-colors" />
+        <div className="min-w-0">
+          {breadcrumb ? (
+            <div className="flex items-center gap-1.5 text-xs sm:text-sm">
+              <button
+                onClick={() => navigate(breadcrumb.parentPath)}
+                className="text-txt-muted hover:text-txt-primary font-medium transition-colors cursor-pointer truncate"
+              >
+                {breadcrumb.parent}
+              </button>
+              <ChevronRight className="w-3.5 h-3.5 text-txt-muted shrink-0" />
+              <h1 className="font-bold font-serif text-txt-primary tracking-tight truncate select-none text-base sm:text-lg">
+                {breadcrumb.current}
+              </h1>
+            </div>
           ) : (
-            <Moon className="w-4 h-4 text-txt-secondary hover:text-primary transition-colors" />
+            <h1 className="text-lg sm:text-xl font-bold font-serif text-txt-primary tracking-tight truncate select-none">
+              {pageTitle}
+            </h1>
           )}
-        </button>
-
-        {/* Settings Button */}
-        <button
-          onClick={() => navigate('/settings')}
-          className="w-9 h-9 rounded-xl border border-border bg-bg-card hover:bg-bg-hover hover:border-primary/50 text-txt-secondary hover:text-txt-primary flex items-center justify-center transition-colors cursor-pointer shadow-2xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-          title="Settings"
-          aria-label="Settings"
-        >
-          <Settings className="w-4 h-4 text-txt-secondary hover:text-primary transition-colors" />
-        </button>
+        </div>
       </div>
+
+      {/* Right: Reserved for page-specific actions where necessary */}
+      <div id="page-header-actions" className="flex items-center gap-2 shrink-0 empty:hidden" />
     </header>
   );
 };

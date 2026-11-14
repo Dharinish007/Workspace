@@ -1,4 +1,6 @@
-export type BackgroundStyle = 'current' | 'paper' | 'notion';
+import { ThemeId, ThemeStyle } from './theme';
+
+export type BackgroundStyle = 'current' | 'minimal' | 'paper' | 'notion';
 
 // 1. General Preferences
 export type SupportedLanguage = 'en' | 'es' | 'fr' | 'de';
@@ -21,6 +23,8 @@ export type LayoutDensity = 'comfortable' | 'compact';
 export type AnimationPreference = 'full' | 'reduced' | 'none';
 
 export interface AppearanceSettings {
+  themeId?: ThemeId;
+  themeStyle?: ThemeStyle;
   themeMode: ThemeMode;
   backgroundStyle: BackgroundStyle;
   accentColor: AccentColor;
@@ -124,6 +128,7 @@ export interface UserSettings {
   habitDefaultColor?: string;
   eventDefaultColor?: string;
   backgroundStyle?: BackgroundStyle;
+  themeStyle?: ThemeStyle;
   timerConfig?: TimerSettingsConfig;
 
   // Modern structured preferences & module settings
